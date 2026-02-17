@@ -1,47 +1,45 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Paiement #{{ paiement.idPaiement }} | Admin{% endblock %}
+{% block title %}Paiement #{{ paiement.idPaiement }} - Admin{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Paiement</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_paiement_index') }}">Paiements</a></li>
-                <li class="active">#{{ paiement.idPaiement }}</li>
-            </ol>
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+
+    <h1>Paiement #{{ paiement.idPaiement }}</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-4">Id</dt>
+                <dd class="col-sm-8">{{ paiement.idPaiement }}</dd>
+                <dt class="col-sm-4">Commande</dt>
+                <dd class="col-sm-8">{% if paiement.commande %}<a href="{{ path('app_commande_show', { id: paiement.commande.idCommande }) }}">#{{ paiement.commande.idCommande }}</a>{% else %}–{% endif %}</dd>
+                <dt class="col-sm-4">Montant</dt>
+                <dd class="col-sm-8">{{ paiement.montant }}</dd>
+                <dt class="col-sm-4">Méthode</dt>
+                <dd class="col-sm-8">{{ paiement.methodePaiement }}</dd>
+                <dt class="col-sm-4">Statut</dt>
+                <dd class="col-sm-8">{{ paiement.statutPaiement }}</dd>
+                <dt class="col-sm-4">Date paiement</dt>
+                <dd class="col-sm-8">{{ paiement.datePaiement ? paiement.datePaiement|date('d/m/Y') : '–' }}</dd>
+                <dt class="col-sm-4">Référence</dt>
+                <dd class="col-sm-8">{{ paiement.referencePaiement|default('–') }}</dd>
+            </dl>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Actions</h5>
+                    <a href="{{ path('app_paiement_edit', { id: paiement.idPaiement }) }}" class="btn btn-warning btn-sm d-block mb-2">Modifier</a>
+                    <form method="post" action="{{ path('app_paiement_delete', { id: paiement.idPaiement }) }}" onsubmit="return confirm('Supprimer ce paiement ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_paiement_' ~ paiement.idPaiement) }}">
+                        <button type="submit" class="btn btn-danger btn-sm d-block mb-2 w-100">Supprimer</button>
+                    </form>
+                    <a href="{{ path('app_paiement_index') }}" class="btn btn-secondary btn-sm d-block w-100">Retour à la liste</a>
+                </div>
+            </div>
         </div>
     </div>
-</section>
-
-<section class="accomodation_area section_gap">
-    <div class="container">
-        <dl class="row">
-            <dt class="col-sm-3">Id</dt>
-            <dd class="col-sm-9">{{ paiement.idPaiement }}</dd>
-            <dt class="col-sm-3">Commande</dt>
-            <dd class="col-sm-9">{% if paiement.commande %}<a href="{{ path('app_commande_show', { id: paiement.commande.idCommande }) }}">#{{ paiement.commande.idCommande }}</a>{% else %}—{% endif %}</dd>
-            <dt class="col-sm-3">Montant</dt>
-            <dd class="col-sm-9">{{ paiement.montant }}</dd>
-            <dt class="col-sm-3">Méthode</dt>
-            <dd class="col-sm-9">{{ paiement.methodePaiement }}</dd>
-            <dt class="col-sm-3">Statut</dt>
-            <dd class="col-sm-9">{{ paiement.statutPaiement }}</dd>
-            <dt class="col-sm-3">Date paiement</dt>
-            <dd class="col-sm-9">{{ paiement.datePaiement ? paiement.datePaiement|date('d/m/Y H:i') : '—' }}</dd>
-            <dt class="col-sm-3">Référence</dt>
-            <dd class="col-sm-9">{{ paiement.referencePaiement|default('—') }}</dd>
-        </dl>
-        <p>
-            <a href="{{ path('app_paiement_edit', { id: paiement.idPaiement }) }}" class="btn theme_btn button_hover">Modifier</a>
-            <form method="post" action="{{ path('app_paiement_delete', { id: paiement.idPaiement }) }}" class="d-inline" onsubmit="return confirm('Supprimer ce paiement ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete_paiement_' ~ paiement.idPaiement) }}">
-                <button type="submit" class="btn btn-danger">Supprimer</button>
-            </form>
-            <a href="{{ path('app_paiement_index') }}" class="btn btn-secondary">Retour à la liste</a>
-        </p>
-    </div>
-</section>
+</div>
 {% endblock %}

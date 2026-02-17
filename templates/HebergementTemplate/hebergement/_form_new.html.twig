@@ -1,132 +1,190 @@
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}, 'multipart': true}) }}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Informations générales</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le nom de l\'hébergement', 'required': true}}) }}
-                    {{ form_errors(form.nom) }}
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-body p-4 p-md-5">
+            <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom">
+                <i class="fas fa-info-circle text-primary me-2"></i>Informations générales
+            </h5>
+            
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de l\'hébergement'}}) }}
+                        {{ form_label(form.nom) }}
+                        {{ form_errors(form.nom) }}
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    {{ form_label(form.nbEtoiles, 'Nombre d\'étoiles', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    {{ form_widget(form.nbEtoiles, {'attr': {'class': 'form-control', 'type': 'number', 'min': '0', 'max': '5'}}) }}
-                    {{ form_errors(form.nbEtoiles) }}
+                <div class="col-md-4">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.nbEtoiles, {'attr': {'class': 'form-control', 'placeholder': 'Étoiles', 'min': '0', 'max': '5'}}) }}
+                        {{ form_label(form.nbEtoiles, 'Nombre d\'étoiles') }}
+                        {{ form_errors(form.nbEtoiles) }}
+                    </div>
                 </div>
             </div>
 
-            <div class="mb-3">
-                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '4', 'placeholder': 'Décrivez votre hébergement en détail...'}}) }}
+            <div class="form-floating mb-4">
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description', 'style': 'height: 150px;'}}) }}
+                {{ form_label(form.description) }}
                 {{ form_errors(form.description) }}
             </div>
-        </div>
-    </div>
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Localisation</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    {{ form_label(form.adresse, 'Adresse', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    {{ form_widget(form.adresse, {'attr': {'class': 'form-control', 'placeholder': 'Rue et numéro'}}) }}
-                    {{ form_errors(form.adresse) }}
+            <h5 class="fw-bold text-dark mb-4 mt-5 pb-2 border-bottom">
+                <i class="fas fa-map-marked-alt text-info me-2"></i>Localisation
+            </h5>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.adresse, {'attr': {'class': 'form-control', 'placeholder': 'Adresse'}}) }}
+                        {{ form_label(form.adresse) }}
+                        {{ form_errors(form.adresse) }}
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    {{ form_label(form.ville, 'Ville', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    {{ form_widget(form.ville, {'attr': {'class': 'form-control', 'placeholder': 'Nom de la ville'}}) }}
-                    {{ form_errors(form.ville) }}
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.ville, {'attr': {'class': 'form-control', 'placeholder': 'Ville'}}) }}
+                        {{ form_label(form.ville) }}
+                        {{ form_errors(form.ville) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.latitude, {'attr': {'class': 'form-control', 'placeholder': 'Latitude'}}) }}
+                        {{ form_label(form.latitude) }}
+                        {{ form_errors(form.latitude) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.longitude, {'attr': {'class': 'form-control', 'placeholder': 'Longitude'}}) }}
+                        {{ form_label(form.longitude) }}
+                        {{ form_errors(form.longitude) }}
+                    </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    {{ form_label(form.latitude, 'Latitude', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    {{ form_widget(form.latitude, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 35.7595', 'step': '0.000001'}}) }}
-                    {{ form_errors(form.latitude) }}
+            <h5 class="fw-bold text-dark mb-4 mt-5 pb-2 border-bottom">
+                <i class="fas fa-camera-retro text-success me-2"></i>Médias & Attribution
+            </h5>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label fw-600 text-muted small px-2">Image Principale (URL ou nom du fichier)</label>
+                        {{ form_widget(form.imagePrincipale, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: hotel.jpg'}}) }}
+                        {{ form_errors(form.imagePrincipale) }}
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    {{ form_label(form.longitude, 'Longitude', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    {{ form_widget(form.longitude, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 10.7969', 'step': '0.000001'}}) }}
-                    {{ form_errors(form.longitude) }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">Médias & Labels</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    {{ form_row(form.imagePrincipale, {'attr': {'class': 'form-control', 'placeholder': 'https://... ou mon-image.jpg'}}) }}
-                </div>
-                <div class="col-md-6 mb-3">
-                    {{ form_label(form.labelEco, 'Label écologique', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                    {{ form_widget(form.labelEco, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Bio, Eco-label'}}) }}
-                    {{ form_errors(form.labelEco) }}
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.labelEco, {'attr': {'class': 'form-control', 'placeholder': 'Label Éco'}}) }}
+                        {{ form_label(form.labelEco) }}
+                        {{ form_errors(form.labelEco) }}
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    {% if form.categorie is defined or form.proprietaire is defined or form.equipements is defined %}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">Associations</h5>
-        </div>
-        <div class="card-body">
-            {% if form.categorie is defined %}
-            <div class="mb-3">
-                {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
-                {{ form_errors(form.categorie) }}
+            {% if form.categorie is defined or form.equipements is defined or form.propietaire is defined %}
+            <div class="row g-4 mt-2">
+                {% if form.categorie is defined %}
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_label(form.categorie) }}
+                        {{ form_errors(form.categorie) }}
+                    </div>
+                </div>
+                {% endif %}
+                {% if form.equipements is defined %}
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        {{ form_widget(form.equipements, {'attr': {'class': 'form-select', 'multiple': 'multiple', 'style': 'height: 100px;'}}) }}
+                        {{ form_label(form.equipements) }}
+                        {{ form_errors(form.equipements) }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if form.propietaire is defined %}
+            <div class="mt-4 p-4 rounded-4 bg-primary-subtle border border-primary-subtle shadow-sm">
+                <h6 class="fw-bold text-primary mb-3">
+                    <i class="fas fa-user-tie me-2"></i>Attribution Propriétaire
+                </h6>
+                <div class="form-floating">
+                    {{ form_widget(form.propietaire, {'attr': {'class': 'form-select shadow-none', 'style': 'border-color: #cbd5e1'}}) }}
+                    {{ form_label(form.propietaire, 'Sélectionner le Propriétaire') }}
+                    {{ form_errors(form.propietaire) }}
+                </div>
+                <p class="text-muted small mt-2 mb-0">
+                    <i class="fas fa-info-circle me-1"></i> Cet utilisateur aura les droits de gestion sur cet établissement.
+                </p>
             </div>
             {% endif %}
-
-            {% if form.proprietaire is defined %}
-            <div class="mb-3">
-                {{ form_label(form.proprietaire, 'Propriétaire', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.proprietaire, {'attr': {'class': 'form-select'}}) }}
-                {{ form_errors(form.proprietaire) }}
-            </div>
             {% endif %}
 
-            {% if form.equipements is defined %}
-            <div class="mb-3">
-                {{ form_label(form.equipements, 'Équipements', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.equipements, {'attr': {'class': 'form-select', 'multiple': 'multiple'}}) }}
-                {{ form_errors(form.equipements) }}
-            </div>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0">Statut</h5>
-        </div>
-        <div class="card-body">
-            <div class="form-check form-switch">
-                {{ form_widget(form.actif, {'attr': {'class': 'form-check-input'}}) }}
-                {{ form_label(form.actif, 'Hébergement actif', {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
+            <div class="mt-5 p-4 rounded-4 bg-light border">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="fw-bold mb-1">Statut de visibilité</h6>
+                        <p class="text-muted small mb-0">Rendre cet hébergement visible sur le site immédiatement.</p>
+                    </div>
+                    <div class="form-check form-switch form-switch-lg">
+                        {{ form_widget(form.actif, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(form.actif, ' ', {'label_attr': {'class': 'form-check-label'}}) }}
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="d-flex gap-2 mb-5">
-        <button type="submit" class="btn btn-primary btn-lg">
-            <i class="bi bi-check-circle"></i> {{ button_label|default('Enregistrer') }}
-        </button>
-        <a href="{{ path('app_hebergement_index') }}" class="btn btn-outline-secondary btn-lg">
-            <i class="bi bi-arrow-left"></i> Annuler
-        </a>
+        
+        <div class="card-footer bg-white p-4 p-md-5 border-top-0 pt-0">
+            <div class="d-flex flex-column flex-md-row gap-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-sm transition-all hover-lift">
+                    <i class="fas fa-check-circle me-2"></i>{{ button_label|default('Enregistrer les modifications') }}
+                </button>
+                <a href="{{ path('app_hebergement_index') }}" class="btn btn-light btn-lg rounded-pill px-5 py-3 border transition-all hover-lift">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </a>
+            </div>
+        </div>
     </div>
 {{ form_end(form) }}
+
+<style>
+    .form-floating > .form-control:focus, .form-floating > .form-control:not(:placeholder-shown) {
+        padding-top: 1.625rem;
+        padding-bottom: 0.625rem;
+    }
+    .form-floating > label {
+        padding-left: 1rem;
+    }
+    .form-check-input {
+        width: 3em !important;
+        height: 1.5em !important;
+        cursor: pointer;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+    }
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+    .fw-600 { font-weight: 600; }
+</style>
+
+<script>
+    (function () {
+      'use strict'
+      const forms = document.querySelectorAll('.needs-validation')
+      Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+          }, false)
+        })
+    })()
+</script>

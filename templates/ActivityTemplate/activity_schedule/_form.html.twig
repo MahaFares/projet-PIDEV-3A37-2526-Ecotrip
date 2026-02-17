@@ -1,4 +1,41 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+<div class="form-group">
+    {{ form_label(form.activity, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.activity, { attr: { class: 'form-input form-select' ~ (form.activity.vars.errors|length ? ' is-invalid' : '') } }) }}
+    {% if form.activity.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.activity) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        {{ form_label(form.startAt, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.startAt, { attr: { class: 'form-input' ~ (form.startAt.vars.errors|length ? ' is-invalid' : ''), type: 'datetime-local' } }) }}
+        {% if form.startAt.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.startAt) }}</div>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.endAt, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.endAt, { attr: { class: 'form-input' ~ (form.endAt.vars.errors|length ? ' is-invalid' : ''), type: 'datetime-local' } }) }}
+        {% if form.endAt.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.endAt) }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-group">
+    {{ form_label(form.availableSpots, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.availableSpots, { attr: { class: 'form-input' ~ (form.availableSpots.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: 10' } }) }}
+    {% if form.availableSpots.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.availableSpots) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="modern-btn btn-submit"><i class="bi bi-check"></i> {{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('app_activity_schedule_index') }}" class="modern-btn btn-cancel"><i class="bi bi-x"></i> Annuler</a>
+</div>
+
 {{ form_end(form) }}

@@ -1,39 +1,34 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Catégorie {{ categorie.nom }} | Admin{% endblock %}
+{% block title %}{{ categorie.nom }} - Admin{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Catégorie</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_categorie_index') }}">Catégories</a></li>
-                <li class="active">{{ categorie.nom }}</li>
-            </ol>
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>{{ categorie.nom }}</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <h3>Détails</h3>
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">{{ categorie.idCategorie }}</dd>
+                <dt class="col-sm-3">Nom</dt>
+                <dd class="col-sm-9">{{ categorie.nom }}</dd>
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">{{ categorie.description|default('–') }}</dd>
+            </dl>
+        </div>
+        <div class="col-md-4">
+            <h3>Actions</h3>
+            <a href="{{ path('app_categorie_edit', { id: categorie.idCategorie }) }}" class="btn btn-warning d-block mb-2">Modifier</a>
+            <form method="post" action="{{ path('app_categorie_delete', { id: categorie.idCategorie }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_categorie_' ~ categorie.idCategorie) }}">
+                <button type="submit" class="btn btn-danger d-block mb-2 w-100">Supprimer</button>
+            </form>
         </div>
     </div>
-</section>
 
-<section class="accomodation_area section_gap">
-    <div class="container">
-        <dl class="row">
-            <dt class="col-sm-3">Id</dt>
-            <dd class="col-sm-9">{{ categorie.idCategorie }}</dd>
-            <dt class="col-sm-3">Nom</dt>
-            <dd class="col-sm-9">{{ categorie.nom }}</dd>
-            <dt class="col-sm-3">Description</dt>
-            <dd class="col-sm-9">{{ categorie.description|default('—') }}</dd>
-        </dl>
-        <p>
-            <a href="{{ path('app_categorie_edit', { id: categorie.idCategorie }) }}" class="btn theme_btn button_hover">Modifier</a>
-            <form method="post" action="{{ path('app_categorie_delete', { id: categorie.idCategorie }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette catégorie ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete_categorie_' ~ categorie.idCategorie) }}">
-                <button type="submit" class="btn btn-danger">Supprimer</button>
-            </form>
-            <a href="{{ path('app_categorie_index') }}" class="btn btn-secondary">Retour à la liste</a>
-        </p>
-    </div>
-</section>
+    <a href="{{ path('app_categorie_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+</div>
 {% endblock %}

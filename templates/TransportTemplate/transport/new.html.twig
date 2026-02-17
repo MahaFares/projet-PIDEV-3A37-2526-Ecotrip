@@ -1,11 +1,12 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Ajouter un Transport{% endblock %}
+{% block title %}Créer un transport - Admin{% endblock %}
 
 {% block body %}
-    <h1>Create new Transport</h1>
-
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>Créer un transport</h1>
     {{ include('TransportTemplate/transport/_form.html.twig') }}
-
-    <a href="{{ path('app_transport_index') }}">back to list</a>
+    <a href="{{ path('app_transport_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+</div>
 {% endblock %}

@@ -40,4 +40,29 @@ class ActivityCategoryRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Get the count of activities for each category
+     *
+     * @return array Array of arrays with category objects and activity counts
+     */
+    public function getActivitiesCountByCategory(): array
+    {
+        $results = $this->createQueryBuilder('c')
+            ->select('c, COUNT(a.id) as count')
+            ->leftJoin('c.activities', 'a')
+            ->groupBy('c.id')
+            ->orderBy('count', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $data = [];
+        foreach ($results as $result) {
+            $data[] = [
+                'category' => $result[0],
+                'count' => (int)$result['count'],
+            ];
+        }
+        return $data;
+    }
 }

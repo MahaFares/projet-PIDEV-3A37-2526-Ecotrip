@@ -1,3 +1,4 @@
+composer show doctrine/migrations
 #!/usr/bin/env php
 <?php
 

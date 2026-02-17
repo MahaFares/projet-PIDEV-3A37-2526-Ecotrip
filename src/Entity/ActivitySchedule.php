@@ -30,11 +30,10 @@ class ActivitySchedule
     #[Assert\Range(min: 1, notInRangeMessage: 'Au moins 1 place doit être disponible')]
     private ?int $availableSpots = null;
 
-    #[ORM\ManyToOne(inversedBy: 'schedules')]
+    #[ORM\ManyToOne(targetEntity: Activity::class, inversedBy: 'schedules')]  // ← Add targetEntity
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'Une activité doit être associée')]
     private ?Activity $activity = null;
-
     public function getId(): ?int
     {
         return $this->id;

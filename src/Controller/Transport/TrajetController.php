@@ -36,7 +36,7 @@ final class TrajetController extends AbstractController
             return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('TransportTemplatetrajet/new.html.twig', [
+        return $this->render('TransportTemplate/trajet/new.html.twig', [
             'transport' => $transport,
             'form' => $form,
         ]);
@@ -71,7 +71,7 @@ final class TrajetController extends AbstractController
     #[Route('/{id}', name: 'app_trajet_delete', methods: ['POST'])]
     public function delete(Request $request, Transport $transport, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$transport->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$transport->getId(), $request->request->get('_token'))) {
             $entityManager->remove($transport);
             $entityManager->flush();
         }

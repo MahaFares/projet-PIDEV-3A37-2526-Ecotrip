@@ -3,88 +3,817 @@
 {% block title %}Transport | EcoTrip{% endblock %}
 
 {% block body %}
-    <!--================Breadcrumb Area =================-->
-    <section class="breadcrumb_area">
-        <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background=""></div>
+    <style>
+        /* Hero Section - GREEN */
+        .transport-hero {
+            background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+            padding: 100px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .transport-hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -250px;
+            right: -150px;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.2); opacity: 0.15; }
+        }
+
+        .transport-hero h1 {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .transport-hero p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.3rem;
+            font-weight: 300;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Filters Section */
+        .filters-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            padding: 35px 40px;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2d5016;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #2d5016, #1e4620);
+            border-radius: 2px;
+        }
+
+        .filter-input {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 14px 18px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .filter-input:focus {
+            border-color: #2d5016;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-input::placeholder {
+            color: #999;
+            font-weight: 400;
+        }
+
+        .filter-input option {
+            padding: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Transport Cards - LARGER & WIDER */
+        .transport-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            animation: cardSlideIn 0.6s ease-out backwards;
+        }
+
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .transport-card:nth-child(1) { animation-delay: 0.1s; }
+        .transport-card:nth-child(2) { animation-delay: 0.2s; }
+        .transport-card:nth-child(3) { animation-delay: 0.3s; }
+        .transport-card:nth-child(4) { animation-delay: 0.4s; }
+        .transport-card:nth-child(5) { animation-delay: 0.5s; }
+        .transport-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .transport-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(45, 80, 22, 0.25);
+        }
+
+        .transport-image-wrapper {
+            position: relative;
+            height: 320px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .transport-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .transport-card:hover .transport-image {
+            transform: scale(1.15) rotate(2deg);
+        }
+
+        .transport-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(45, 80, 22, 0.95);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(45, 80, 22, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .transport-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .transport-card:hover .transport-overlay {
+            opacity: 1;
+        }
+
+        .transport-type {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .transport-body {
+            padding: 30px;
+        }
+
+        .transport-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .transport-details {
+            margin-bottom: 25px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 18px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-item:hover {
+            background: #e8f5e9;
+            transform: translateX(5px);
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        .transport-price {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 15px;
+        }
+
+        .price-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #2d5016;
+        }
+
+        .price-currency {
+            font-size: 1.3rem;
+            color: #2d5016;
+            font-weight: 600;
+        }
+
+        .price-unit {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .btn-reserve {
+            width: 100%;
+            background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+            color: white;
+            border: none;
+            padding: 18px 35px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-reserve:disabled {
+            background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-reserve:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-reserve:disabled::before {
+            display: none;
+        }
+
+        .btn-reserve::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-reserve:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-reserve:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(45, 80, 22, 0.4);
+        }
+
+        .btn-reserve:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-reserve span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Custom Green Dots Loading Animation */
+        .green-dots-loader {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .green-dots-loader div {
+            position: absolute;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #2d5016;
+            animation: green-dots-loader 1.2s linear infinite;
+        }
+
+        .green-dots-loader div:nth-child(1) {
+            animation-delay: 0s;
+            top: 37px;
+            left: 66px;
+        }
+
+        .green-dots-loader div:nth-child(2) {
+            animation-delay: -0.1s;
+            top: 22px;
+            left: 62px;
+        }
+
+        .green-dots-loader div:nth-child(3) {
+            animation-delay: -0.2s;
+            top: 11px;
+            left: 52px;
+        }
+
+        .green-dots-loader div:nth-child(4) {
+            animation-delay: -0.3s;
+            top: 7px;
+            left: 37px;
+        }
+
+        .green-dots-loader div:nth-child(5) {
+            animation-delay: -0.4s;
+            top: 11px;
+            left: 22px;
+        }
+
+        .green-dots-loader div:nth-child(6) {
+            animation-delay: -0.5s;
+            top: 22px;
+            left: 11px;
+        }
+
+        .green-dots-loader div:nth-child(7) {
+            animation-delay: -0.6s;
+            top: 37px;
+            left: 7px;
+        }
+
+        .green-dots-loader div:nth-child(8) {
+            animation-delay: -0.7s;
+            top: 52px;
+            left: 11px;
+        }
+
+        .green-dots-loader div:nth-child(9) {
+            animation-delay: -0.8s;
+            top: 62px;
+            left: 22px;
+        }
+
+        .green-dots-loader div:nth-child(10) {
+            animation-delay: -0.9s;
+            top: 66px;
+            left: 37px;
+        }
+
+        .green-dots-loader div:nth-child(11) {
+            animation-delay: -1s;
+            top: 62px;
+            left: 52px;
+        }
+
+        .green-dots-loader div:nth-child(12) {
+            animation-delay: -1.1s;
+            top: 52px;
+            left: 62px;
+        }
+
+        @keyframes green-dots-loader {
+            0%, 20%, 80%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+        }
+
+        /* Results Count */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .results-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 100px 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .transport-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .filters-container {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .transport-hero h1 {
+                font-size: 2rem;
+            }
+
+            .transport-hero p {
+                font-size: 1.1rem;
+            }
+
+            .filters-container {
+                margin-top: -30px;
+                padding: 20px 15px;
+            }
+
+            .transport-image-wrapper {
+                height: 250px;
+            }
+        }
+
+        /* Success Animation */
+        @keyframes successPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-success-animation {
+            animation: successPop 0.4s ease;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="transport-hero">
         <div class="container">
-            <div class="page-cover text-center">
-                <h2 class="page-cover-tittle">Transport</h2>
-                <ol class="breadcrumb">
-                    <li><a href="{{ path('app_home') }}">Home</a></li>
-                    <li class="active">Transport</li>
-                </ol>
+            <div class="text-center">
+                <h1>Eco-Friendly Transport</h1>
+                <p>Choose sustainable transportation for your journey</p>
             </div>
         </div>
     </section>
-    <!--================Breadcrumb Area =================-->
 
-    <!--================ Transport Area  =================-->
-    <section class="accomodation_area section_gap">
-        <div class="container">
-            {% set filters = filters|default({}) %}
-            <div class="section_title text-center">
-                <h2 class="title_color">Available Transports</h2>
-                <p>Choose your eco-friendly transport option for your journey</p>
+    <!-- Main Content -->
+    <div class="container-fluid px-5" style="margin-top: -50px; position: relative; z-index: 10;">
+        <!-- Filters -->
+        <div class="filters-container" style="max-width: 1600px; margin: 0 auto;">
+            <div class="filters-title">
+                Search & Filter Transports
             </div>
-            <div class="row mb-4">
-                <form method="get" class="row g-2 w-100">
-                    <div class="col-md-3">
-                        <input type="text" name="type" value="{{ filters.type|default('') }}" class="form-control" placeholder="Type (Ex: minivan)">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" step="0.01" name="minPrice" value="{{ filters.minPrice is not null ? filters.minPrice : '' }}" class="form-control" placeholder="Prix min (DT)">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" step="0.01" name="maxPrice" value="{{ filters.maxPrice is not null ? filters.maxPrice : '' }}" class="form-control" placeholder="Prix max (DT)">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" name="minCapacity" value="{{ filters.minCapacity is not null ? filters.minCapacity : '' }}" class="form-control" placeholder="Capacité min">
-                    </div>
-                    <div class="col-md-2">
-                        <select name="available" class="form-select">
-                            <option value="">Tous</option>
-                            <option value="1" {% if filters.available is same as(true) %}selected{% endif %}>Disponible</option>
-                            <option value="0" {% if filters.available is same as(false) %}selected{% endif %}>Indisponible</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1 d-grid">
-                        <button type="submit" class="btn btn-primary">Filtrer</button>
-                    </div>
-                </form>
+            <form id="filterForm" class="row g-3">
+                <div class="col-md-3">
+                    <input
+                            type="text"
+                            name="type"
+                            value="{{ filters.type|default('') }}"
+                            class="form-control filter-input"
+                            placeholder="Type (e.g., minivan, bus)">
+                </div>
+                <div class="col-md-2">
+                    <input
+                            type="number"
+                            step="0.01"
+                            name="minPrice"
+                            value="{{ filters.minPrice is not null ? filters.minPrice : '' }}"
+                            class="form-control filter-input"
+                            placeholder="Min Price (DT)">
+                </div>
+                <div class="col-md-2">
+                    <input
+                            type="number"
+                            step="0.01"
+                            name="maxPrice"
+                            value="{{ filters.maxPrice is not null ? filters.maxPrice : '' }}"
+                            class="form-control filter-input"
+                            placeholder="Max Price (DT)">
+                </div>
+                <div class="col-md-2">
+                    <input
+                            type="number"
+                            name="minCapacity"
+                            value="{{ filters.minCapacity is not null ? filters.minCapacity : '' }}"
+                            class="form-control filter-input"
+                            placeholder="Min Capacity">
+                </div>
+                <div class="col-md-3">
+                    <select name="available" class="form-select filter-input">
+                        <option value="">All Availability</option>
+                        <option value="1" {% if filters.available is same as(true) %}selected{% endif %}>Available</option>
+                        <option value="0" {% if filters.available is same as(false) %}selected{% endif %}>Not Available</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div style="padding: 60px 0; max-width: 1600px; margin: 0 auto;">
+            <div class="results-header">
+                <div class="results-count" id="resultsCount">
+                    <span id="transportCount">{{ transports|length }}</span> Transport{{ transports|length > 1 ? 's' : '' }} Found
+                </div>
             </div>
-            <div class="row mb_30">
+
+            <div class="row g-4" id="transportsList">
                 {% if transports is defined and transports|length > 0 %}
                     {% for transport in transports %}
-                    <div class="col-lg-3 col-sm-6 mb-4">
-                        <div class="accomodation_item text-center">
-                            <div class="hotel_img" style="position: relative; overflow: hidden; border-radius: 8px;">
-                                {% if transport.image %}
-                                    <img src="{{ asset('uploads/transports/' ~ transport.image) }}" alt="{{ transport.type }}" style="height: 250px; object-fit: cover; width: 100%; display: block;">
-                                {% else %}
-                                    <img src="{{ asset('images/transport.jpg') }}" alt="{{ transport.type }}" style="height: 250px; object-fit: cover; width: 100%; display: block;">
-                                {% endif %}
-                                <a href="#" class="btn btn-success button_hover" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); padding: 10px 25px; font-weight: bold; z-index: 10;">
-                                    <i class="fa fa-cart-plus"></i> Book Now
-                                </a>
-                            </div>
-                            <a href="#"><h4 class="sec_h4">{{ transport.type }}</h4></a>
-                            <div class="transport-details" style="padding: 10px;">
-                                <p><strong>Capacity:</strong> {{ transport.capacite }} passengers</p>
-                                <p><strong>CO2 Emission:</strong> {{ transport.emissionco2 }} kg</p>
-                                <h5><span style="color: #2196F3; font-size: 1.3rem;">{{ transport.prixparpersonne }} DT</span><small>/person</small></h5>
+                        <div class="col-lg-4 col-md-6"
+                             data-type="{{ transport.type|lower }}"
+                             data-price="{{ transport.prixparpersonne }}"
+                             data-capacity="{{ transport.capacite }}"
+                             data-disponible="{{ transport.disponible ? '1' : '0' }}">
+                            <div class="transport-card">
+                                <div class="transport-image-wrapper">
+                                    {% if transport.image %}
+                                        <img src="{{ asset('uploads/transports/' ~ transport.image) }}" alt="{{ transport.type }}" class="transport-image">
+                                    {% else %}
+                                        <img src="{{ asset('images/transport.jpg') }}" alt="{{ transport.type }}" class="transport-image">
+                                    {% endif %}
+                                    <div class="transport-badge">ECO-FRIENDLY</div>
+                                    <div class="transport-overlay">
+                                        <div class="transport-type">{{ transport.type|upper }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="transport-body">
+                                    <h4 class="transport-title">{{ transport.type }}</h4>
+
+                                    <div class="transport-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Capacity</span>
+                                            <span class="detail-value">{{ transport.capacite }} passengers</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">CO2 Emission</span>
+                                            <span class="detail-value">{{ transport.emissionco2 }} kg</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="transport-price">
+                                        <span class="price-amount">{{ transport.prixparpersonne }}</span>
+                                        <span class="price-currency">DT</span>
+                                        <span class="price-unit">/person</span>
+                                    </div>
+
+                                    <button
+                                            type="button"
+                                            class="btn-reserve"
+                                            data-transport-id="{{ transport.id }}"
+                                            data-url="{{ path('app_panier_add_transport', {id: transport.id}) }}"
+                                            {% if not transport.disponible %}disabled{% endif %}>
+                                        <span>{% if transport.disponible %}Reserve Now{% else %}Not Available{% endif %}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     {% endfor %}
                 {% else %}
                     <div class="col-12">
-                        <div class="alert alert-info text-center">
-                            <p>No transports available at the moment. Please check back later!</p>
+                        <div class="empty-state">
+                            <div class="empty-icon">🚗</div>
+                            <h3>No Transports Available</h3>
+                            <p>Try adjusting your filters to see more results</p>
                         </div>
                     </div>
                 {% endif %}
             </div>
         </div>
-    </section>
-    <!--================ Transport Area  =================-->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterForm = document.getElementById('filterForm');
+            const transportsList = document.getElementById('transportsList');
+            const transportCount = document.getElementById('transportCount');
+
+            // AJAX filtering - trigger on input change
+            filterForm.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('input', debounce(filterTransports, 300));
+                input.addEventListener('change', filterTransports);
+            });
+
+            function filterTransports() {
+                const typeInput = filterForm.querySelector('[name="type"]').value.trim().toLowerCase();
+                const minPrice = parseFloat(filterForm.querySelector('[name="minPrice"]').value) || null;
+                const maxPrice = parseFloat(filterForm.querySelector('[name="maxPrice"]').value) || null;
+                const minCapacity = parseInt(filterForm.querySelector('[name="minCapacity"]').value) || null;
+
+                const allCards = Array.from(transportsList.querySelectorAll('[data-type]'));
+
+                // Filter
+                let visibleCards = allCards.filter(card => {
+                    const type = (card.dataset.type || '').toLowerCase();
+                    const price = parseFloat(card.dataset.price) || 0;
+                    const capacity = parseInt(card.dataset.capacity) || 0;
+
+                    const matchesType = !typeInput || type.includes(typeInput);
+                    const matchesMinPrice = !minPrice || price >= minPrice;
+                    const matchesMaxPrice = !maxPrice || price <= maxPrice;
+                    const matchesMinCapacity = !minCapacity || capacity >= minCapacity;
+
+                    return matchesType && matchesMinPrice && matchesMaxPrice && matchesMinCapacity;
+                });
+
+                // Update DOM
+                allCards.forEach(card => card.style.display = 'none');
+
+                if (visibleCards.length === 0) {
+                    transportsList.innerHTML = `
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <div class="empty-icon">🚗</div>
+                                <h3>No Transports Found</h3>
+                                <p>Try adjusting your filters</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    visibleCards.forEach(card => {
+                        card.style.display = '';
+                        transportsList.appendChild(card);
+                    });
+                }
+
+                transportCount.textContent = visibleCards.length;
+                attachReserveListeners();
+            }
+
+            // Debounce function to limit API calls
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Reserve button functionality
+            function attachReserveListeners() {
+                document.querySelectorAll('.btn-reserve').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = '<span>Adding...</span>';
+                        this.disabled = true;
+
+                        fetch(this.dataset.url, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                            .then(r => r.json())
+                            .then(d => {
+                                if (d.success) {
+                                    // Success animation
+                                    this.innerHTML = '<span>✓ Added!</span>';
+                                    this.classList.add('btn-success-animation');
+                                    this.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+
+                                    // Update cart badge if function exists
+                                    if (typeof updateCartBadge === 'function') {
+                                        updateCartBadge(d.count);
+                                    }
+
+                                    // Reset after 2 seconds
+                                    setTimeout(() => {
+                                        this.innerHTML = originalHTML;
+                                        this.disabled = false;
+                                        this.style.background = '';
+                                        this.classList.remove('btn-success-animation');
+                                    }, 2000);
+                                } else {
+                                    // Error state
+                                    this.innerHTML = '<span>✗ Error</span>';
+                                    this.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                                    setTimeout(() => {
+                                        this.innerHTML = originalHTML;
+                                        this.disabled = false;
+                                        this.style.background = '';
+                                    }, 2000);
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Error:', err);
+                                this.innerHTML = originalHTML;
+                                this.disabled = false;
+                            });
+                    });
+                });
+            }
+
+            // Initial attach
+            attachReserveListeners();
+
+            // Smooth scroll animation
+            window.addEventListener('scroll', function() {
+                const cards = document.querySelectorAll('.transport-card');
+                cards.forEach(card => {
+                    const cardTop = card.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+
+                    if (cardTop < windowHeight - 100) {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

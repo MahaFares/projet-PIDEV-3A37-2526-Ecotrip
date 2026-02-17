@@ -15,11 +15,28 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/hebergement')]
 final class HebergementController extends AbstractController
 {
-    #[Route(name: 'app_hebergement_index', methods: ['GET'])]
-    public function index(HebergementRepository $hebergementRepository): Response
+    #[Route('', name: 'app_hebergement_index', methods: ['GET'])]
+    public function index(Request $request, HebergementRepository $hebergementRepository): Response
     {
+        $q = $request->query->get('q');
+        $minStars = $request->query->get('minStars');
+        $maxStars = $request->query->get('maxStars');
+        $active = $request->query->get('active');
+
+        $minStars = $minStars !== null && $minStars !== '' ? (int) $minStars : null;
+        $maxStars = $maxStars !== null && $maxStars !== '' ? (int) $maxStars : null;
+        $active = ($active === '1' ? true : ($active === '0' ? false : null));
+
+        $hebergements = $hebergementRepository->findByFilters($q, $minStars, $maxStars, $active);
+
         return $this->render('HebergementTemplate/hebergement/index.html.twig', [
-            'hebergements' => $hebergementRepository->findAll(),
+            'hebergements' => $hebergements,
+            'filters' => [
+                'q' => $q,
+                'minStars' => $minStars,
+                'maxStars' => $maxStars,
+                'active' => $active,
+            ],
         ]);
     }
 
@@ -45,7 +62,7 @@ final class HebergementController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_hebergement_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_hebergement_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
     public function show(Hebergement $hebergement): Response
     {
         return $this->render('HebergementTemplate/hebergement/show.html.twig', [
@@ -53,7 +70,7 @@ final class HebergementController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_hebergement_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_hebergement_edit', methods: ['GET', 'POST'], requirements: ['id' => '\\d+'])]
     public function edit(Request $request, Hebergement $hebergement, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(HebergementType::class, $hebergement);
@@ -72,7 +89,7 @@ final class HebergementController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_hebergement_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_hebergement_delete', methods: ['POST'], requirements: ['id' => '\\d+'])]
     public function delete(Request $request, Hebergement $hebergement, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$hebergement->getId(), $request->getPayload()->getString('_token'))) {

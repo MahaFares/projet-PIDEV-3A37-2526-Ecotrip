@@ -1,33 +1,30 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Nouvelle catégorie | Admin{% endblock %}
+{% block title %}Nouvelle catégorie - Admin{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Nouvelle catégorie</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_categorie_index') }}">Catégories</a></li>
-                <li class="active">Nouvelle</li>
-            </ol>
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>Créer une catégorie</h1>
+    
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="form-group mb-3">
+            {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.nom) }}
         </div>
-    </div>
-</section>
 
-<section class="accomodation_area section_gap">
-    <div class="container">
-        {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">{{ message }}</div>
-        {% endfor %}
+        <div class="form-group mb-3">
+            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+            {{ form_errors(form.description) }}
+        </div>
 
-        {{ form_start(form) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.description) }}
-        <button type="submit" class="btn theme_btn button_hover">Enregistrer</button>
-        <a href="{{ path('app_categorie_index') }}" class="btn btn-secondary">Annuler</a>
-        {{ form_end(form) }}
-    </div>
-</section>
+        <div class="form-group mt-4">
+            <button type="submit" class="btn btn-success">Créer la catégorie</button>
+        </div>
+    {{ form_end(form) }}
+    
+    <a href="{{ path('app_categorie_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+</div>
 {% endblock %}

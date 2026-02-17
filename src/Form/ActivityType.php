@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType; 
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
@@ -66,6 +67,8 @@ class ActivityType extends AbstractType
                 ],
                 'mapped' => false,
             ])
+            
+
             ->add('isActive', CheckboxType::class, [
                 'required' => false,
                 'help' => 'Cochez pour rendre l\'activité disponible',

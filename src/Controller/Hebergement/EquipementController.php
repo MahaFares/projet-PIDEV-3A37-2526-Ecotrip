@@ -32,6 +32,7 @@ final class EquipementController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($equipement);
             $entityManager->flush();
+            $this->addFlash('success', 'Équipement créé avec succès.');
 
             return $this->redirectToRoute('app_equipement_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -58,6 +59,7 @@ final class EquipementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+            $this->addFlash('success', 'Équipement mis à jour.');
 
             return $this->redirectToRoute('app_equipement_index', [], Response::HTTP_SEE_OTHER);
         }

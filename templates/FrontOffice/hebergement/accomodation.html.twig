@@ -3,198 +3,698 @@
 {% block title %}Hébergements | EcoTrip{% endblock %}
 
 {% block body %}
-    <!--================Breadcrumb Area =================-->
-    <section class="breadcrumb_area">
-        <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background=""></div>
+    <style>
+        #hebergementsList {
+            /* Gaps handled by Bootstrap g-4 class */
+        }
+
+        /* Hero Section - GREEN */
+        .hebergement-hero {
+            background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+            padding: 100px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hebergement-hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -250px;
+            right: -150px;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.2); opacity: 0.15; }
+        }
+
+        .hebergement-hero h1 {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .hebergement-hero p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.3rem;
+            font-weight: 300;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Filters Section */
+        .filters-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            padding: 35px 40px;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2d5016;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #2d5016, #1e4620);
+            border-radius: 2px;
+        }
+
+        .filter-input {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 14px 18px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .filter-input:focus {
+            border-color: #2d5016;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-input::placeholder {
+            color: #999;
+            font-weight: 400;
+        }
+
+        .filter-input option {
+            padding: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-clear {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .btn-clear:hover {
+            border-color: #2d5016;
+            color: #2d5016;
+            transform: translateY(-2px);
+        }
+
+        /* Hebergement Cards */
+        .hebergement-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            width: 100%;
+            animation: cardSlideIn 0.6s ease-out backwards;
+        }
+
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hebergement-card:nth-child(1) { animation-delay: 0.1s; }
+        .hebergement-card:nth-child(2) { animation-delay: 0.2s; }
+        .hebergement-card:nth-child(3) { animation-delay: 0.3s; }
+        .hebergement-card:nth-child(4) { animation-delay: 0.4s; }
+        .hebergement-card:nth-child(5) { animation-delay: 0.5s; }
+        .hebergement-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .hebergement-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(45, 80, 22, 0.25);
+        }
+
+        .hebergement-image-wrapper {
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .hebergement-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hebergement-card:hover .hebergement-image {
+            transform: scale(1.15) rotate(2deg);
+        }
+
+        .hebergement-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(45, 80, 22, 0.95);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(45, 80, 22, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .stars-wrapper {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            display: flex;
+            gap: 3px;
+        }
+
+        .star-icon {
+            color: #ffc107;
+            font-size: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hebergement-body {
+            padding: 25px;
+        }
+
+        .hebergement-header {
+            margin-bottom: 20px;
+        }
+
+        .hebergement-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .hebergement-location {
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hebergement-category {
+            display: inline-block;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: #2d5016;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .hebergement-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .hebergement-equipements {
+            margin-bottom: 20px;
+        }
+
+        .equipement-badge {
+            display: inline-block;
+            background: #f8f9fa;
+            color: #666;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .equipement-badge:hover {
+            background: #e8f5e9;
+            color: #2d5016;
+        }
+
+        .hebergement-price {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 20px;
+            padding: 18px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 15px;
+        }
+
+        .price-amount {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #2d5016;
+        }
+
+        .price-currency {
+            font-size: 1.1rem;
+            color: #2d5016;
+            font-weight: 600;
+        }
+
+        .price-unit {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .btn-reserve {
+            width: 100%;
+            background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-reserve::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-reserve:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-reserve:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(45, 80, 22, 0.4);
+        }
+
+        .btn-reserve:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-reserve span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Green Dots Loading */
+        .green-dots-loader {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .green-dots-loader div {
+            position: absolute;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #2d5016;
+            animation: green-dots-loader 1.2s linear infinite;
+        }
+
+        .green-dots-loader div:nth-child(1) { animation-delay: 0s; top: 37px; left: 66px; }
+        .green-dots-loader div:nth-child(2) { animation-delay: -0.1s; top: 22px; left: 62px; }
+        .green-dots-loader div:nth-child(3) { animation-delay: -0.2s; top: 11px; left: 52px; }
+        .green-dots-loader div:nth-child(4) { animation-delay: -0.3s; top: 7px; left: 37px; }
+        .green-dots-loader div:nth-child(5) { animation-delay: -0.4s; top: 11px; left: 22px; }
+        .green-dots-loader div:nth-child(6) { animation-delay: -0.5s; top: 22px; left: 11px; }
+        .green-dots-loader div:nth-child(7) { animation-delay: -0.6s; top: 37px; left: 7px; }
+        .green-dots-loader div:nth-child(8) { animation-delay: -0.7s; top: 52px; left: 11px; }
+        .green-dots-loader div:nth-child(9) { animation-delay: -0.8s; top: 62px; left: 22px; }
+        .green-dots-loader div:nth-child(10) { animation-delay: -0.9s; top: 66px; left: 37px; }
+        .green-dots-loader div:nth-child(11) { animation-delay: -1s; top: 62px; left: 52px; }
+        .green-dots-loader div:nth-child(12) { animation-delay: -1.1s; top: 52px; left: 62px; }
+
+        @keyframes green-dots-loader {
+            0%, 20%, 80%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
+
+        /* Results Count */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .results-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 100px 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .hebergement-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .filters-container {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .hebergement-hero h1 {
+                font-size: 2rem;
+            }
+
+            .hebergement-hero p {
+                font-size: 1.1rem;
+            }
+
+            .filters-container {
+                margin-top: -30px;
+                padding: 20px 15px;
+            }
+
+            .hebergement-image-wrapper {
+                height: 220px;
+            }
+        }
+
+        /* Success Animation */
+        @keyframes successPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-success-animation {
+            animation: successPop 0.4s ease;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="hebergement-hero">
         <div class="container">
-            <div class="page-cover text-center">
-                <h2 class="page-cover-tittle">Nos Hébergements</h2>
-                <ol class="breadcrumb">
-                    <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                    <li class="active">Hébergements</li>
-                </ol>
+            <div class="text-center">
+                <h1>Eco-Friendly Accommodations</h1>
+                <p>Discover sustainable places to stay in Tunisia</p>
             </div>
         </div>
     </section>
-    <!--================Breadcrumb Area =================-->
 
-    <!--================ Search & Filter Area =================-->
-    <section class="py-4" style="background-color: #f8f9fa;">
-        <div class="container">
-            <div class="card p-3 shadow-sm">
-                <div class="row g-3 align-items-center">
-                    <div class="col-md-7">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa fa-search"></i></span>
-                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom ou ville..." />
-                            <button id="clearSearch" class="btn btn-outline-secondary" type="button">Effacer</button>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <select id="sortSelect" class="form-select">
-                            <option value="">-- Trier par --</option>
-                            <option value="nom_asc">Nom (A-Z)</option>
-                            <option value="nom_desc">Nom (Z-A)</option>
-                            <option value="etoiles_desc">Meilleures évaluations</option>
-                            <option value="ville_asc">Ville (A-Z)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 text-end">
-                        <small class="text-muted">{{ hebergements|length }} résultats</small>
-                    </div>
+    <!-- Main Content -->
+    <div class="container-fluid px-5" style="margin-top: -50px; position: relative; z-index: 10;">
+        <!-- Filters -->
+        <div class="filters-container" style="max-width: 1400px; margin: 0 auto;">
+            <div class="filters-title">
+                Search & Filter Accommodations
+            </div>
+            <form id="filterForm" class="row g-3">
+                <div class="col-md-5">
+                    <input
+                            type="text"
+                            id="searchInput"
+                            name="search"
+                            class="form-control filter-input"
+                            placeholder="Search by name or city...">
+                </div>
+                <div class="col-md-3">
+                    <select id="sortSelect" name="sort" class="form-select filter-input">
+                        <option value="">Sort by</option>
+                        <option value="nom_asc">Name (A-Z)</option>
+                        <option value="nom_desc">Name (Z-A)</option>
+                        <option value="etoiles_desc">Best Rated</option>
+                        <option value="ville_asc">City (A-Z)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="stars" class="form-select filter-input">
+                        <option value="">All Stars</option>
+                        <option value="5">5 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="2">2 Stars</option>
+                        <option value="1">1 Star</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" id="clearBtn" class="btn-clear w-100">
+                        Clear Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div style="padding: 60px 0; max-width: 1600px; margin: 0 auto;">
+            <div class="results-header">
+                <div class="results-count">
+                    <span id="hebergementCount">{{ hebergements|length }}</span> Accommodation{{ hebergements|length > 1 ? 's' : '' }} Found
                 </div>
             </div>
-        </div>
-    </section>
-    <!--================ Search & Filter Area =================-->
 
-    <!--================ Accommodation Area =================-->
-    <section class="accomodation_area section_gap">
-        <div class="container">
-            <div id="noResults" class="text-center py-5" style="display: none;">
-                <p class="text-muted fs-5">Aucun hébergement ne correspond à votre recherche.</p>
-            </div>
-            <div id="accommodationGrid" class="row">
+            <div class="row g-4" id="hebergementsList">
                 {% if hebergements|length > 0 %}
                     {% for hebergement in hebergements %}
-                        <div class="col-lg-4 col-md-6 mb-4 accommodation-card" data-nom="{{ hebergement.nom|lower }}" data-ville="{{ hebergement.ville|lower }}" data-etoiles="{{ hebergement.nbEtoiles }}">
-                            <div class="card h-100 shadow-sm border-0" style="overflow: hidden; transition: all 0.3s ease;">
-                                <div style="height: 250px; overflow: hidden; background: #e9ecef; position: relative;">
+                        <div class="col-lg-4 col-md-6 mb-5"
+                             data-nom="{{ hebergement.nom|lower }}"
+                             data-ville="{{ hebergement.ville|lower }}"
+                             data-etoiles="{{ hebergement.nbEtoiles }}">
+                            <div class="hebergement-card">
+                                <div class="hebergement-image-wrapper">
                                     {% if hebergement.imagePrincipale and hebergement.imagePrincipale != '' %}
                                         {% if hebergement.imagePrincipale starts with 'http' %}
-                                            <img src="{{ hebergement.imagePrincipale }}" alt="{{ hebergement.nom }}" class="w-100 h-100 accommodation-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                            <img src="{{ hebergement.imagePrincipale }}" alt="{{ hebergement.nom }}" class="hebergement-image">
                                         {% else %}
-                                            <img src="{{ asset('uploads/' ~ hebergement.imagePrincipale) }}" alt="{{ hebergement.nom }}" class="w-100 h-100 accommodation-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                            <img src="{{ asset('uploads/' ~ hebergement.imagePrincipale) }}" alt="{{ hebergement.nom }}" class="hebergement-image">
                                         {% endif %}
                                     {% else %}
-                                        <img src="{{ asset('images/room1.jpg') }}" alt="{{ hebergement.nom }}" class="w-100 h-100 accommodation-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                        <img src="{{ asset('images/room1.jpg') }}" alt="{{ hebergement.nom }}" class="hebergement-image">
                                     {% endif %}
+
                                     {% if hebergement.labelEco %}
-                                        <div style="position: absolute; top: 10px; right: 10px;">
-                                            <span class="badge bg-success"><i class="fa fa-leaf"></i> {{ hebergement.labelEco }}</span>
-                                        </div>
+                                        <div class="hebergement-badge">{{ hebergement.labelEco }}</div>
                                     {% endif %}
+
+                                    <div class="stars-wrapper">
+                                        {% for i in 1..hebergement.nbEtoiles %}
+                                            <i class="fa fa-star star-icon"></i>
+                                        {% endfor %}
+                                    </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h5 class="card-title mb-0">{{ hebergement.nom }}</h5>
-                                            {% set minPrice = null %}
-                                            {% for chambre in hebergement.chambres %}
-                                                {% if chambre.prixParNuit is defined and chambre.prixParNuit is not null %}
-                                                    {% if minPrice is null or chambre.prixParNuit < minPrice %}
-                                                        {% set minPrice = chambre.prixParNuit %}
-                                                    {% endif %}
-                                                {% endif %}
-                                            {% endfor %}
-                                            {% if minPrice is not null %}
-                                                <p class="h6 text-primary mb-1 mt-1">{{ minPrice|number_format(2, ',', ' ') }} TND / nuit</p>
-                                            {% else %}
-                                                <p class="h6 text-secondary mb-1 mt-1">Prix indisponible</p>
-                                            {% endif %}
-                                        </div>
-                                        <div class="text-warning">
-                                            {% for i in 1..hebergement.nbEtoiles %}
-                                                <i class="fa fa-star"></i>
-                                            {% endfor %}
+
+                                <div class="hebergement-body">
+                                    {% if hebergement.categorie %}
+                                        <span class="hebergement-category">{{ hebergement.categorie.nom }}</span>
+                                    {% endif %}
+
+                                    <div class="hebergement-header">
+                                        <h5 class="hebergement-title">{{ hebergement.nom }}</h5>
+                                        <div class="hebergement-location">
+                                            <i class="fa fa-map-marker"></i>
+                                            <span>{{ hebergement.ville }}</span>
                                         </div>
                                     </div>
-
-                                    {% if hebergement.categorie %}
-                                        <p class="small mb-2"><span class="badge bg-secondary">{{ hebergement.categorie.nom }}</span></p>
-                                    {% endif %}
-
-                                    <p class="text-muted small mb-3"><i class="fa fa-map-marker"></i> {{ hebergement.ville }}</p>
 
                                     {% if hebergement.description %}
-                                        <p class="small text-muted mb-3">{{ hebergement.description|slice(0, 100) }}...</p>
+                                        <p class="hebergement-description">{{ hebergement.description }}</p>
                                     {% endif %}
 
-                                    <div class="mb-3">
-                                        <p class="small mb-2"><strong>Équipements:</strong></p>
-                                        <div>
-                                            {% if hebergement.equipements|length > 0 %}
-                                                {% for equipement in hebergement.equipements|slice(0,3) %}
-                                                    <span class="badge bg-info me-1 mb-1">{{ equipement.nom }}</span>
-                                                {% endfor %}
-                                                {% if hebergement.equipements|length > 3 %}
-                                                    <span class="badge bg-secondary">+{{ hebergement.equipements|length - 3 }}</span>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted small">Aucun équipement</span>
+                                    {% if hebergement.equipements|length > 0 %}
+                                        <div class="hebergement-equipements">
+                                            {% for equipement in hebergement.equipements|slice(0,3) %}
+                                                <span class="equipement-badge">{{ equipement.nom }}</span>
+                                            {% endfor %}
+                                            {% if hebergement.equipements|length > 3 %}
+                                                <span class="equipement-badge">+{{ hebergement.equipements|length - 3 }} more</span>
                                             {% endif %}
                                         </div>
+                                    {% endif %}
+
+                                    {% set minPrice = null %}
+                                    {% for chambre in hebergement.chambres %}
+                                        {% if chambre.prixParNuit is defined and chambre.prixParNuit is not null %}
+                                            {% if minPrice is null or chambre.prixParNuit < minPrice %}
+                                                {% set minPrice = chambre.prixParNuit %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <div class="hebergement-price">
+                                        {% if minPrice is not null %}
+                                            <span class="price-amount">{{ minPrice|number_format(0) }}</span>
+                                            <span class="price-currency">TND</span>
+                                            <span class="price-unit">/night</span>
+                                        {% else %}
+                                            <span class="price-amount" style="font-size: 1.2rem;">Price on request</span>
+                                        {% endif %}
                                     </div>
 
-                                    <div class="d-grid gap-2">
-                                        <a href="#" class="btn btn-success btn-sm"><i class="fa fa-calendar"></i> Réserver</a>
-                                    </div>
+                                    <button
+                                            type="button"
+                                            class="btn-reserve"
+                                            data-url="{{ path('app_panier_add_hebergement', {id: hebergement.id}) }}">
+                                        <span>Reserve Now</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div class="col-12 text-center py-5">
-                        <p class="text-muted">Aucun hébergement à afficher.</p>
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <div class="empty-icon">🏨</div>
+                            <h3>No Accommodations Available</h3>
+                            <p>Try adjusting your filters to see more results</p>
+                        </div>
                     </div>
                 {% endif %}
             </div>
         </div>
-    </section>
-    <!--================ Accommodation Area =================-->
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
             const sortSelect = document.getElementById('sortSelect');
-            const clearBtn = document.getElementById('clearSearch');
-            const grid = document.getElementById('accommodationGrid');
-            const noResults = document.getElementById('noResults');
+            const clearBtn = document.getElementById('clearBtn');
+            const filterForm = document.getElementById('filterForm');
+            const hebergementsList = document.getElementById('hebergementsList');
+            const hebergementCount = document.getElementById('hebergementCount');
 
-            function filterAccommodations() {
+            // AJAX filtering
+            function filterHebergements() {
                 const searchTerm = searchInput.value.trim().toLowerCase();
                 const sortValue = sortSelect.value;
-                const allCards = Array.from(document.querySelectorAll('.accommodation-card'));
+                const starsFilter = filterForm.querySelector('[name="stars"]').value;
 
-                // Step 1: Filter cards
+                const allCards = Array.from(hebergementsList.querySelectorAll('[data-nom]'));
+
+                // Filter
                 let visibleCards = allCards.filter(card => {
-                    if (!searchTerm) return true;
                     const nom = (card.dataset.nom || '').toLowerCase();
                     const ville = (card.dataset.ville || '').toLowerCase();
-                    return nom.includes(searchTerm) || ville.includes(searchTerm);
+                    const etoiles = card.dataset.etoiles || '';
+
+                    const matchesSearch = !searchTerm || nom.includes(searchTerm) || ville.includes(searchTerm);
+                    const matchesStars = !starsFilter || etoiles === starsFilter;
+
+                    return matchesSearch && matchesStars;
                 });
 
-                // Step 2: Sort visible cards
+                // Sort
                 visibleCards.sort((a, b) => {
-                    // Prioritize search relevance if search term exists
                     if (searchTerm) {
                         const nomA = (a.dataset.nom || '').toLowerCase();
                         const nomB = (b.dataset.nom || '').toLowerCase();
-                        const villeA = (a.dataset.ville || '').toLowerCase();
-                        const villeB = (b.dataset.ville || '').toLowerCase();
-                        
-                        // Exact name match
-                        const aExactNom = nomA === searchTerm ? 0 : 1;
-                        const bExactNom = nomB === searchTerm ? 0 : 1;
-                        if (aExactNom !== bExactNom) return aExactNom - bExactNom;
-                        
-                        // Name starts with search term
-                        const aStartsNom = nomA.startsWith(searchTerm) ? 0 : 1;
-                        const bStartsNom = nomB.startsWith(searchTerm) ? 0 : 1;
-                        if (aStartsNom !== bStartsNom) return aStartsNom - bStartsNom;
-                        
-                        // Exact city match
-                        const aExactVille = villeA === searchTerm ? 0 : 1;
-                        const bExactVille = villeB === searchTerm ? 0 : 1;
-                        if (aExactVille !== bExactVille) return aExactVille - bExactVille;
-                        
-                        // City starts with search term
-                        const aStartsVille = villeA.startsWith(searchTerm) ? 0 : 1;
-                        const bStartsVille = villeB.startsWith(searchTerm) ? 0 : 1;
-                        if (aStartsVille !== bStartsVille) return aStartsVille - bStartsVille;
+
+                        if (nomA.startsWith(searchTerm) && !nomB.startsWith(searchTerm)) return -1;
+                        if (!nomA.startsWith(searchTerm) && nomB.startsWith(searchTerm)) return 1;
                     }
-                    
-                    // Apply selected sort
+
                     switch(sortValue) {
                         case 'nom_asc':
                             return a.dataset.nom.localeCompare(b.dataset.nom);
@@ -209,48 +709,100 @@
                     }
                 });
 
-                // Step 3: Reorder grid by using appendChild (moves existing elements to new position)
+                // Update DOM
+                allCards.forEach(card => card.style.display = 'none');
+
                 if (visibleCards.length === 0) {
-                    noResults.style.display = 'block';
-                    allCards.forEach(card => card.style.display = 'none');
+                    hebergementsList.innerHTML = `
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <div class="empty-icon">🏨</div>
+                                <h3>No Accommodations Found</h3>
+                                <p>Try adjusting your filters</p>
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    noResults.style.display = 'none';
-                    // Hide all cards first
-                    allCards.forEach(card => card.style.display = 'none');
-                    // Show and reorder visible cards
                     visibleCards.forEach(card => {
                         card.style.display = '';
-                        grid.appendChild(card);
+                        hebergementsList.appendChild(card);
                     });
                 }
+
+                hebergementCount.textContent = visibleCards.length;
+                attachReserveListeners();
             }
 
-            // Bind events
-            searchInput.addEventListener('input', filterAccommodations);
-            sortSelect.addEventListener('change', filterAccommodations);
-            clearBtn.addEventListener('click', function() { 
-                searchInput.value = ''; 
-                filterAccommodations(); 
+            // Event listeners
+            searchInput.addEventListener('input', debounce(filterHebergements, 300));
+            sortSelect.addEventListener('change', filterHebergements);
+            filterForm.querySelector('[name="stars"]').addEventListener('change', filterHebergements);
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                sortSelect.value = '';
+                filterForm.querySelector('[name="stars"]').value = '';
+                filterHebergements();
             });
 
-            // Image hover effect
-            function setupHoverEffect() {
-                document.querySelectorAll('.accommodation-card').forEach(card => {
-                    const img = card.querySelector('.accommodation-image');
-                    if (img) {
-                        card.addEventListener('mouseenter', function() { 
-                            img.style.transform = 'scale(1.05)'; 
-                        });
-                        card.addEventListener('mouseleave', function() { 
-                            img.style.transform = 'scale(1)'; 
-                        });
-                    }
+            // Debounce
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func(...args), wait);
+                };
+            }
+
+            // Reserve buttons
+            function attachReserveListeners() {
+                document.querySelectorAll('.btn-reserve').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = '<span>Adding...</span>';
+                        this.disabled = true;
+
+                        fetch(this.dataset.url, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                            .then(r => r.json())
+                            .then(d => {
+                                if (d.success) {
+                                    this.innerHTML = '<span>✓ Added!</span>';
+                                    this.classList.add('btn-success-animation');
+                                    this.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+
+                                    if (typeof updateCartBadge === 'function') {
+                                        updateCartBadge(d.count);
+                                    }
+
+                                    setTimeout(() => {
+                                        this.innerHTML = originalHTML;
+                                        this.disabled = false;
+                                        this.style.background = '';
+                                        this.classList.remove('btn-success-animation');
+                                    }, 2000);
+                                } else {
+                                    this.innerHTML = '<span>✗ Error</span>';
+                                    this.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                                    setTimeout(() => {
+                                        this.innerHTML = originalHTML;
+                                        this.disabled = false;
+                                        this.style.background = '';
+                                    }, 2000);
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Error:', err);
+                                this.innerHTML = originalHTML;
+                                this.disabled = false;
+                            });
+                    });
                 });
             }
 
-            setupHoverEffect();
-            filterAccommodations();
+            attachReserveListeners();
         });
     </script>
 {% endblock %}
- 

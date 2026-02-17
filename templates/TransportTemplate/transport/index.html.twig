@@ -1,147 +1,219 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Gestion des Transports{% endblock %}
+{% block title %}Gestion Transports | EcoTrip Admin{% endblock %}
+{% block page_title %}Gestion des Transports{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.user-mgmt { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.user-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-box {
+    background: white; border-radius: 16px; padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04);
+}
+.stat-box h4 { font-size: 1.75rem; font-weight: 800; margin: 0 0 4px 0; color: #0f172a; }
+.stat-box span { font-size: 0.85rem; color: #64748b; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 24px; }
+.search-wrap { flex: 1; min-width: 220px; position: relative; }
+.search-wrap input {
+    width: 100%; padding: 12px 16px 12px 44px;
+    border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 0.95rem;
+}
+.search-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+
+.filter-wrap select, .filter-wrap input {
+    padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px;
+    font-size: 0.95rem; min-width: 120px;
+}
+
+.btn-add {
+    padding: 12px 24px; background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: white; border: none; border-radius: 12px; font-weight: 600;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-add:hover { color: white; opacity: 0.95; }
+
+.table-card {
+    background: white; border-radius: 20px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    overflow: hidden; border: 1px solid rgba(0,0,0,0.04);
+}
+.table-card table { width: 100%; border-collapse: collapse; }
+.table-card th {
+    padding: 16px 20px; text-align: left; font-weight: 600; font-size: 0.8rem;
+    color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;
+    background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+}
+.table-card td { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; }
+.table-card tr:hover td { background: #fafbfc; }
+
+.user-avatar-placeholder {
+    width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #2563eb; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; vertical-align: middle; margin-right: 10px;
+}
+
+.btn-action {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px; color: #64748b;
+    transition: all 0.2s; border: none; background: none;
+}
+.btn-action:hover { color: white; }
+.btn-action.edit:hover { background: #2563eb; }
+.btn-action.view:hover { background: #16a34a; }
+.btn-action.delete:hover { background: #ef4444; }
+
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+@media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
+.chart-card {
+    background: white; border-radius: 20px; padding: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04);
+}
+.chart-card h4 { font-size: 1rem; font-weight: 600; margin: 0 0 16px 0; color: #0f172a; }
+.chart-wrap { height: 220px; position: relative; }
+</style>
+{% endblock %}
 
 {% block body %}
-<div style="position: sticky; top: 0; background: white; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 20px 0;">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="h2 mb-0"><i class="fa fa-car"></i> Gestion des Transports</h1>
-            </div>
-            <div class="col-md-4 text-end">
-                <a href="{{ path('app_transport_new') }}" class="btn btn-success btn-lg">
-                    <i class="fa fa-plus"></i> Ajouter un Transport
-                </a>
-            </div>
+<div class="container-fluid user-mgmt">
+    {% for flash in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ flash }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    <div class="user-stats">
+        <div class="stat-box"><h4>{{ stats.total }}</h4><span>Total Transports</span></div>
+        <div class="stat-box"><h4>{{ stats.available }}</h4><span>Disponibles</span></div>
+        <div class="stat-box"><h4>{{ stats.unavailable }}</h4><span>Indisponibles</span></div>
+        <div class="stat-box"><h4>{{ stats.types|length }}</h4><span>Types Différents</span></div>
+    </div>
+
+    <div class="charts-row">
+        <div class="chart-card">
+            <h4>Répartition par Type</h4>
+            <div class="chart-wrap"><canvas id="chartTypes"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <h4>Disponibilité</h4>
+            <div class="chart-wrap"><canvas id="chartAvailability"></canvas></div>
         </div>
     </div>
-</div>
 
-<div class="container mt-4">
-    <div class="mb-4">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label">Type</label>
-                <input type="text" name="type" value="{{ filters.type|default('') }}" class="form-control" placeholder="Ex: Bus, Voiture">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Prix min (DT)</label>
-                <input type="number" step="0.01" name="minPrice" value="{{ filters.minPrice is not null ? filters.minPrice : '' }}" class="form-control">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Prix max (DT)</label>
-                <input type="number" step="0.01" name="maxPrice" value="{{ filters.maxPrice is not null ? filters.maxPrice : '' }}" class="form-control">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Capacité min</label>
-                <input type="number" name="minCapacity" value="{{ filters.minCapacity is not null ? filters.minCapacity : '' }}" class="form-control">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Disponibilité</label>
-                <select name="available" class="form-select">
-                    <option value="">Tous</option>
-                    <option value="1" {% if filters.available is same as(true) %}selected{% endif %}>Disponible</option>
-                    <option value="0" {% if filters.available is same as(false) %}selected{% endif %}>Indisponible</option>
-                </select>
-            </div>
-            <div class="col-md-1 d-grid">
-                <button type="submit" class="btn btn-primary">Filtrer</button>
-            </div>
-        </form>
+    <div class="toolbar">
+        <div class="search-wrap">
+            <i class="fa fa-search"></i>
+            <input type="text"
+                   id="searchInput"
+                   placeholder="Rechercher un transport..."
+                   value="{{ filters.q|default('') }}">
+        </div>
+        <div class="filter-wrap d-flex gap-2">
+            <select id="availableFilter">
+                <option value="">Tous les statuts</option>
+                <option value="1" {{ filters.available is same as(true) ? 'selected' : '' }}>Disponible</option>
+                <option value="0" {{ filters.available is same as(false) ? 'selected' : '' }}>Indisponible</option>
+            </select>
+            <input type="number" id="minPriceFilter" placeholder="Prix Min" value="{{ filters.minPrice }}">
+            <input type="number" id="maxPriceFilter" placeholder="Prix Max" value="{{ filters.maxPrice }}">
+        </div>
+        <a href="{{ path('app_transport_new') }}" class="btn-add"><i class="fa fa-plus"></i> Nouveau Transport</a>
     </div>
 
-    {% if transports %}
-    <div class="table-responsive">
-        <table class="table table-hover table-striped align-middle">
-            <thead class="table-dark">
+    <div class="table-card">
+        <table>
+            <thead>
                 <tr>
-                    <th>Image</th>
+                    <th>ID</th>
                     <th>Type</th>
+                    <th>Catégorie</th>
+                    <th>Chauffeur</th>
                     <th>Capacité</th>
-                    <th>Émission CO2</th>
-                    <th>Prix</th>
-                    <th>Statut</th>
-                    <th style="width: 200px;">Actions</th>
+                    <th>Prix/P</th>
+                    <th>CO2</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-            {% for transport in transports %}
-                <tr>
-                    <td>
-                        {% if transport.image %}
-                            <img src="{{ asset('uploads/transports/' ~ transport.image) }}" alt="{{ transport.type }}" style="height: 60px; width: 60px; object-fit: cover; border-radius: 8px;">
-                        {% else %}
-                            <div style="height: 60px; width: 60px; background-color: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                <i class="fa fa-image" style="color: #adb5bd;"></i>
-                            </div>
-                        {% endif %}
-                    </td>
-                    <td><strong>{{ transport.type }}</strong></td>
-                    <td>{{ transport.capacite }} passagers</td>
-                    <td>{{ transport.emissionco2 }} kg</td>
-                    <td><strong>{{ transport.prixparpersonne }} DT</strong></td>
-                    <td>
-                        {% if transport.disponible %}
-                            <span class="badge bg-success"><i class="fa fa-check"></i> Disponible</span>
-                        {% else %}
-                            <span class="badge bg-danger"><i class="fa fa-times"></i> Indisponible</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="btn-group" role="group">
-                            <a href="{{ path('app_transport_show', {'id': transport.id}) }}" class="btn btn-sm btn-info" title="Voir">
-                                <i class="fa fa-eye"></i> Voir
-                            </a>
-                            <a href="{{ path('app_transport_edit', {'id': transport.id}) }}" class="btn btn-sm btn-warning" title="Modifier">
-                                <i class="fa fa-edit"></i> Modifier
-                            </a>
-                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ transport.id }}" title="Supprimer">
-                                <i class="fa fa-trash"></i> Supprimer
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- Modal de confirmation pour la suppression -->
-                <div class="modal fade" id="deleteModal{{ transport.id }}" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title"><i class="fa fa-warning"></i> Confirmer la suppression</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>Êtes-vous sûr de vouloir supprimer le transport <strong>{{ transport.type }}</strong> ?</p>
-                                <p class="text-muted">Cette action ne peut pas être annulée.</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                <form method="post" action="{{ path('app_transport_delete', {'id': transport.id}) }}" style="display: inline;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ transport.id) }}">
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="fa fa-trash"></i> Supprimer
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+            <tbody id="transportTableBody">
+                {% include 'TransportTemplate/transport/_transport_table.html.twig' with {transports: transports} %}
             </tbody>
         </table>
     </div>
-    {% else %}
-    <div class="alert alert-info text-center py-5">
-        <h4><i class="fa fa-info-circle"></i> Aucun transport trouvé</h4>
-        <p class="mb-3">Commencez par créer votre premier transport.</p>
-        <a href="{{ path('app_transport_new') }}" class="btn btn-primary btn-lg">
-            <i class="fa fa-plus"></i> Créer un Transport
-        </a>
-    </div>
-    {% endif %}
 </div>
 
-<!-- Bootstrap JS pour les modals -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Types Chart
+    const ctxTypes = document.getElementById('chartTypes');
+    if (ctxTypes) {
+        new Chart(ctxTypes, {
+            type: 'bar',
+            data: {
+                labels: {{ stats.chartLabels|json_encode|raw }},
+                datasets: [{
+                    label: 'Nombre de transports',
+                    data: {{ stats.chartData|json_encode|raw }},
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+
+    // Availability Chart
+    const ctxAvail = document.getElementById('chartAvailability');
+    if (ctxAvail) {
+        new Chart(ctxAvail, {
+            type: 'doughnut',
+            data: {
+                labels: ['Disponible', 'Indisponible'],
+                datasets: [{
+                    data: [{{ stats.available }}, {{ stats.unavailable }}],
+                    backgroundColor: ['#22c55e', '#ef4444'],
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    let debounce;
+    function fetchTransports() {
+        const q = document.getElementById('searchInput').value;
+        const available = document.getElementById('availableFilter').value;
+        const minPrice = document.getElementById('minPriceFilter').value;
+        const maxPrice = document.getElementById('maxPriceFilter').value;
+        
+        const params = new URLSearchParams({
+            q: q,
+            available: available,
+            minPrice: minPrice,
+            maxPrice: maxPrice
+        });
+
+        fetch('{{ path('app_transport_ajax') }}?' + params.toString())
+            .then(r => r.text())
+            .then(html => { document.getElementById('transportTableBody').innerHTML = html; });
+    }
+
+    ['searchInput', 'minPriceFilter', 'maxPriceFilter'].forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            clearTimeout(debounce);
+            debounce = setTimeout(fetchTransports, 300);
+        });
+    });
+
+    document.getElementById('availableFilter').addEventListener('change', fetchTransports);
+});
+</script>
 {% endblock %}

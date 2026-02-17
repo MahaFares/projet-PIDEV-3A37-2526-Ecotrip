@@ -80,4 +80,52 @@ class ActivityRepository extends ServiceEntityRepository
     {
         return $this->findAllForBlog($categoryId, $minPrice, $maxPrice);
     }
+
+    /**
+     * Find activities by filters: text search (title/description), price range and active flag.
+     *
+     * @return Activity[]
+     */
+    public function findByFilters(?string $q = null, ?float $minPrice = null, ?float $maxPrice = null, ?bool $available = null): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.category', 'c')
+            ->addSelect('c')
+            ->orderBy('a.title', 'ASC');
+
+        if ($q) {
+            $qb->andWhere('a.title LIKE :q OR a.description LIKE :q')
+               ->setParameter('q', '%'.$q.'%');
+        }
+
+        if ($minPrice !== null) {
+            $qb->andWhere('a.price >= :minPrice')->setParameter('minPrice', $minPrice);
+        }
+
+        if ($maxPrice !== null) {
+            $qb->andWhere('a.price <= :maxPrice')->setParameter('maxPrice', $maxPrice);
+        }
+
+        if ($available !== null) {
+            $qb->andWhere('a.isActive = :active')->setParameter('active', $available);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Find top rated activities
+     *
+     * @return Activity[]
+     */
+    public function findTopRated(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.isActive = :active')
+            ->setParameter('active', true)
+            ->orderBy('a.id', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

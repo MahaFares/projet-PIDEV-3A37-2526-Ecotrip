@@ -1,47 +1,13 @@
-git rebase origin/main{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Modifier le Transport{% endblock %}
+{% block title %}Modifier le transport - Admin{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-warning text-dark">
-                    <h3 class="card-title mb-0"><i class="fa fa-edit"></i> Modifier le Transport</h3>
-                </div>
-                <div class="card-body">
-                    {{ include('TransportTemplate/transport/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
-                </div>
-                <div class="card-footer bg-light">
-                    <a href="{{ path('app_transport_index') }}" class="btn btn-secondary">
-                        <i class="fa fa-arrow-left"></i> Retour à la liste
-                    </a>
-                </div>
-            </div>
-
-    {{ include('TransportTemplate/transport/_form.html.twig', {'button_label': 'Update'}) }}
-
-<!-- Modal de confirmation pour la suppression -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="fa fa-warning"></i> Confirmer la suppression</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Êtes-vous absolument sûr de vouloir supprimer ce transport ?</p>
-                <p class="fw-bold">{{ transport.type }}</p>
-                <p class="text-muted">Cette action ne peut pas être annulée.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                {{ include('TransportTemplate/transport/_delete_form.html.twig') }}
-            </div>
-        </div>
-    </div>
-</div>
-
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>Modifier le transport</h1>
+    {{ include('TransportTemplate/transport/_form.html.twig', {'button_label': 'Enregistrer'}) }}
+    <a href="{{ path('app_transport_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
     {{ include('TransportTemplate/transport/_delete_form.html.twig') }}
+</div>
 {% endblock %}

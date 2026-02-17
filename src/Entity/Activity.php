@@ -50,7 +50,13 @@ class Activity
 
     #[ORM\Column(nullable: true)]
     #[Assert\Length(max: 255, maxMessage: 'L\'URL de l\'image ne peut pas dépasser 255 caractères')]
+    #[Assert\Regex(
+    pattern: "/\.(jpg|jpeg|png|webp)$/i",
+    message: "Le fichier doit être une image valide (jpg, jpeg, png, webp)")]
     private ?string $image = null;
+
+    
+
 
     #[ORM\Column]
     private bool $isActive = true;
@@ -104,4 +110,35 @@ class Activity
     public function setGuide(?Guide $g): self { $this->guide = $g; return $this; }
 
     public function getSchedules(): Collection { return $this->schedules; }
+
+    public function setImage360(?string $image360): self
+    {
+        $this->image360 = $image360;
+        return $this;
+    }
+
+    public function getLatitude(): ?string
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?string $latitude): self
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?string
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?string $longitude): self
+    {
+        $this->longitude = $longitude;
+        return $this;
+    }
+
+
+
 }

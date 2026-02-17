@@ -1,4 +1,67 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+<div class="form-row">
+    <div class="form-group">
+        {{ form_label(form.firstName, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.firstName, { attr: { class: 'form-input' ~ (form.firstName.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: Jean' } }) }}
+        {% if form.firstName.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.firstName) }}</div>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.lastName, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.lastName, { attr: { class: 'form-input' ~ (form.lastName.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: Dupont' } }) }}
+        {% if form.lastName.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.lastName) }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        {{ form_label(form.email, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.email, { attr: { class: 'form-input' ~ (form.email.vars.errors|length ? ' is-invalid' : ''), placeholder: 'exemple@email.com' } }) }}
+        {% if form.email.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.email) }}</div>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.phone, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.phone, { attr: { class: 'form-input' ~ (form.phone.vars.errors|length ? ' is-invalid' : ''), placeholder: '+33 1 23 45 67 89' } }) }}
+        {% if form.phone.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.phone) }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-group">
+    {{ form_label(form.bio, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.bio, { attr: { class: 'form-textarea' ~ (form.bio.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Parlez de votre expérience...', rows: 5 } }) }}
+    {% if form.bio.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.bio) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        {{ form_label(form.rating, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.rating, { attr: { class: 'form-input' ~ (form.rating.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: 4.5', min: 0, max: 5, step: 0.5 } }) }}
+        {% if form.rating.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.rating) }}</div>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.photo, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.photo, { attr: { class: 'form-input' ~ (form.photo.vars.errors|length ? ' is-invalid' : ''), placeholder: 'https://example.com/photo.jpg' } }) }}
+        {% if form.photo.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.photo) }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="modern-btn btn-submit"><i class="bi bi-check"></i> {{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('app_guide_index') }}" class="modern-btn btn-cancel"><i class="bi bi-x"></i> Annuler</a>
+</div>
+
 {{ form_end(form) }}

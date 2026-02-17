@@ -16,28 +16,33 @@ class ChambreRepository extends ServiceEntityRepository
         parent::__construct($registry, Chambre::class);
     }
 
-    //    /**
-    //     * @return Chambre[] Returns an array of Chambre objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findBySearchQuery(string $query): array
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.hebergement', 'h')
+            ->where('c.numero LIKE :query')
+            ->orWhere('c.type LIKE :query')
+            ->orWhere('h.nom LIKE :query')
+            ->orWhere('h.ville LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->orderBy('c.numero', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+    /**
+     * @return Chambre[]
+     */
+    public function findByFilters(?string $q = null): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->leftJoin('c.hebergement', 'h')
+            ->orderBy('c.numero', 'ASC');
 
-    //    public function findOneBySomeField($value): ?Chambre
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($q) {
+            $qb->andWhere('c.numero LIKE :q OR c.type LIKE :q OR h.nom LIKE :q')
+                ->setParameter('q', '%' . $q . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

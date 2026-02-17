@@ -1,37 +1,69 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Nouveau paiement | Admin{% endblock %}
+{% block title %}Créer un paiement - Admin{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Nouveau paiement</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_paiement_index') }}">Paiements</a></li>
-                <li class="active">Nouveau</li>
-            </ol>
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+
+    <h1>Créer un paiement</h1>
+
+    {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.commande, 'Commande', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(form.commande, { attr: { class: 'form-control' } }) }}
+                    {{ form_errors(form.commande) }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.montant, 'Montant', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(form.montant, { attr: { class: 'form-control' } }) }}
+                    {{ form_errors(form.montant) }}
+                </div>
+            </div>
         </div>
-    </div>
-</section>
 
-<section class="accomodation_area section_gap">
-    <div class="container">
-        {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">{{ message }}</div>
-        {% endfor %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.methodePaiement, 'Méthode de paiement', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(form.methodePaiement, { attr: { class: 'form-control' } }) }}
+                    {{ form_errors(form.methodePaiement) }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.statutPaiement, 'Statut', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(form.statutPaiement, { attr: { class: 'form-control' } }) }}
+                    {{ form_errors(form.statutPaiement) }}
+                </div>
+            </div>
+        </div>
 
-        {{ form_start(form) }}
-        {{ form_row(form.commande) }}
-        {{ form_row(form.montant) }}
-        {{ form_row(form.methodePaiement) }}
-        {{ form_row(form.statutPaiement) }}
-        {{ form_row(form.datePaiement) }}
-        {{ form_row(form.referencePaiement) }}
-        <button type="submit" class="btn theme_btn button_hover">Enregistrer</button>
-        <a href="{{ path('app_paiement_index') }}" class="btn btn-secondary">Annuler</a>
-        {{ form_end(form) }}
-    </div>
-</section>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.datePaiement, 'Date de paiement', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(form.datePaiement, { attr: { class: 'form-control' } }) }}
+                    {{ form_errors(form.datePaiement) }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.referencePaiement, 'Référence', { label_attr: { class: 'form-label' } }) }}
+                    {{ form_widget(form.referencePaiement, { attr: { class: 'form-control' } }) }}
+                    {{ form_errors(form.referencePaiement) }}
+                </div>
+            </div>
+        </div>
+
+        {{ form_rest(form) }}
+        <button type="submit" class="btn btn-success">Créer</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_paiement_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+</div>
 {% endblock %}

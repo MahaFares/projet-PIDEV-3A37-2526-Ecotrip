@@ -1,45 +1,267 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Produit {{ produit.nom }} | Admin{% endblock %}
+{% block title %}Produits | EcoTrip{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Produit</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_produit_index') }}">Produits</a></li>
-                <li class="active">{{ produit.nom }}</li>
-            </ol>
+    <!--================Breadcrumb Area =================-->
+    <section class="breadcrumb_area">
+        <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background=""></div>
+        <div class="container">
+            <div class="page-cover text-center">
+                <h2 class="page-cover-tittle">Nos Produits</h2>
+                <ol class="breadcrumb">
+                    <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="active">Produits</li>
+                </ol>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+    <!--================Breadcrumb Area =================-->
 
-<section class="accomodation_area section_gap">
-    <div class="container">
-        <dl class="row">
-            <dt class="col-sm-3">Id</dt>
-            <dd class="col-sm-9">{{ produit.id }}</dd>
-            <dt class="col-sm-3">Nom</dt>
-            <dd class="col-sm-9">{{ produit.nom }}</dd>
-            <dt class="col-sm-3">Prix</dt>
-            <dd class="col-sm-9">{{ produit.prix }}</dd>
-            <dt class="col-sm-3">Stock</dt>
-            <dd class="col-sm-9">{{ produit.stock }}</dd>
-            <dt class="col-sm-3">Image</dt>
-            <dd class="col-sm-9">{{ produit.image|default('—') }}</dd>
-            <dt class="col-sm-3">Catégorie</dt>
-            <dd class="col-sm-9">{{ produit.categorie ? produit.categorie.nom : '—' }}</dd>
-        </dl>
-        <p>
-            <a href="{{ path('app_produit_edit', { id: produit.id }) }}" class="btn theme_btn button_hover">Modifier</a>
-            <form method="post" action="{{ path('app_produit_delete', { id: produit.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer ce produit ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete_produit_' ~ produit.id) }}">
-                <button type="submit" class="btn btn-danger">Supprimer</button>
-            </form>
-            <a href="{{ path('app_produit_index') }}" class="btn btn-secondary">Retour à la liste</a>
-        </p>
-    </div>
-</section>
+    <!--================ Search & Filter Area =================-->
+    <section class="py-4" style="background-color: #f8f9fa;">
+        <div class="container">
+            <div class="card p-3 shadow-sm">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-7">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa fa-search"></i></span>
+                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom ou catégorie..." />
+                            <button id="clearSearch" class="btn btn-outline-secondary" type="button">Effacer</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="sortSelect" class="form-select">
+                            <option value="">-- Trier par --</option>
+                            <option value="nom_asc">Nom (A-Z)</option>
+                            <option value="nom_desc">Nom (Z-A)</option>
+                            <option value="prix_asc">Prix croissant</option>
+                            <option value="prix_desc">Prix décroissant</option>
+                            <option value="stock_desc">Stock disponible</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <small class="text-muted">{{ produits|length }} résultats</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================ Search & Filter Area =================-->
+
+    <!--================ Products Area =================-->
+    <section class="accomodation_area section_gap">
+        <div class="container">
+            <div class="mb-3">
+                <a href="{{ path('app_produit_new') }}" class="btn btn-success"><i class="fa fa-plus"></i> Ajouter un produit</a>
+            </div>
+            
+            <div id="noResults" class="text-center py-5" style="display: none;">
+                <p class="text-muted fs-5">Aucun produit ne correspond à votre recherche.</p>
+            </div>
+            
+            <div id="productGrid" class="row">
+                {% if produits|length > 0 %}
+                    {% for produit in produits %}
+                        <div class="col-lg-4 col-md-6 mb-4 product-card" 
+                             data-nom="{{ produit.nom|lower }}" 
+                             data-categorie="{{ produit.categorie ? produit.categorie.nom|lower : '' }}" 
+                             data-prix="{{ produit.prix }}"
+                             data-stock="{{ produit.stock }}">
+                            <div class="card h-100 shadow-sm border-0" style="overflow: hidden; transition: all 0.3s ease;">
+                                <div style="height: 250px; overflow: hidden; background: #e9ecef; position: relative;">
+                                    {% if produit.image and produit.image != '' %}
+                                        {% if produit.image starts with 'http' %}
+                                            <img src="{{ produit.image }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                        {% else %}
+                                            <img src="{{ asset('uploads/' ~ produit.image) }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                        {% endif %}
+                                    {% else %}
+                                        <img src="{{ asset('images/default-product.jpg') }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                    {% endif %}
+                                    
+                                    {% if produit.stock <= 0 %}
+                                        <div style="position: absolute; top: 10px; right: 10px;">
+                                            <span class="badge bg-danger"><i class="fa fa-exclamation-circle"></i> Rupture de stock</span>
+                                        </div>
+                                    {% elseif produit.stock < 10 %}
+                                        <div style="position: absolute; top: 10px; right: 10px;">
+                                            <span class="badge bg-warning"><i class="fa fa-warning"></i> Stock faible</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h5 class="card-title mb-0">{{ produit.nom }}</h5>
+                                            <p class="h6 text-primary mb-1 mt-1">{{ produit.prix|number_format(2, ',', ' ') }} TND</p>
+                                        </div>
+                                    </div>
+
+                                    {% if produit.categorie %}
+                                        <p class="small mb-2"><span class="badge bg-secondary">{{ produit.categorie.nom }}</span></p>
+                                    {% else %}
+                                        <p class="small mb-2"><span class="badge bg-light text-dark">Sans catégorie</span></p>
+                                    {% endif %}
+
+                                    <div class="mb-3">
+                                        <p class="small mb-1"><strong>Stock disponible:</strong></p>
+                                        <div>
+                                            {% if produit.stock > 0 %}
+                                                <span class="badge bg-success">{{ produit.stock }} unités</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Épuisé</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ path('app_produit_show', { id: produit.id }) }}" class="btn btn-info btn-sm text-white">
+                                            <i class="fa fa-eye"></i> Voir détails
+                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_produit_edit', { id: produit.id }) }}" class="btn btn-warning btn-sm">
+                                                <i class="fa fa-edit"></i> Modifier
+                                            </a>
+                                            <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ produit.id }})">
+                                                <i class="fa fa-trash"></i> Supprimer
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Hidden delete form -->
+                                    <form id="delete-form-{{ produit.id }}" method="post" action="{{ path('app_produit_delete', { id: produit.id }) }}" style="display: none;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_produit_' ~ produit.id) }}">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted">Aucun produit à afficher.</p>
+                        <a href="{{ path('app_produit_new') }}" class="btn btn-success mt-3">
+                            <i class="fa fa-plus"></i> Ajouter le premier produit
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    <!--================ Products Area =================-->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+            const clearBtn = document.getElementById('clearSearch');
+            const grid = document.getElementById('productGrid');
+            const noResults = document.getElementById('noResults');
+
+            function filterProducts() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                const sortValue = sortSelect.value;
+                const allCards = Array.from(document.querySelectorAll('.product-card'));
+
+                // Step 1: Filter cards
+                let visibleCards = allCards.filter(card => {
+                    if (!searchTerm) return true;
+                    const nom = (card.dataset.nom || '').toLowerCase();
+                    const categorie = (card.dataset.categorie || '').toLowerCase();
+                    return nom.includes(searchTerm) || categorie.includes(searchTerm);
+                });
+
+                // Step 2: Sort visible cards
+                visibleCards.sort((a, b) => {
+                    // Prioritize search relevance if search term exists
+                    if (searchTerm) {
+                        const nomA = (a.dataset.nom || '').toLowerCase();
+                        const nomB = (b.dataset.nom || '').toLowerCase();
+                        const catA = (a.dataset.categorie || '').toLowerCase();
+                        const catB = (b.dataset.categorie || '').toLowerCase();
+                        
+                        // Exact name match
+                        const aExactNom = nomA === searchTerm ? 0 : 1;
+                        const bExactNom = nomB === searchTerm ? 0 : 1;
+                        if (aExactNom !== bExactNom) return aExactNom - bExactNom;
+                        
+                        // Name starts with search term
+                        const aStartsNom = nomA.startsWith(searchTerm) ? 0 : 1;
+                        const bStartsNom = nomB.startsWith(searchTerm) ? 0 : 1;
+                        if (aStartsNom !== bStartsNom) return aStartsNom - bStartsNom;
+                        
+                        // Exact category match
+                        const aExactCat = catA === searchTerm ? 0 : 1;
+                        const bExactCat = catB === searchTerm ? 0 : 1;
+                        if (aExactCat !== bExactCat) return aExactCat - bExactCat;
+                    }
+                    
+                    // Apply selected sort
+                    switch(sortValue) {
+                        case 'nom_asc':
+                            return a.dataset.nom.localeCompare(b.dataset.nom);
+                        case 'nom_desc':
+                            return b.dataset.nom.localeCompare(a.dataset.nom);
+                        case 'prix_asc':
+                            return parseFloat(a.dataset.prix || 0) - parseFloat(b.dataset.prix || 0);
+                        case 'prix_desc':
+                            return parseFloat(b.dataset.prix || 0) - parseFloat(a.dataset.prix || 0);
+                        case 'stock_desc':
+                            return parseInt(b.dataset.stock || 0) - parseInt(a.dataset.stock || 0);
+                        default:
+                            return 0;
+                    }
+                });
+
+                // Step 3: Reorder grid
+                if (visibleCards.length === 0) {
+                    noResults.style.display = 'block';
+                    allCards.forEach(card => card.style.display = 'none');
+                } else {
+                    noResults.style.display = 'none';
+                    // Hide all cards first
+                    allCards.forEach(card => card.style.display = 'none');
+                    // Show and reorder visible cards
+                    visibleCards.forEach(card => {
+                        card.style.display = '';
+                        grid.appendChild(card);
+                    });
+                }
+            }
+
+            // Bind events
+            searchInput.addEventListener('input', filterProducts);
+            sortSelect.addEventListener('change', filterProducts);
+            clearBtn.addEventListener('click', function() { 
+                searchInput.value = ''; 
+                filterProducts(); 
+            });
+
+            // Image hover effect
+            function setupHoverEffect() {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const img = card.querySelector('.product-image');
+                    if (img) {
+                        card.addEventListener('mouseenter', function() { 
+                            img.style.transform = 'scale(1.05)'; 
+                        });
+                        card.addEventListener('mouseleave', function() { 
+                            img.style.transform = 'scale(1)'; 
+                        });
+                    }
+                });
+            }
+
+            setupHoverEffect();
+            filterProducts();
+        });
+
+        // Delete confirmation function
+        function confirmDelete(produitId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+                document.getElementById('delete-form-' + produitId).submit();
+            }
+        }
+    </script>
 {% endblock %}

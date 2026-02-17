@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'basefront.html.twig' %}
 
 {% block title %}{{ activity.title }} - Royal Hotel{% endblock %}
 
@@ -162,6 +162,13 @@
                         </div>
                     </div>
                 </div>
+            {% endif %}
+
+            {% if activity.image360 or (activity.latitude and activity.longitude) %}
+                <a href="{{ path('app_activity_virtual_tour', {id: activity.id}) }}" 
+                class="btn btn-primary btn-lg">
+                    <i class="fa fa-globe"></i> Visite Virtuelle 360°
+                </a>
             {% endif %}
         </div>
     </div>

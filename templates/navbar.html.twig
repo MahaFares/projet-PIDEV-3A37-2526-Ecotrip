@@ -15,6 +15,13 @@
                     <li class="nav-item"><a class="nav-link {{ (active_route|default('')) == 'app_activites' ? 'active' : '' }}" href="{{ path('app_activites') }}">Activité</a></li>
                     <li class="nav-item"><a class="nav-link {{ (active_route|default('')) == 'app_transport' ? 'active' : '' }}" href="{{ path('app_transport') }}">Transport</a></li>
                     <li class="nav-item"><a class="nav-link {{ (active_route|default('')) == 'app_boutique' ? 'active' : '' }}" href="{{ path('app_boutique') }}">Boutique</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ (active_route|default('')) == 'app_panier_index' ? 'active' : '' }}" href="{{ path('app_panier_index') }}" style="position:relative;">
+                            <i class="fa fa-shopping-cart"></i> Panier
+                            {% set cart_count = cart_count() %}
+<span id="cartBadge" class="badge bg-danger rounded-pill" style="position:absolute;top:-5px;right:-8px;font-size:0.65rem;{{ cart_count > 0 ? '' : 'display:none;' }}">{{ cart_count }}</span>
+                        </a>
+                    </li>
                     <li class="nav-item"><a class="nav-link {{ (active_route|default('')) == 'app_contact' ? 'active' : '' }}" href="{{ path('app_contact') }}">Contact</a></li>
                     {% if app.user %}
                         <li class="nav-item"><a class="nav-link {{ (active_route|default('')) == 'app_my_account' ? 'active' : '' }}" href="{{ path('app_my_account') }}">Mon compte</a></li>

@@ -1,109 +1,105 @@
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-        {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-body p-4 p-md-5">
+            <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom">
+                <i class="bi bi-door-open text-primary me-2"></i>Détails de la Chambre
+            </h5>
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form_widget(form.numero, {'attr': {'class': 'form-control', 'placeholder': 'Numéro'}}) }}
+                        {{ form_label(form.numero, 'Numéro de Chambre') }}
+                        {{ form_errors(form.numero) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form_widget(form.type, {'attr': {'class': 'form-control', 'placeholder': 'Type'}}) }}
+                        {{ form_label(form.type, 'Type de Chambre') }}
+                        {{ form_errors(form.type) }}
+                    </div>
+                </div>
+            </div>
 
-        {% if form.vars.errors|length > 0 %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <h4 class="alert-heading">Erreurs de saisie</h4>
-            {% for error in form.vars.errors %}
-                <div>{{ error.message }}</div>
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form_widget(form.capacite, {'attr': {'class': 'form-control', 'placeholder': 'Capacité'}}) }}
+                        {{ form_label(form.capacite) }}
+                        {{ form_errors(form.capacite) }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        {{ form_widget(form.prixParNuit, {'attr': {'class': 'form-control', 'placeholder': 'Prix', 'step': '0.01'}}) }}
+                        {{ form_label(form.prixParNuit, 'Prix par Nuit (DT)') }}
+                        {{ form_errors(form.prixParNuit) }}
+                    </div>
+                </div>
+            </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="mb-3">
-                    {{ form_label(form.numero) }}
-                    {{ form_widget(form.numero, {'attr': {'class': 'form-control' ~ (form.numero.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                    {% if form.numero.vars.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.numero.vars.errors %}
-                                {{ error.message }}<br>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+            <div class="form-floating mb-4">
+                {{ form_widget(form.hebergement, {'attr': {'class': 'form-select'}}) }}
+                {{ form_label(form.hebergement, 'Hébergement Associé') }}
+                {{ form_errors(form.hebergement) }}
             </div>
-            <div class="col-md-4">
-                <div class="mb-3">
-                    {{ form_label(form.type) }}
-                    {{ form_widget(form.type, {'attr': {'class': 'form-control' ~ (form.type.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                    {% if form.type.vars.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.type.vars.errors %}
-                                {{ error.message }}<br>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="mb-3">
-                    {{ form_label(form.capacite) }}
-                    {{ form_widget(form.capacite, {'attr': {'class': 'form-control' ~ (form.capacite.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                    {% if form.capacite.vars.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.capacite.vars.errors %}
-                                {{ error.message }}<br>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="mb-3">
-                    {{ form_label(form.prixParNuit) }}
-                    {{ form_widget(form.prixParNuit, {'attr': {'class': 'form-control' ~ (form.prixParNuit.vars.errors|length > 0 ? ' is-invalid' : ''), 'step': '0.01'}}) }}
-                    {% if form.prixParNuit.vars.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.prixParNuit.vars.errors %}
-                                {{ error.message }}<br>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+            <div class="form-floating mb-4">
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description', 'style': 'height: 120px;'}}) }}
+                {{ form_label(form.description) }}
+                {{ form_errors(form.description) }}
             </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <div class="form-check form-switch">
-                        {{ form_widget(form.disponible, {'attr': {'class': 'form-check-input' ~ (form.disponible.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
-                        {{ form_label(form.disponible, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                        {% if form.disponible.vars.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.disponible.vars.errors %}
-                                    {{ error.message }}<br>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+
+            <div class="mt-4 p-4 rounded-4 bg-light border">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="fw-bold mb-1">Disponibilité</h6>
+                        <p class="text-muted small mb-0">Indiquer si la chambre est disponible à la réservation.</p>
+                    </div>
+                    <div class="form-check form-switch form-switch-lg">
+                        {{ form_widget(form.disponible, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(form.disponible, ' ', {'label_attr': {'class': 'form-check-label'}}) }}
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="mb-3">
-            {{ form_label(form.description) }}
-            {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : ''), 'rows': '4'}}) }}
-            {% if form.description.vars.errors %}
-                <div class="invalid-feedback d-block">
-                    {% for error in form.description.vars.errors %}
-                        {{ error.message }}<br>
-                    {% endfor %}
-                </div>
-            {% endif %}
+        
+        <div class="card-footer bg-white p-4 p-md-5 border-top-0 pt-0">
+            <div class="d-flex flex-column flex-md-row gap-3">
+                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-sm transition-all hover-lift">
+                    <i class="bi bi-check-circle me-2"></i>{{ button_label|default('Enregistrer la chambre') }}
+                </button>
+                <a href="{{ path('app_chambre_index') }}" class="btn btn-light btn-lg rounded-pill px-5 py-3 border transition-all hover-lift">
+                    <i class="bi bi-x-circle me-2"></i>Annuler
+                </a>
+            </div>
         </div>
-
-        <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
-            <a href="{{ path('app_chambre_index') }}" class="btn btn-secondary">Annuler</a>
-        </div>
-
-        {{ form_end(form) }}
     </div>
-</div>
+{{ form_end(form) }}
 
+<style>
+    .form-floating > .form-control:focus, .form-floating > .form-control:not(:placeholder-shown) {
+        padding-top: 1.625rem;
+        padding-bottom: 0.625rem;
+    }
+    .form-check-input { width: 3em !important; height: 1.5em !important; cursor: pointer; }
+    .hover-lift:hover { transform: translateY(-2px); }
+    .transition-all { transition: all 0.3s ease; }
+</style>
 
+<script>
+    (function () {
+      'use strict'
+      const forms = document.querySelectorAll('.needs-validation')
+      Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          form.classList.add('was-validated')
+        }, false)
+      })
+    })()
+</script>

@@ -1,42 +1,48 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Transport{% endblock %}
+{% block title %}{{ transport.type }} - Admin{% endblock %}
 
 {% block body %}
-    <h1>Transport</h1>
-
-    <table class="table">
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>{{ transport.type }}</h1>
+    
+    <table class="table table-borderless">
         <tbody>
             <tr>
-                <th>Id</th>
+                <th style="color: #2d5016; font-weight: bold; width: 30%;">Id</th>
                 <td>{{ transport.id }}</td>
             </tr>
             <tr>
-                <th>Type</th>
+                <th style="color: #2d5016; font-weight: bold;">Type</th>
                 <td>{{ transport.type }}</td>
             </tr>
             <tr>
-                <th>Capacite</th>
+                <th style="color: #2d5016; font-weight: bold;">Capacité</th>
                 <td>{{ transport.capacite }}</td>
             </tr>
             <tr>
-                <th>Emissionco2</th>
-                <td>{{ transport.emissionco2 }}</td>
+                <th style="color: #2d5016; font-weight: bold;">Émission CO2</th>
+                <td>{{ transport.emissionco2 }} kg</td>
             </tr>
             <tr>
-                <th>Prixparpersonne</th>
-                <td>{{ transport.prixparpersonne }}</td>
+                <th style="color: #2d5016; font-weight: bold;">Prix/Personne</th>
+                <td>{{ transport.prixparpersonne }} DT</td>
             </tr>
             <tr>
-                <th>Disponible</th>
-                <td>{{ transport.disponible ? 'Yes' : 'No' }}</td>
+                <th style="color: #2d5016; font-weight: bold;">Disponible</th>
+                <td>{{ transport.disponible ? 'Oui' : 'Non' }}</td>
             </tr>
         </tbody>
     </table>
 
-    <a href="{{ path('app_trajet_index') }}">back to list</a>
-
-    <a href="{{ path('app_trajet_edit', {'id': transport.id}) }}">edit</a>
-
-    {{ include('TransportTemplate/trajet/_delete_form.html.twig') }}
+    <div style="margin-top: 30px;">
+        <a href="{{ path('app_trajet_edit', {'id': transport.id}) }}" class="btn btn-primary">Modifier</a>
+        <a href="{{ path('app_trajet_index') }}" class="btn btn-secondary">Retour à la liste</a>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        {{ include('TransportTemplate/trajet/_delete_form.html.twig') }}
+    </div>
+</div>
 {% endblock %}

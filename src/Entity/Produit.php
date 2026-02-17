@@ -53,9 +53,18 @@ class Produit
     #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'produit')]
     private Collection $commandes;
 
+    /**
+     * @var Collection<int, LigneDeCommande>
+     */
+    #[ORM\OneToMany(targetEntity: LigneDeCommande::class, mappedBy: 'idProduct')]
+    private Collection $ligneDeCommandes;
+
+   
+
     public function __construct()
     {
         $this->commandes = new ArrayCollection();
+        $this->ligneDeCommandes = new ArrayCollection();
     }
 
     public static function validateNom(mixed $object, ExecutionContextInterface $context): void
@@ -172,4 +181,36 @@ class Produit
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, LigneDeCommande>
+     */
+    public function getLigneDeCommandes(): Collection
+    {
+        return $this->ligneDeCommandes;
+    }
+
+    public function addLigneDeCommande(LigneDeCommande $ligneDeCommande): static
+    {
+        if (!$this->ligneDeCommandes->contains($ligneDeCommande)) {
+            $this->ligneDeCommandes->add($ligneDeCommande);
+            $ligneDeCommande->setIdProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLigneDeCommande(LigneDeCommande $ligneDeCommande): static
+    {
+        if ($this->ligneDeCommandes->removeElement($ligneDeCommande)) {
+            // set the owning side to null (unless already changed)
+            if ($ligneDeCommande->getIdProduct() === $this) {
+                $ligneDeCommande->setIdProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+
 }

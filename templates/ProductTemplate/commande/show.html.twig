@@ -1,51 +1,46 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Commande #{{ commande.idCommande }} | Admin{% endblock %}
+{% block title %}Commande #{{ commande.idCommande }} - Admin{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Commande</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_commande_index') }}">Commandes</a></li>
-                <li class="active">#{{ commande.idCommande }}</li>
-            </ol>
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>Commande #{{ commande.idCommande }}</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <h3>Détails</h3>
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">{{ commande.idCommande }}</dd>
+                <dt class="col-sm-3">Utilisateur</dt>
+                <dd class="col-sm-9">{{ commande.idUser ?? '–' }}</dd>
+                <dt class="col-sm-3">Produit</dt>
+                <dd class="col-sm-9">{{ commande.produit ? commande.produit.nom : '–' }}</dd>
+                <dt class="col-sm-3">Type</dt>
+                <dd class="col-sm-9">{{ commande.typeCommande ? commande.typeCommande.value : '–' }}</dd>
+                <dt class="col-sm-3">Quantité</dt>
+                <dd class="col-sm-9">{{ commande.quantite }}</dd>
+                <dt class="col-sm-3">Prix unitaire</dt>
+                <dd class="col-sm-9">{{ commande.prixUnitaire }}</dd>
+                <dt class="col-sm-3">Total</dt>
+                <dd class="col-sm-9">{{ commande.total }}</dd>
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-9">{{ commande.dateCommande ? commande.dateCommande|date('d/m/Y H:i') : '–' }}</dd>
+                <dt class="col-sm-3">Statut</dt>
+                <dd class="col-sm-9">{{ commande.statutCommande }}</dd>
+            </dl>
+        </div>
+        <div class="col-md-4">
+            <h3>Actions</h3>
+            <a href="{{ path('app_commande_edit', { id: commande.idCommande }) }}" class="btn btn-warning d-block mb-2">Modifier</a>
+            <form method="post" action="{{ path('app_commande_delete', { id: commande.idCommande }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_' ~ commande.idCommande) }}">
+                <button type="submit" class="btn btn-danger d-block mb-2 w-100">Supprimer</button>
+            </form>
         </div>
     </div>
-</section>
 
-<section class="accomodation_area section_gap">
-    <div class="container">
-        <dl class="row">
-            <dt class="col-sm-3">Id</dt>
-            <dd class="col-sm-9">{{ commande.idCommande }}</dd>
-            <dt class="col-sm-3">Id utilisateur</dt>
-            <dd class="col-sm-9">{{ commande.idUser ?? '—' }}</dd>
-            <dt class="col-sm-3">Produit</dt>
-            <dd class="col-sm-9">{{ commande.produit ? commande.produit.nom : '—' }}</dd>
-            <dt class="col-sm-3">Type</dt>
-            <dd class="col-sm-9">{{ commande.typeCommande ? commande.typeCommande.value : '—' }}</dd>
-            <dt class="col-sm-3">Quantité</dt>
-            <dd class="col-sm-9">{{ commande.quantite }}</dd>
-            <dt class="col-sm-3">Prix unitaire</dt>
-            <dd class="col-sm-9">{{ commande.prixUnitaire }}</dd>
-            <dt class="col-sm-3">Total</dt>
-            <dd class="col-sm-9">{{ commande.total }}</dd>
-            <dt class="col-sm-3">Date commande</dt>
-            <dd class="col-sm-9">{{ commande.dateCommande ? commande.dateCommande|date('d/m/Y H:i') : '—' }}</dd>
-            <dt class="col-sm-3">Statut</dt>
-            <dd class="col-sm-9">{{ commande.statutCommande }}</dd>
-        </dl>
-        <p>
-            <a href="{{ path('app_commande_edit', { id: commande.idCommande }) }}" class="btn theme_btn button_hover">Modifier</a>
-            <form method="post" action="{{ path('app_commande_delete', { id: commande.idCommande }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette commande ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete_commande_' ~ commande.idCommande) }}">
-                <button type="submit" class="btn btn-danger">Supprimer</button>
-            </form>
-            <a href="{{ path('app_commande_index') }}" class="btn btn-secondary">Retour à la liste</a>
-        </p>
-    </div>
-</section>
+    <a href="{{ path('app_commande_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+</div>
 {% endblock %}

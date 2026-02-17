@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/png">
-    <title>{% block title %}Royal Hotel{% endblock %}</title>
+    <title>{% block title %}EcoTrip{% endblock %}</title>
     <!-- Global CSS -->
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('vendors/linericon/style.css') }}">
@@ -49,6 +49,7 @@
     <script src="{{ asset('js/stellar.js') }}"></script>
     <script src="{{ asset('vendors/lightbox/simpleLightbox.min.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
+    <script>window.updateCartBadge = function(c) { var b = document.getElementById('cartBadge'); if(b) { b.textContent = c; b.style.display = c > 0 ? '' : 'none'; } };</script>
     {% block javascripts %}{% endblock %}
 </body>
 </html>

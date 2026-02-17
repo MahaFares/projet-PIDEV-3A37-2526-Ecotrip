@@ -15,10 +15,28 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ChambreController extends AbstractController
 {
     #[Route(name: 'app_chambre_index', methods: ['GET'])]
-    public function index(ChambreRepository $chambreRepository): Response
+    public function index(Request $request, ChambreRepository $chambreRepository): Response
     {
+        $searchQuery = $request->query->get('q', '');
+
+        // Filter chambres based on search
+        if (!empty($searchQuery)) {
+            $chambres = $chambreRepository->findBySearchQuery($searchQuery);
+        } else {
+            $chambres = $chambreRepository->findAll();
+        }
+
+        // If AJAX request, return only the table rows partial
+        if ($request->isXmlHttpRequest() || $request->query->get('ajax')) {
+            return $this->render('HebergementTemplate/chambre/_table.html.twig', [
+                'chambres' => $chambres,
+            ]);
+        }
+
+        // Regular request, return full page
         return $this->render('HebergementTemplate/chambre/index.html.twig', [
-            'chambres' => $chambreRepository->findAll(),
+            'chambres' => $chambres,
+            'filters' => ['q' => $searchQuery],
         ]);
     }
 

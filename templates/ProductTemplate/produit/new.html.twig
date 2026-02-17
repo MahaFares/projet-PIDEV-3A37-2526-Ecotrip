@@ -1,37 +1,12 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Nouveau produit | Admin{% endblock %}
+{% block title %}Nouveau produit - Admin{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Nouveau produit</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_produit_index') }}">Produits</a></li>
-                <li class="active">Nouveau</li>
-            </ol>
-        </div>
-    </div>
-</section>
-
-<section class="accomodation_area section_gap">
-    <div class="container">
-        {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">{{ message }}</div>
-        {% endfor %}
-
-        {{ form_start(form) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.description) }}
-        {{ form_row(form.prix) }}
-        {{ form_row(form.stock) }}
-        {{ form_row(form.image) }}
-        {{ form_row(form.categorie) }}
-        <button type="submit" class="btn theme_btn button_hover">Enregistrer</button>
-        <a href="{{ path('app_produit_index') }}" class="btn btn-secondary">Annuler</a>
-        {{ form_end(form) }}
-    </div>
-</section>
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>Créer un produit</h1>
+    {{ include('ProductTemplate/produit/_form.html.twig') }}
+    <a href="{{ path('app_produit_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+</div>
 {% endblock %}

@@ -1,80 +1,256 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Hébergement - Admin{% endblock %}
+{% block title %}{{ hebergement.nom }} - Détails{% endblock %}
+{% block page_title %}Détails de l'Hébergement{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+.hebergement-details { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.detail-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.04);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.hero-section {
+    position: relative;
+    height: 300px;
+    background: #f1f5f9;
+}
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: 30px;
+    color: white;
+}
+.hero-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.hero-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-top: 5px;
+}
+
+.content-section {
+    padding: 30px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+@media (max-width: 992px) { .info-grid { grid-template-columns: 1fr; } }
+
+.info-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+.info-value {
+    font-size: 1.1rem;
+    color: #0f172a;
+    font-weight: 500;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.badge-status {
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.badge-status.active { background: #dcfce7; color: #166534; }
+.badge-status.inactive { background: #fee2e2; color: #991b1b; }
+
+.stars-display { color: #f59e0b; font-size: 1.2rem; }
+
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-custom {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-custom:hover { transform: translateY(-2px); }
+.btn-back { background: #f1f5f9; color: #64748b; }
+.btn-back:hover { background: #e2e8f0; color: #475569; }
+.btn-edit { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+.btn-edit:hover { opacity: 0.95; color: white; }
+.btn-delete { background: #fee2e2; color: #ef4444; }
+.btn-delete:hover { background: #fecaca; color: #dc2626; }
+
+.map-container {
+    height: 250px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+</style>
+{% endblock %}
 
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
-    <h1>Détails du hébergement</h1>
+<div class="container hebergement-details py-4">
+    <div class="detail-card">
+        <div class="hero-section">
+            {% if hebergement.imagePrincipale %}
+                {% if hebergement.imagePrincipale starts with 'http' %}
+                    <img src="{{ hebergement.imagePrincipale }}" alt="{{ hebergement.nom }}" class="hero-image">
+                {% else %}
+                    <img src="{{ asset('uploads/' ~ hebergement.imagePrincipale) }}" alt="{{ hebergement.nom }}" class="hero-image">
+                {% endif %}
+            {% else %}
+                <div class="hero-image d-flex align-items-center justify-content-center bg-light text-muted">
+                    <i class="fas fa-hotel fa-4x"></i>
+                </div>
+            {% endif %}
+            <div class="hero-overlay">
+                <div class="d-flex justify-content-between align-items-end">
+                    <div>
+                        <h1 class="hero-title">{{ hebergement.nom }}</h1>
+                        <div class="hero-subtitle">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ hebergement.ville }}, {{ hebergement.adresse }}
+                        </div>
+                    </div>
+                    <div class="stars-display">
+                        {% for i in 1..5 %}
+                            {% if i <= hebergement.nbEtoiles %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <table class="table table-striped">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ hebergement.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ hebergement.nom }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ hebergement.description }}</td>
-            </tr>
-            <tr>
-                <th>Adresse</th>
-                <td>{{ hebergement.adresse }}</td>
-            </tr>
-            <tr>
-                <th>Ville</th>
-                <td>{{ hebergement.ville }}</td>
-            </tr>
-            <tr>
-                <th>NbEtoiles</th>
-                <td>{{ hebergement.nbEtoiles }}</td>
-            </tr>
-            <tr>
-                <th>ImagePrincipale</th>
-                <td>
-                    {% if hebergement.imagePrincipale %}
-                        <img src="{{ asset('uploads/' ~ hebergement.imagePrincipale) }}" alt="{{ hebergement.nom }}" style="max-height: 150px; max-width: 250px; object-fit: cover;" />
-                    {% else %}
-                        <span class="text-muted">Aucune image</span>
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <th>LabelEco</th>
-                <td>{{ hebergement.labelEco }}</td>
-            </tr>
-            <tr>
-                <th>Latitude</th>
-                <td>{{ hebergement.latitude }}</td>
-            </tr>
-            <tr>
-                <th>Longitude</th>
-                <td>{{ hebergement.longitude }}</td>
-            </tr>
-            <tr>
-                <th>Actif</th>
-                <td>{{ hebergement.actif ? 'Yes' : 'No' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="content-section">
+            <div class="info-grid">
+                <!-- Left Column: Description & Details -->
+                <div>
+                    <div class="mb-4">
+                        <div class="info-label">Statut</div>
+                        {% if hebergement.actif %}
+                            <span class="badge-status active"><i class="fas fa-check-circle"></i> Actif - Visible pour les clients</span>
+                        {% else %}
+                            <span class="badge-status inactive"><i class="fas fa-times-circle"></i> Inactif - Masqué</span>
+                        {% endif %}
+                    </div>
 
-    <div class="mt-3">
-        <a href="{{ path('app_hebergement_index') }}" class="btn btn-secondary">Retour à la liste</a>
-        <a href="{{ path('app_hebergement_edit', {'id': hebergement.id}) }}" class="btn btn-primary ms-2">Modifier</a>
-    </div>
+                    <div class="mb-4">
+                        <div class="info-label">Description</div>
+                        <div class="info-value text-muted">{{ hebergement.description|nl2br }}</div>
+                    </div>
 
-<<<<<<< HEAD
-    <a href="{{ path('app_hebergement_edit', {'id': hebergement.id}) }}">edit</a>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="info-label">Catégorie</div>
+                            <div class="info-value">
+                                <i class="fas fa-tag me-2 text-primary"></i>
+                                {{ hebergement.categorie.nom|default('Non catégorisé') }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="info-label">Label Éco</div>
+                            <div class="info-value">
+                                {% if hebergement.labelEco %}
+                                    <span class="text-success"><i class="fas fa-leaf me-2"></i>{{ hebergement.labelEco }}</span>
+                                {% else %}
+                                    <span class="text-muted">Aucun label</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    {{ include('HebergementTemplate/hebergement/_delete_form.html.twig') }}
-=======
-    <div class="mt-3">
-        {{ include('HebergementTemplate/hebergement/_delete_form.html.twig') }}
+                <!-- Right Column: Map & Location -->
+                <div>
+                    <div class="info-label mb-2">Localisation</div>
+                    <div class="map-container" id="map"></div>
+                    <div class="mt-3 text-muted small">
+                        Latitude: {{ hebergement.latitude|default('N/A') }} <br>
+                        Longitude: {{ hebergement.longitude|default('N/A') }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <a href="{{ path('app_hebergement_index') }}" class="btn-custom btn-back">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('app_hebergement_edit', {'id': hebergement.id}) }}" class="btn-custom btn-edit">
+                        <i class="fas fa-pencil-alt"></i> Modifier
+                    </a>
+                    <form method="post" action="{{ path('app_hebergement_delete', {'id': hebergement.id}) }}" onsubmit="return confirm('Attention ! Cette action est irréversible.');" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ hebergement.id) }}">
+                        <button class="btn-custom btn-delete">
+                            <i class="fas fa-trash-alt"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
->>>>>>> d1fec4b (temp)
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lat = {{ hebergement.latitude|default('36.8065') }};
+        const lon = {{ hebergement.longitude|default('10.1815') }};
+        
+        var map = L.map('map').setView([lat, lon], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        {% if hebergement.latitude and hebergement.longitude %}
+            L.marker([lat, lon]).addTo(map)
+                .bindPopup('{{ hebergement.nom|e('js') }}')
+                .openPopup();
+        {% endif %}
+    });
+</script>
 {% endblock %}

@@ -61,10 +61,18 @@ class Commande
     #[ORM\OneToMany(targetEntity: Paiement::class, mappedBy: 'commande')]
     private Collection $paiements;
 
+    /**
+     * @var Collection<int, LigneDeCommande>
+     */
+    #[ORM\OneToMany(targetEntity: LigneDeCommande::class, mappedBy: 'idCommande')]
+    private Collection $ligneDeCommandes;
+
+
     public function __construct()
     {
         $this->paiements = new ArrayCollection();
         $this->idUser = self::DEFAULT_USER_ID;
+        $this->ligneDeCommandes = new ArrayCollection();
     }
 
     public function getIdCommande(): ?int
@@ -173,4 +181,35 @@ class Commande
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, LigneDeCommande>
+     */
+    public function getLigneDeCommandes(): Collection
+    {
+        return $this->ligneDeCommandes;
+    }
+
+    public function addLigneDeCommande(LigneDeCommande $ligneDeCommande): static
+    {
+        if (!$this->ligneDeCommandes->contains($ligneDeCommande)) {
+            $this->ligneDeCommandes->add($ligneDeCommande);
+            $ligneDeCommande->setIdCommande($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLigneDeCommande(LigneDeCommande $ligneDeCommande): static
+    {
+        if ($this->ligneDeCommandes->removeElement($ligneDeCommande)) {
+            // set the owning side to null (unless already changed)
+            if ($ligneDeCommande->getIdCommande() === $this) {
+                $ligneDeCommande->setIdCommande(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

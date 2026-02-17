@@ -41,10 +41,14 @@
                                 label: 'Email',
                                 attr: { placeholder: 'votre@email.com', class: 'form-control' }
                             }) }}
-                            {{ form_row(registrationForm.plainPassword, {
-                                label: 'Mot de passe',
-                                attr: { placeholder: '••••••••', class: 'form-control' }
-                            }) }}
+                            {{ form_row(registrationForm.username, {
+                                label: 'Username',
+                                attr: { placeholder: 'username', class: 'form-control'}
+                            })}}
+                            {{ form_errors(registrationForm.plainPassword) }}
+                            {{ form_row(registrationForm.plainPassword.first) }}
+                            {{ form_row(registrationForm.plainPassword.second) }}
+                            {{ form_row(registrationForm.captcha) }}
                             {{ form_row(registrationForm.agreeTerms, {
                                 label: "J'accepte les conditions d'utilisation"
                             }) }}

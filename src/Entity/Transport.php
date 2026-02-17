@@ -16,40 +16,48 @@ class Transport
     #[ORM\Column]
     private ?int $id = null;
 
-   #[ORM\Column(length: 100)]
-#[Assert\NotBlank(message: "Le type de transport est obligatoire")]
-#[Assert\Length(
-    min: 3,
-    max: 100,
-    minMessage: "Le type doit contenir au moins {{ limit }} caractères",
-    maxMessage: "Le type ne peut pas dépasser {{ limit }} caractères"
-)]
-private ?string $type = null;
+    #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: "Le type de transport est obligatoire")]
+    #[Assert\Length(
+        min: 3,
+        max: 100,
+        minMessage: "Le type doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le type ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private ?string $type = null;
 
-  #[ORM\Column]
-#[Assert\NotBlank(message: "La capacité est obligatoire")]
-#[Assert\Positive(message: "La capacité doit être un nombre positif")]
-#[Assert\Range(
-    min: 1,
-    max: 500,
-    notInRangeMessage: "La capacité doit être entre {{ min }} et {{ max }}"
-)]
-private ?int $capacite = null;
+    #[ORM\Column]
+    #[Assert\NotBlank(message: "La capacité est obligatoire")]
+    #[Assert\Positive(message: "La capacité doit être un nombre positif")]
+    #[Assert\Range(
+        min: 1,
+        max: 500,
+        notInRangeMessage: "La capacité doit être entre {{ min }} et {{ max }}"
+    )]
+    private ?int $capacite = null;
 
     #[ORM\Column(name: 'emissionco2')]
-#[Assert\NotBlank(message: "L'émission CO2 est obligatoire")]
-#[Assert\PositiveOrZero(message: "L'émission CO2 doit être positive ou zéro")]
-private ?float $emissionco2 = null;
+    #[Assert\NotBlank(message: "L'émission CO2 est obligatoire")]
+    #[Assert\PositiveOrZero(message: "L'émission CO2 doit être positive ou zéro")]
+    private ?float $emissionco2 = null;
 
-  #[ORM\Column(type: 'decimal', precision: 10, scale: 2, name: 'prixparpersonne')]
-#[Assert\NotBlank(message: "Le prix est obligatoire")]
-#[Assert\Positive(message: "Le prix doit être positif")]
-private ?string $prixparpersonne = null;
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, name: 'prixparpersonne')]
+    #[Assert\NotBlank(message: "Le prix est obligatoire")]
+    #[Assert\Positive(message: "Le prix doit être positif")]
+    private ?string $prixparpersonne = null;
     #[ORM\Column]
     private ?bool $disponible = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
+
+    #[ORM\ManyToOne(inversedBy: 'transports')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?TransportCategory $category = null;
+
+    #[ORM\ManyToOne(inversedBy: 'transports')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Chauffeur $chauffeur = null;
 
     /**
      * @var Collection<int, Trajet>
@@ -165,7 +173,28 @@ private ?string $prixparpersonne = null;
     public function setImage(?string $image): static
     {
         $this->image = $image;
+        return $this;
+    }
 
+    public function getCategory(): ?TransportCategory
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?TransportCategory $category): static
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    public function getChauffeur(): ?Chauffeur
+    {
+        return $this->chauffeur;
+    }
+
+    public function setChauffeur(?Chauffeur $chauffeur): static
+    {
+        $this->chauffeur = $chauffeur;
         return $this;
     }
 }

@@ -40,4 +40,20 @@ class ActivityScheduleRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Find upcoming schedules (starting from now)
+     *
+     * @return ActivitySchedule[]
+     */
+    public function findUpcomingSchedules(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.startAt > :now')
+            ->setParameter('now', new \DateTime())
+            ->orderBy('s.startAt', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

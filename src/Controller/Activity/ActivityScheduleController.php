@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/activity/schedule')]
 final class ActivityScheduleController extends AbstractController
 {
-    #[Route(name: 'app_activity_schedule_index', methods: ['GET'])]
+    #[Route('', name: 'app_activity_schedule_index', methods: ['GET'])]
     public function index(ActivityScheduleRepository $activityScheduleRepository): Response
     {
         return $this->render('ActivityTemplate/activity_schedule/index.html.twig', [
@@ -42,7 +42,7 @@ final class ActivityScheduleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_activity_schedule_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_activity_schedule_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(ActivitySchedule $activitySchedule): Response
     {
         return $this->render('ActivityTemplate/activity_schedule/show.html.twig', [
@@ -50,7 +50,7 @@ final class ActivityScheduleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_activity_schedule_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_activity_schedule_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, ActivitySchedule $activitySchedule, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(ActivityScheduleType::class, $activitySchedule);
@@ -68,7 +68,7 @@ final class ActivityScheduleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_activity_schedule_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_activity_schedule_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, ActivitySchedule $activitySchedule, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$activitySchedule->getId(), $request->getPayload()->getString('_token'))) {

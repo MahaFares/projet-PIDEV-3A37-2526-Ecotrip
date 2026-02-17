@@ -1,38 +1,75 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Modifier commande #{{ commande.idCommande }} | Admin{% endblock %}
+{% block title %}Modifier commande #{{ commande.idCommande }} - Admin{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Modifier la commande</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="{{ path('app_commande_index') }}">Commandes</a></li>
-                <li class="active">Modifier</li>
-            </ol>
+<div class="container py-4">
+    {{ include('admin_nav.html.twig') }}
+    <h1>Modifier la commande #{{ commande.idCommande }}</h1>
+    
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="form-group mb-3">
+            {{ form_label(form.produit, 'Produit', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.produit, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.produit) }}
         </div>
-    </div>
-</section>
 
-<section class="accomodation_area section_gap">
-    <div class="container">
-        {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">{{ message }}</div>
-        {% endfor %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.typeCommande, 'Type de commande', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.typeCommande, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.typeCommande) }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.quantite, 'Quantité', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.quantite, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.quantite) }}
+                </div>
+            </div>
+        </div>
 
-        {{ form_start(form) }}
-        {{ form_row(form.produit) }}
-        {{ form_row(form.typeCommande) }}
-        {{ form_row(form.quantite) }}
-        {{ form_row(form.prixUnitaire) }}
-        {{ form_row(form.total) }}
-        {{ form_row(form.dateCommande) }}
-        {{ form_row(form.statutCommande) }}
-        <button type="submit" class="btn theme_btn button_hover">Enregistrer</button>
-        <a href="{{ path('app_commande_show', { id: commande.idCommande }) }}" class="btn btn-secondary">Annuler</a>
-        {{ form_end(form) }}
-    </div>
-</section>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.prixUnitaire, 'Prix unitaire', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.prixUnitaire, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.prixUnitaire) }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.total, 'Total', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.total, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.total) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.dateCommande, 'Date de commande', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.dateCommande, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateCommande) }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    {{ form_label(form.statutCommande, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.statutCommande, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.statutCommande) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-4">
+            <button type="submit" class="btn btn-success">Mettre à jour</button>
+        </div>
+    {{ form_end(form) }}
+    
+    <a href="{{ path('app_commande_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+</div>
 {% endblock %}

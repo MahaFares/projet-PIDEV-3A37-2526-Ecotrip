@@ -1,102 +1,93 @@
-{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-    <div class="form-group mb-3">
-        {{ form_label(form.title, 'Titre de l\'activité', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.title) }}
-        {% if form.title.vars.help %}
-            <small class="form-text text-muted d-block mt-1">{{ form.title.vars.help }}</small>
-        {% endif %}
-    </div>
+{{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
 
-    <div class="form-group mb-3">
-        {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '6'}}) }}
-        {{ form_errors(form.description) }}
-        {% if form.description.vars.help %}
-            <small class="form-text text-muted d-block mt-1">{{ form.description.vars.help }}</small>
-        {% endif %}
-    </div>
+<div class="form-group mb-3">
+    {{ form_label(form.title, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.title, { attr: { class: 'form-input' ~ (form.title.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: Randonnée en montagne' } }) }}
+    {% if form.title.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.title) }}</div>
+    {% endif %}
+</div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                {{ form_label(form.price, 'Prix (EUR)', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.price, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.price) }}
-                {% if form.price.vars.help %}
-                    <small class="form-text text-muted d-block mt-1">{{ form.price.vars.help }}</small>
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                {{ form_label(form.durationMinutes, 'Durée (minutes)', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.durationMinutes, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.durationMinutes) }}
-                {% if form.durationMinutes.vars.help %}
-                    <small class="form-text text-muted d-block mt-1">{{ form.durationMinutes.vars.help }}</small>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+<div class="form-group mb-3">
+    {{ form_label(form.description, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.description, { attr: { class: 'form-textarea' ~ (form.description.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Décrivez l\'activité en détail', rows: 6 } }) }}
+    {% if form.description.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.description) }}</div>
+    {% endif %}
+</div>
 
-    <div class="form-group mb-3">
-        {{ form_label(form.location, 'Lieu', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.location, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.location) }}
-        {% if form.location.vars.help %}
-            <small class="form-text text-muted d-block mt-1">{{ form.location.vars.help }}</small>
-        {% endif %}
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                {{ form_label(form.maxParticipants, 'Nombre max de participants', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.maxParticipants, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.maxParticipants) }}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                {{ form_label(form.category, 'Catégorie', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.category, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.category) }}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                {{ form_label(form.guide, 'Guide', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.guide, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.guide) }}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                {{ form_label(form.isActive, 'Actif', {'label_attr': {'class': 'form-check-label'}}) }}
-                <div class="form-check">
-                    {{ form_widget(form.isActive, {'attr': {'class': 'form-check-input'}}) }}
-                </div>
-                {{ form_errors(form.isActive) }}
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group mb-3">
-        {{ form_label(form.image, 'Image de l\'activité', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.image, {'attr': {'class': 'form-control', 'accept': 'image/jpeg,image/png,image/gif'}}) }}
-        {{ form_errors(form.image) }}
-        {% if form.image.vars.help %}
-            <small class="form-text text-muted d-block mt-1">{{ form.image.vars.help }}</small>
-        {% endif %}
-    </div>
-
+<div class="form-row">
     <div class="form-group">
-        <button type="submit" class="btn btn-primary" style="background-color: #2d5016; border-color: #2d5016;">
-            {{ button_label|default('Enregistrer') }}
-        </button>
+        {{ form_label(form.price, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.price, { attr: { class: 'form-input' ~ (form.price.vars.errors|length ? ' is-invalid' : '') } }) }}
+        {% if form.price.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.price) }}</div>
+        {% endif %}
     </div>
+    <div class="form-group">
+        {{ form_label(form.durationMinutes, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.durationMinutes, { attr: { class: 'form-input' ~ (form.durationMinutes.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: 120' } }) }}
+        {% if form.durationMinutes.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.durationMinutes) }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-group mb-3">
+    {{ form_label(form.location, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.location, { attr: { class: 'form-input' ~ (form.location.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: Alpes, Chamonix' } }) }}
+    {% if form.location.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.location) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        {{ form_label(form.maxParticipants, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.maxParticipants, { attr: { class: 'form-input' ~ (form.maxParticipants.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: 15' } }) }}
+        {% if form.maxParticipants.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.maxParticipants) }}</div>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form_label(form.category, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.category, { attr: { class: 'form-input form-select' ~ (form.category.vars.errors|length ? ' is-invalid' : '') } }) }}
+        {% if form.category.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.category) }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+        {{ form_label(form.guide, null, { label_attr: { class: 'form-label' } }) }}
+        {{ form_widget(form.guide, { attr: { class: 'form-input form-select' ~ (form.guide.vars.errors|length ? ' is-invalid' : '') } }) }}
+        {% if form.guide.vars.errors|length > 0 %}
+            <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.guide) }}</div>
+        {% endif %}
+    </div>
+    <div class="form-group d-flex align-items-end">
+        <div class="form-check">
+            {{ form_widget(form.isActive, { attr: { class: 'form-check-input' } }) }}
+            {{ form_label(form.isActive, null, { label_attr: { class: 'form-check-label' } }) }}
+        </div>
+        {% if form.isActive.vars.errors|length > 0 %}
+            <div class="error-message">{{ form_errors(form.isActive) }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="form-group mb-3">
+    {{ form_label(form.image, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.image, { attr: { class: 'form-input' ~ (form.image.vars.errors|length ? ' is-invalid' : ''), accept: 'image/jpeg,image/png,image/gif' } }) }}
+    {% if form.image.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.image) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="modern-btn btn-submit"><i class="bi bi-check"></i> {{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('app_activity_index') }}" class="modern-btn btn-cancel"><i class="bi bi-x"></i> Annuler</a>
+</div>
+
 {{ form_end(form) }}
