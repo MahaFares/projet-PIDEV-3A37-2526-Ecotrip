@@ -8,13 +8,57 @@
     {% endif %}
 </div>
 
-<div class="form-group mb-3">
-    {{ form_label(form.description, null, { label_attr: { class: 'form-label' } }) }}
+<div class="form-group mb-3" id="activity-description-wrap">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+        {{ form_label(form.description, null, { label_attr: { class: 'form-label mb-0' } }) }}
+        <button type="button" class="modern-btn btn-ai-generate" id="activityAiGenerateDesc" title="Générer une description avec l'IA">
+            <i class="bi bi-magic"></i> Générer avec l'IA
+        </button>
+    </div>
     {{ form_widget(form.description, { attr: { class: 'form-textarea' ~ (form.description.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Décrivez l\'activité en détail', rows: 6 } }) }}
     {% if form.description.vars.errors|length > 0 %}
         <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.description) }}</div>
     {% endif %}
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('activityAiGenerateDesc');
+    var form = document.querySelector('form');
+    if (!btn || !form) return;
+    btn.addEventListener('click', function() {
+        var descInput = form.querySelector('textarea[name*="[description]"]');
+        if (!descInput) return;
+        var originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Génération...';
+        btn.disabled = true;
+        var categorySelect = form.querySelector('select[name*="[category]"]');
+        var categoryName = categorySelect && categorySelect.options[categorySelect.selectedIndex] ? categorySelect.options[categorySelect.selectedIndex].text : '';
+        var payload = {
+            title: (form.querySelector('input[name*="[title]"]') || {}).value || 'Activité',
+            location: (form.querySelector('input[name*="[location]"]') || {}).value || 'Tunisie',
+            category: categoryName,
+            durationMinutes: (form.querySelector('input[name*="[durationMinutes]"]') || {}).value || '',
+            price: (form.querySelector('input[name*="[price]"]') || {}).value || '',
+            maxParticipants: (form.querySelector('input[name*="[maxParticipants]"]') || {}).value || ''
+        };
+        fetch('{{ path('app_activity_ai_description') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.description) descInput.value = data.description;
+            else alert('Erreur lors de la génération.');
+        })
+        .catch(function() { alert('Erreur technique.'); })
+        .finally(function() {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    });
+});
+</script>
 
 <div class="form-row">
     <div class="form-group">

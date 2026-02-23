@@ -30,7 +30,7 @@ class HomeController extends AbstractController
     #[Route('/hebergements', name: 'app_hebergement')]
     public function hebergement(HebergementRepository $hebergementRepository): Response
     {
-        $hebergements = $hebergementRepository->findAll();
+        $hebergements = $hebergementRepository->findAllForListing();
         return $this->render('FrontOffice/hebergement/accomodation.html.twig', [
             'hebergements' => $hebergements,
         ]);

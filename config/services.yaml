@@ -34,3 +34,8 @@ services:
             $sid:   '%env(TWILIO_SID)%'
             $token: '%env(TWILIO_AUTH_TOKEN)%'  # ← FIXED
             $from:  '%env(TWILIO_FROM)%'
+
+    App\Service\HuggingFaceFaceService:
+        arguments:
+            $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
+            $modelId: '%env(HUGGINGFACE_FACE_MODEL)%'

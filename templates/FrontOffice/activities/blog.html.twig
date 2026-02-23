@@ -778,6 +778,19 @@
             transform: translateY(-2px);
         }
 
+        /* Activity reserve block - modern */
+        .ecotrip-activity-reserve-block { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e5e7eb; }
+        .ecotrip-reserve-fields { background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); padding: 20px 24px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #bbf7d0; }
+        .ecotrip-reserve-label { display: block; font-weight: 600; font-size: 0.9rem; color: #374151; margin-bottom: 8px; }
+        .ecotrip-reserve-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+        .ecotrip-reserve-input:focus { outline: none; border-color: #2d5016; box-shadow: 0 0 0 4px rgba(45,80,22,0.12); }
+        .ecotrip-reserve-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+        .ecotrip-activity-btn { padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; display: inline-flex; align-items: center; }
+        .ecotrip-activity-btn-primary { background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%); color: #fff; }
+        .ecotrip-activity-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(45,80,22,0.35); color: #fff; }
+        .ecotrip-activity-btn-ghost { background: #fff; color: #2d5016; border: 2px solid #2d5016; }
+        .ecotrip-activity-btn-ghost:hover { background: #2d5016; color: #fff; transform: translateY(-2px); }
+
         /* Responsive Design */
         @media (max-width: 991px) {
             .filter-sidebar-panel {
@@ -997,7 +1010,7 @@
                                 <div class="card-activity">
                                     <a href="#" class="card-activity-link">
                                         <div class="img-wrap">
-                                            <img src="{{ activity.image ? asset(activity.image) : asset('images/room' ~ (((activity.id ?? 0) % 4) + 1) ~ '.jpg') }}" alt="{{ activity.title }}">
+                                            <img src="{{ activity.image ? asset(activity.image) : asset('images/room' ~ (((activity.id ?? 0) % 4) + 1) ~ '.jpg') }}" alt="{{ activity.title }}" loading="lazy" decoding="async">
                                             <div class="img-overlay">
                                                 <span class="img-overlay-location">{{ activity.location|default('Tunisie') }}</span>
                                                 {% if activity.category %}
@@ -1126,6 +1139,7 @@
                     const button = event.relatedTarget;
                     if (!button) return;
 
+                    var addActivityUrlBase = "{{ path('app_panier_add_activity', {id: 0}) }}";
                     const data = {
                         id: button.dataset.activityId || 'inconnu',
                         title: button.dataset.activityTitle || 'Activité sans titre',
@@ -1171,17 +1185,53 @@
                                 </div>
                             </div>
 
-                            <div class="modal-actions mt-4">
-                                <button class="modal-btn-reserve">Réserver maintenant</button>
-                                <button class="modal-btn-cart btn-add-cart" data-url="/panier/add-activity/${data.id}">
-                                    Ajouter au panier
-                                </button>
+                            <div class="modal-actions mt-4 ecotrip-activity-reserve-block">
+                                <div class="ecotrip-reserve-fields">
+                                    <label class="ecotrip-reserve-label">Date souhaitée</label>
+                                    <input type="datetime-local" class="ecotrip-reserve-input" id="activityReserveDate" data-activity-id="${data.id}">
+                                    <label class="ecotrip-reserve-label mt-3">Nombre de participants</label>
+                                    <input type="number" class="ecotrip-reserve-input" id="activityReserveParticipants" value="1" min="1" max="50">
+                                </div>
+                                <div class="ecotrip-reserve-actions">
+                                    <button type="button" class="ecotrip-activity-btn ecotrip-activity-btn-primary" id="activityReserveBtn" data-url="${addActivityUrlBase.replace(/0$/, data.id)}"><i class="fa fa-calendar-check-o me-2"></i>Réserver maintenant</button>
+                                    <button type="button" class="ecotrip-activity-btn ecotrip-activity-btn-ghost btn-add-cart" data-url="${addActivityUrlBase.replace(/0$/, data.id)}"><i class="fa fa-cart-plus me-2"></i>Ajouter au panier</button>
+                                </div>
                             </div>
                         </div>
                     `;
 
                     document.getElementById('modalContent').innerHTML = content;
                     document.getElementById('activityModalLabel').textContent = data.title;
+
+                    var today = new Date();
+                    today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+                    document.getElementById('activityReserveDate').value = today.toISOString().slice(0, 16);
+
+                    document.getElementById('activityReserveBtn').addEventListener('click', function() {
+                        var url = this.dataset.url;
+                        var dateInput = document.getElementById('activityReserveDate');
+                        var participantsInput = document.getElementById('activityReserveParticipants');
+                        var reservedAt = dateInput.value ? new Date(dateInput.value).toISOString() : null;
+                        var participants = parseInt(participantsInput.value, 10) || 1;
+                        var fd = new FormData();
+                        fd.append('participants', participants);
+                        if (reservedAt) fd.append('reservedAt', reservedAt);
+                        fd.append('_token', '{{ csrf_token("panier") }}');
+                        this.disabled = true;
+                        this.innerHTML = 'Ajout...';
+                        fetch(url, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(function(r) { return r.json(); })
+                            .then(function(d) {
+                                if (d.success) {
+                                    if (typeof updateCartBadge === 'function') updateCartBadge(d.count);
+                                    var modal = bootstrap.Modal.getInstance(document.getElementById('activityModal'));
+                                    if (modal) modal.hide();
+                                    if (window.showToast) showToast('Réservation ajoutée au panier !', 'success');
+                                } else { if (window.showToast) showToast(d.message || 'Erreur', 'error'); }
+                            })
+                            .catch(function() { if (window.showToast) showToast('Erreur réseau.', 'error'); })
+                            .finally(function() { document.getElementById('activityReserveBtn').disabled = false; document.getElementById('activityReserveBtn').innerHTML = 'Réserver maintenant'; });
+                    });
                 });
             } else {
                 console.error('[MODAL] #activityModal non trouvé dans le DOM');
@@ -1310,7 +1360,7 @@
                 openChatBtn.style.display = 'none';
                 if (notification) notification.style.display = 'none';
                 if (firstOpen) {
-                    addMessage("Salut ! 🌿 Je suis ton assistant EcoTrip.<br>Tu veux des idées d’activités à Tunis, un hébergement à Djerba, un transport pour le désert ou un programme complet ? Dis-moi tout !", true);
+                    addMessage("Salut Hassan ! 🌿 Je suis ton assistant EcoTrip.<br>Tu veux des idées d’activités à Tunis, un hébergement à Djerba, un transport pour le désert ou un programme complet ? Dis-moi tout !", true);
                     firstOpen = false;
                 }
                 chatInput.focus();

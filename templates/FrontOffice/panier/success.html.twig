@@ -111,6 +111,45 @@
     font-weight: 700;
     color: #111827;
 }
+
+/* Signature Pad Styles */
+.sig-container {
+    margin: 20px auto;
+    padding: 15px;
+    border: 2px dashed #2d5016;
+    border-radius: 12px;
+    background: #f8faf5;
+    max-width: 400px;
+}
+.sig-canvas {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: crosshair;
+    touch-action: none;
+    width: 100%;
+    height: 150px;
+}
+.sig-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+.btn-clear {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-clear:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+}
 </style>
 {% endblock %}
 
@@ -143,10 +182,26 @@
             <p class="text-muted mb-3">
                 Numéro de commande : <strong>#{{ commande.idCommande }}</strong>
             </p>
+
+            <!-- Signature Pad Area -->
+            <div class="sig-container">
+                <div class="mb-2 text-start">
+                    <small class="fw-bold text-success"><i class="fa fa-pencil"></i> Signez ici pour votre facture :</small>
+                </div>
+                <canvas id="sig-canvas" class="sig-canvas" width="400" height="150"></canvas>
+                <div class="sig-controls">
+                    <small class="text-muted italic">Optionnel : Votre signature manuscrite</small>
+                    <button type="button" id="sig-clearBtn" class="btn-clear">Effacer</button>
+                </div>
+            </div>
+
             <div class="d-flex flex-column align-items-center mt-3">
-                <a href="{{ path('app_panier_facture_pdf', {id: commande.idCommande}) }}" class="btn btn-outline-secondary btn-ghost mb-3">
-                    <i class="fa fa-file-pdf-o me-1"></i> Télécharger la facture (PDF)
-                </a>
+                <form id="facture-form" method="POST" action="{{ path('app_panier_facture_pdf', {id: commande.idCommande}) }}" style="width: 100%;">
+                    <input type="hidden" name="signature" id="signature-data">
+                    <button type="submit" class="btn btn-outline-secondary btn-ghost mb-3 w-100">
+                        <i class="fa fa-file-pdf-o me-1"></i> Télécharger la facture (PDF)
+                    </button>
+                </form>
                 <a href="{{ path('app_home') }}" class="btn btn-main mt-1">
                     Continuer sur EcoTrip
                 </a>
@@ -165,4 +220,82 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('sig-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const clearBtn = document.getElementById('sig-clearBtn');
+    const form = document.getElementById('facture-form');
+    const signatureInput = document.getElementById('signature-data');
+
+    let drawing = false;
+    let hasSigned = false;
+
+    ctx.strokeStyle = '#2d5016';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    function startDrawing(e) {
+        drawing = true;
+        draw(e);
+    }
+
+    function stopDrawing() {
+        drawing = false;
+        ctx.beginPath();
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        hasSigned = true;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDrawing);
+
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    window.addEventListener('touchend', stopDrawing);
+
+    clearBtn.addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSigned = false;
+    });
+
+    form.addEventListener('submit', function() {
+        if (hasSigned) {
+            signatureInput.value = canvas.toDataURL('image/png');
+        }
+    });
+
+    // Handle responsive canvas
+    function resizeCanvas() {
+        const containerWidth = canvas.parentElement.clientWidth - 30;
+        if (containerWidth < 400) {
+            const ratio = canvas.height / canvas.width;
+            canvas.width = containerWidth;
+            canvas.height = containerWidth * ratio;
+            // Reducer stroke relative to size
+            ctx.lineWidth = 2 * (containerWidth / 400);
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#2d5016';
+        }
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+});
+</script>
 {% endblock %}

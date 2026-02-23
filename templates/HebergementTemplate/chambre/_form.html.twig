@@ -31,12 +31,103 @@
                     </div>
                 </div>
                 <div class="col-md-6">
+                    <div class="d-flex justify-content-end mb-1">
+                         <button type="button" class="btn btn-xs btn-outline-success rounded-pill py-0" id="btn-suggest-price" style="font-size: 0.8rem;">
+                            <i class="fas fa-robot me-1"></i> Suggérer prix
+                        </button>
+                    </div>
                     <div class="form-floating">
-                        {{ form_widget(form.prixParNuit, {'attr': {'class': 'form-control', 'placeholder': 'Prix', 'step': '0.01'}}) }}
+                        {{ form_widget(form.prixParNuit, {'attr': {'class': 'form-control', 'placeholder': 'Prix', 'step': '0.01', 'id': 'chambre_prix'}}) }}
                         {{ form_label(form.prixParNuit, 'Prix par Nuit (DT)') }}
                         {{ form_errors(form.prixParNuit) }}
                     </div>
                 </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const btnSuggest = document.getElementById('btn-suggest-price');
+                const priceInput = document.getElementById('chambre_prix');
+                
+                if(btnSuggest) {
+                    btnSuggest.addEventListener('click', function() {
+                        const originalText = btnSuggest.innerHTML;
+                        btnSuggest.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ...';
+                        btnSuggest.disabled = true;
+
+                        try {
+                            const form = btnSuggest.closest('form');
+                            if (!form) throw new Error("Formulaire non trouvé");
+
+                            const typeInput = form.querySelector('[name$="[type]"]');
+                            const capaciteInput = form.querySelector('[name$="[capacite]"]');
+                            
+                            // More robust lookup for price input
+                            const priceInput = form.querySelector('[name$="[prixParNuit]"]') || document.getElementById('chambre_prix') || document.getElementById('chambre_prixParNuit');
+
+                            if (!typeInput) throw new Error("Champ Type introuvable");
+                            if (!capaciteInput) throw new Error("Champ Capacité introuvable");
+                            if (!priceInput) throw new Error("Champ Prix introuvable (vérifiez l'ID ou le nom)");
+
+                            const hebSelect = form.querySelector('select[name$="[hebergement]"]');
+                            const hebText = (hebSelect && hebSelect.selectedIndex >= 0) ? hebSelect.options[hebSelect.selectedIndex].text : 'Non spécifié';
+
+                            const data = {
+                                type: typeInput.value,
+                                capacite: capaciteInput.value,
+                                hebergement: hebText,
+                                ville: 'Tunisie', 
+                                etoiles: 'Standard'
+                            };
+
+                            fetch('{{ path('app_chambre_ai_price') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify(data)
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error("HTTP " + response.status);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if(data.suggestion) {
+                                    const match = data.suggestion.match(/(\d+([.,]\d+)?)/);
+                                    if(match) {
+                                        // Ensure we use the local variable which is checked
+                                        if (priceInput) {
+                                            priceInput.value = match[0].replace(',', '.');
+                                        } else {
+                                            alert("Suggestion: " + match[0] + " (Champ prix introuvable pour auto-fill)");
+                                        }
+                                    } else {
+                                        alert('Suggestion: ' + data.suggestion);
+                                    }
+                                } else {
+                                    alert('Erreur: Pas de suggestion reçue.');
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                alert('Erreur technique: ' + err.message);
+                            })
+                            .finally(() => {
+                                btnSuggest.innerHTML = originalText;
+                                btnSuggest.disabled = false;
+                            });
+                        } catch (e) {
+                            console.error(e);
+                            alert('Erreur JS: ' + e.message);
+                            btnSuggest.innerHTML = originalText;
+                            btnSuggest.disabled = false;
+                        }
+                    });
+                }
+            });
+        </script>
             </div>
 
             <div class="form-floating mb-4">

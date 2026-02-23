@@ -16,7 +16,11 @@ class CloudinaryService
 
     public function uploadImage(UploadedFile $file, string $folder = 'ecotrip'): string
     {
-        $upload = $this->cloudinary->uploadApi()->upload($file->getRealPath(), [
+        $path = $file->getRealPath() ?: $file->getPathname();
+        if (!is_readable($path)) {
+            throw new \RuntimeException('Uploaded file is not readable. Check PHP upload_max_filesize and temp directory.');
+        }
+        $upload = $this->cloudinary->uploadApi()->upload($path, [
             'folder' => $folder,
         ]);
 

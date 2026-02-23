@@ -535,6 +535,26 @@
         .btn-success-animation {
             animation: successPop 0.4s ease;
         }
+
+        /* EcoTrip reserve modal - modern */
+        .ecotrip-reserve-modal .modal-content { border: none; border-radius: 20px; box-shadow: 0 25px 80px rgba(0,0,0,0.18); overflow: hidden; }
+        .ecotrip-modal-header { background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%); color: #fff; padding: 24px 28px; display: flex; align-items: flex-start; justify-content: space-between; border: none; }
+        .ecotrip-modal-header-inner { display: flex; align-items: center; gap: 16px; }
+        .ecotrip-modal-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+        .ecotrip-modal-subtitle { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
+        .ecotrip-modal-close { background: none; border: none; color: rgba(255,255,255,0.9); font-size: 1.3rem; padding: 4px; line-height: 1; cursor: pointer; opacity: 0.9; }
+        .ecotrip-modal-close:hover { color: #fff; opacity: 1; }
+        .ecotrip-modal-body { padding: 28px 28px 24px; }
+        .ecotrip-form-group { margin-bottom: 20px; }
+        .ecotrip-form-group label { display: block; font-weight: 600; font-size: 0.9rem; color: #374151; margin-bottom: 8px; }
+        .ecotrip-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+        .ecotrip-input:focus { outline: none; border-color: #2d5016; box-shadow: 0 0 0 4px rgba(45,80,22,0.15); }
+        .ecotrip-modal-footer { padding: 20px 28px 24px; border-top: 1px solid #f3f4f6; background: #fafafa; gap: 12px; }
+        .ecotrip-btn { padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+        .ecotrip-btn-primary { background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%); color: #fff; }
+        .ecotrip-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(45,80,22,0.35); color: #fff; }
+        .ecotrip-btn-ghost { background: #fff; color: #6b7280; border: 2px solid #e5e7eb; }
+        .ecotrip-btn-ghost:hover { background: #f9fafb; color: #374151; }
     </style>
 
     <!-- Hero Section -->
@@ -618,9 +638,9 @@
                             <div class="transport-card">
                                 <div class="transport-image-wrapper">
                                     {% if transport.image %}
-                                        <img src="{{ asset('uploads/transports/' ~ transport.image) }}" alt="{{ transport.type }}" class="transport-image">
+                                        <img src="{{ asset('uploads/transports/' ~ transport.image) }}" alt="{{ transport.type }}" class="transport-image" loading="lazy" decoding="async">
                                     {% else %}
-                                        <img src="{{ asset('images/transport.jpg') }}" alt="{{ transport.type }}" class="transport-image">
+                                        <img src="{{ asset('images/transport.jpg') }}" alt="{{ transport.type }}" class="transport-image" loading="lazy" decoding="async">
                                     {% endif %}
                                     <div class="transport-badge">ECO-FRIENDLY</div>
                                     <div class="transport-overlay">
@@ -650,11 +670,12 @@
 
                                     <button
                                             type="button"
-                                            class="btn-reserve"
+                                            class="btn-reserve btn-reserve-transport"
                                             data-transport-id="{{ transport.id }}"
                                             data-url="{{ path('app_panier_add_transport', {id: transport.id}) }}"
+                                            data-label="{{ transport.type|e('html_attr') }}"
                                             {% if not transport.disponible %}disabled{% endif %}>
-                                        <span>{% if transport.disponible %}Reserve Now{% else %}Not Available{% endif %}</span>
+                                        <span>{% if transport.disponible %}Réserver{% else %}Indisponible{% endif %}</span>
                                     </button>
                                 </div>
                             </div>
@@ -673,8 +694,95 @@
         </div>
     </div>
 
+    <!-- Modal Réserver transport - modern -->
+    <div class="modal fade ecotrip-reserve-modal" id="reserveTransportModal" tabindex="-1" aria-labelledby="reserveTransportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content ecotrip-modal-content">
+                <div class="modal-header ecotrip-modal-header">
+                    <div class="ecotrip-modal-header-inner">
+                        <span class="ecotrip-modal-icon"><i class="fa fa-car"></i></span>
+                        <div>
+                            <h5 class="modal-title mb-0" id="reserveTransportModalLabel">Réserver un transport</h5>
+                            <p class="ecotrip-modal-subtitle mb-0" id="reserveTransportLabel">—</p>
+                        </div>
+                    </div>
+                    <button type="button" class="ecotrip-modal-close" data-dismiss="modal" aria-label="Fermer"><i class="fa fa-times"></i></button>
+                </div>
+                <div class="modal-body ecotrip-modal-body">
+                    <form id="reserveTransportForm">
+                        <input type="hidden" name="_token" value="{{ csrf_token('panier') }}">
+                        <div class="ecotrip-form-group">
+                            <label for="transportDepart">Lieu de départ</label>
+                            <input type="text" class="ecotrip-input" id="transportDepart" name="depart" placeholder="ex: Tunis" required>
+                        </div>
+                        <div class="ecotrip-form-group">
+                            <label for="transportArrivee">Lieu d'arrivée</label>
+                            <input type="text" class="ecotrip-input" id="transportArrivee" name="arrivee" placeholder="ex: Sousse" required>
+                        </div>
+                        <div class="ecotrip-form-group">
+                            <label for="transportTravelDate">Date du trajet</label>
+                            <input type="date" class="ecotrip-input" id="transportTravelDate" name="travelDate" required min="">
+                        </div>
+                        <div class="ecotrip-form-group">
+                            <label for="transportPassengers">Nombre de passagers</label>
+                            <input type="number" class="ecotrip-input" id="transportPassengers" name="passengers" value="1" min="1" max="50" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer ecotrip-modal-footer">
+                    <button type="button" class="ecotrip-btn ecotrip-btn-ghost" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="ecotrip-btn ecotrip-btn-primary" id="reserveTransportSubmit"><i class="fa fa-cart-plus me-2"></i>Ajouter au panier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            var todayTransport = new Date().toISOString().split('T')[0];
+            document.getElementById('transportTravelDate').setAttribute('min', todayTransport);
+            var currentTransportReserveUrl = null;
+            document.querySelectorAll('.btn-reserve-transport').forEach(function(btn) {
+                if (btn.disabled) return;
+                btn.addEventListener('click', function() {
+                    currentTransportReserveUrl = this.dataset.url;
+                    document.getElementById('reserveTransportLabel').textContent = this.dataset.label || 'Transport';
+                    document.getElementById('reserveTransportForm').reset();
+                    document.getElementById('transportTravelDate').setAttribute('min', todayTransport);
+                    document.getElementById('transportPassengers').value = 1;
+                    $('#reserveTransportModal').modal('show');
+                });
+            });
+            document.getElementById('reserveTransportSubmit').addEventListener('click', function() {
+                if (!currentTransportReserveUrl) return;
+                var depart = document.getElementById('transportDepart').value.trim();
+                var arrivee = document.getElementById('transportArrivee').value.trim();
+                var travelDate = document.getElementById('transportTravelDate').value;
+                var passengers = parseInt(document.getElementById('transportPassengers').value, 10) || 1;
+                if (!depart || !arrivee) { if (window.showToast) showToast('Veuillez remplir départ et arrivée.', 'error'); return; }
+                if (!travelDate) { if (window.showToast) showToast('Veuillez choisir la date.', 'error'); return; }
+                var fd = new FormData();
+                fd.append('depart', depart);
+                fd.append('arrivee', arrivee);
+                fd.append('travelDate', travelDate);
+                fd.append('passengers', passengers);
+                fd.append('_token', document.querySelector('#reserveTransportForm [name="_token"]').value);
+                var submitBtn = this;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Ajout...';
+                fetch(currentTransportReserveUrl, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        if (d.success) {
+                            $('#reserveTransportModal').modal('hide');
+                            if (typeof updateCartBadge === 'function') updateCartBadge(d.count);
+                            if (window.showToast) showToast('Ajouté au panier !', 'success');
+                        } else { if (window.showToast) showToast(d.message || 'Erreur', 'error'); }
+                    })
+                    .catch(function() { if (window.showToast) showToast('Erreur réseau.', 'error'); })
+                    .finally(function() { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa fa-cart-plus"></i> Ajouter au panier'; });
+            });
+
             const filterForm = document.getElementById('filterForm');
             const transportsList = document.getElementById('transportsList');
             const transportCount = document.getElementById('transportCount');
@@ -744,9 +852,9 @@
                 };
             }
 
-            // Reserve button functionality
+            // Reserve button functionality (direct add only for non-transport reserve buttons)
             function attachReserveListeners() {
-                document.querySelectorAll('.btn-reserve').forEach(btn => {
+                document.querySelectorAll('.btn-reserve:not(.btn-reserve-transport)').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const originalHTML = this.innerHTML;
                         this.innerHTML = '<span>Adding...</span>';

@@ -15,19 +15,26 @@
       <change beforePath="$PROJECT_DIR$/public/css/bootstrap.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/bootstrap.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Activity/ActivityController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Activity/ActivityController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/BackOffice_Controller/DashboardController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/BackOffice_Controller/DashboardController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/FrontOffice_Controller/BoutiqueController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/FrontOffice_Controller/BoutiqueController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/FrontOffice_Controller/HomeController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/FrontOffice_Controller/HomeController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Hebergement/CategorieHebergementController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Hebergement/CategorieHebergementController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Hebergement/ChambreController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Hebergement/ChambreController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Hebergement/EquipementController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Hebergement/EquipementController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/Hebergement/HebergementController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Hebergement/HebergementController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Produit/CategorieCrudController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Produit/CategorieCrudController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Produit/CommandeCrudController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Produit/CommandeCrudController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Produit/ProduitCrudController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Produit/ProduitCrudController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Transport/TrajetController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Transport/TrajetController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/Transport/TransportController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/Transport/TransportController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/User/RegistrationController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/User/RegistrationController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/User/SecurityController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/User/SecurityController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/User/UserController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/User/UserController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entity/Commande.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Commande.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entity/Hebergement.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Hebergement.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Entity/Reservation.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Reservation.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entity/Transport.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Transport.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Entity/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/User.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Form/ChambreType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/ChambreType.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Form/ChangePasswordType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/ChangePasswordType.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Form/EquipementType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/EquipementType.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Form/HebergementType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/HebergementType.php" afterDir="false" />
@@ -38,7 +45,9 @@
       <change beforePath="$PROJECT_DIR$/src/Form/UserType.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form/UserType.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Repository/CategorieHebergementRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/CategorieHebergementRepository.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Repository/ChambreRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/ChambreRepository.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Repository/HebergementRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/HebergementRepository.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Repository/ProduitRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/ProduitRepository.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Repository/ReservationRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/ReservationRepository.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Repository/TransportRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/TransportRepository.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Repository/UserRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/UserRepository.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Security/UserAuthenticator.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Security/UserAuthenticator.php" afterDir="false" />
@@ -122,6 +131,7 @@
       <change beforePath="$PROJECT_DIR$/templates/user/change_password.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user/change_password.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/user/my_account.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user/my_account.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/user/registration/register.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user/registration/register.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/user/security/login.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user/security/login.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/user/update_account.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user/update_account.html.twig" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -272,6 +282,14 @@
       <path value="$PROJECT_DIR$/vendor/twilio/sdk" />
       <path value="$PROJECT_DIR$/vendor/symfony/http-client-contracts" />
       <path value="$PROJECT_DIR$/vendor/symfony/http-client" />
+      <path value="$PROJECT_DIR$/vendor/tecnickcom/tcpdf" />
+      <path value="$PROJECT_DIR$/vendor/dasprid/enum" />
+      <path value="$PROJECT_DIR$/vendor/knplabs/knp-components" />
+      <path value="$PROJECT_DIR$/vendor/knplabs/knp-paginator-bundle" />
+      <path value="$PROJECT_DIR$/vendor/endroid/qr-code-bundle" />
+      <path value="$PROJECT_DIR$/vendor/endroid/installer" />
+      <path value="$PROJECT_DIR$/vendor/endroid/qr-code" />
+      <path value="$PROJECT_DIR$/vendor/bacon/bacon-qr-code" />
     </include_path>
   </component>
   <component name="ProjectId" id="39jQ4LoqGU20HDQXMiEjOJQtZ4G" />
@@ -284,7 +302,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;produit&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/hassa/Music/PI_EcoTrip/PI_EcoTrip&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/hassa/Downloads/Codecrafters-main (2)/Codecrafters-main&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -302,7 +320,14 @@
       <option name="presentableId" value="Default" />
       <updated>1771206807427</updated>
       <workItem from="1771206808423" duration="24998000" />
-      <workItem from="1771250036356" duration="8309000" />
+      <workItem from="1771250036356" duration="9619000" />
+      <workItem from="1771350559888" duration="1177000" />
+      <workItem from="1771361421575" duration="946000" />
+      <workItem from="1771369174545" duration="11675000" />
+      <workItem from="1771598532138" duration="1271000" />
+      <workItem from="1771611537556" duration="1791000" />
+      <workItem from="1771620653494" duration="41000" />
+      <workItem from="1771736545208" duration="604000" />
     </task>
     <servers />
   </component>
