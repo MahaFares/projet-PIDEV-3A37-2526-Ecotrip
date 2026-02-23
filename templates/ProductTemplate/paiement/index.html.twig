@@ -513,7 +513,9 @@
                         <tr data-paiement-id="{{ p.idPaiement }}"
                             data-commande="{{ p.commande ? p.commande.idCommande : '' }}"
                             data-montant="{{ p.montant }}"
-                            data-methode="{{ p.methodePaiement }}">
+                            data-methode="{{ p.methodePaiement }}"
+                            data-delete-token="{{ csrf_token('delete_paiement_' ~ p.idPaiement) }}"
+                            data-delete-url="{{ path('app_paiement_delete', { id: p.idPaiement }) }}">
                             <td>
                                 <span class="commande-id">#{{ p.commande ? p.commande.idCommande : '–' }}</span>
                             </td>
@@ -687,23 +689,23 @@
             filterPaiements();
         }
 
-        // Delete confirmation using event delegation
+        // Delete confirmation using event delegation (CSRF token from row data)
         document.getElementById('tableBody').addEventListener('click', function(e) {
             const deleteBtn = e.target.closest('.action-btn-delete');
             if (deleteBtn) {
                 const row = deleteBtn.closest('tr');
                 const paiementId = row.dataset.paiementId;
+                const deleteToken = row.dataset.deleteToken;
+                const deleteUrl = row.dataset.deleteUrl;
 
-                if (paiementId && confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
+                if (paiementId && deleteToken && deleteUrl && confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = '/admin/paiement/' + paiementId + '/delete';
-
+                    form.action = deleteUrl;
                     const csrfInput = document.createElement('input');
                     csrfInput.type = 'hidden';
                     csrfInput.name = '_token';
-                    csrfInput.value = 'delete_paiement_' + paiementId;
-
+                    csrfInput.value = deleteToken;
                     form.appendChild(csrfInput);
                     document.body.appendChild(form);
                     form.submit();

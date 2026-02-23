@@ -147,6 +147,20 @@
 .module-stat a { font-size: 0.85rem; font-weight: 600; color: #16a34a; text-decoration: none; margin-top: 8px; display: inline-block; }
 .module-stat a:hover { text-decoration: underline; }
 
+/* Chart containers (hébergement) */
+.heb-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+@media (max-width: 991px) { .heb-charts-row { grid-template-columns: 1fr; } }
+.heb-chart-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.04);
+    animation: fadeInUp 0.5s ease-out;
+}
+.heb-chart-card h5 { font-size: 1rem; font-weight: 600; margin: 0 0 16px 0; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+.heb-chart-wrap { height: 260px; position: relative; }
+
 /* Content Row */
 .module-content { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 @media (max-width: 991px) { .module-content { grid-template-columns: 1fr; } }
@@ -243,7 +257,7 @@
         </div>
         <div class="stat-card blue">
             <div class="icon-wrap"><i class="fa fa-building"></i></div>
-            <h3>0</h3>
+            <h3>{{ totalHebergements ?? 0 }}</h3>
             <p>Hébergements</p>
         </div>
         <div class="stat-card orange">
@@ -339,25 +353,35 @@
             <div class="icon"><i class="fa fa-building"></i></div>
             <h4>Module Hébergement</h4>
         </div>
+        <div class="heb-charts-row">
+            <div class="heb-chart-card">
+                <h5><i class="fa fa-line-chart"></i> Chambres par hébergement (top 10)</h5>
+                <div class="heb-chart-wrap"><canvas id="chartHebChambresLine"></canvas></div>
+            </div>
+            <div class="heb-chart-card">
+                <h5><i class="fa fa-pie-chart"></i> Hébergements par catégorie</h5>
+                <div class="heb-chart-wrap"><canvas id="chartHebPie"></canvas></div>
+            </div>
+        </div>
+        <div class="heb-charts-row">
+            <div class="heb-chart-card">
+                <h5><i class="fa fa-pie-chart"></i> Chambres par type</h5>
+                <div class="heb-chart-wrap"><canvas id="chartChambreTypePie"></canvas></div>
+            </div>
+            <div class="heb-chart-card">
+                <h5><i class="fa fa-bar-chart"></i> Résumé hébergement & chambres</h5>
+                <div class="heb-chart-wrap"><canvas id="chartHebBar"></canvas></div>
+            </div>
+        </div>
         <div class="module-stats">
             <div class="module-stat">
-                <div class="icon" style="color:#2563eb"><i class="fa fa-building"></i></div>
-                <h5>0</h5>
-                <span>Total Hébergements</span>
-            </div>
-            <div class="module-stat">
-                <div class="icon" style="color:#16a34a"><i class="fa fa-home"></i></div>
-                <h5>0</h5>
-                <span>Chambres</span>
-            </div>
-            <div class="module-stat">
                 <div class="icon" style="color:#ea580c"><i class="fa fa-cog"></i></div>
-                <h5>0</h5>
+                <h5>{{ totalEquipements ?? 0 }}</h5>
                 <span>Équipements</span>
             </div>
             <div class="module-stat">
                 <div class="icon" style="color:#7c3aed"><i class="fa fa-tags"></i></div>
-                <h5>0</h5>
+                <h5>{{ totalCategoriesHebergement ?? 0 }}</h5>
                 <span>Catégories</span>
             </div>
         </div>
@@ -415,22 +439,22 @@
         <div class="module-stats">
             <div class="module-stat">
                 <div class="icon" style="color:#dc2626"><i class="fa fa-shopping-bag"></i></div>
-                <h5>0</h5>
+                <h5>{{ totalProduits ?? 0 }}</h5>
                 <span>Total Produits</span>
             </div>
             <div class="module-stat">
                 <div class="icon" style="color:#7c3aed"><i class="fa fa-tags"></i></div>
-                <h5>0</h5>
+                <h5>{{ totalCategoriesBoutique ?? 0 }}</h5>
                 <span>Catégories</span>
             </div>
             <div class="module-stat">
                 <div class="icon" style="color:#2563eb"><i class="fa fa-shopping-cart"></i></div>
-                <h5>0</h5>
+                <h5>{{ totalCommandes ?? 0 }}</h5>
                 <span>Commandes</span>
             </div>
             <div class="module-stat">
                 <div class="icon" style="color:#16a34a"><i class="fa fa-credit-card"></i></div>
-                <h5>0</h5>
+                <h5>{{ totalPaiements ?? 0 }}</h5>
                 <span>Paiements</span>
             </div>
         </div>
@@ -442,4 +466,107 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    const pieColors = ['#2563eb', '#16a34a', '#ea580c', '#7c3aed', '#dc2626', '#0d9488', '#ca8a04', '#db2777', '#4f46e5', '#059669'];
+
+    // 1) Line chart: Chambres par hébergement (top 10)
+    const lineLabels = {{ chambresPerHebergementLabels|default([])|json_encode|raw }};
+    const lineData = {{ chambresPerHebergementData|default([])|json_encode|raw }};
+    if (lineLabels.length > 0) {
+        new Chart(document.getElementById('chartHebChambresLine'), {
+            type: 'line',
+            data: {
+                labels: lineLabels,
+                datasets: [{
+                    label: 'Nombre de chambres',
+                    data: lineData,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { ticks: { maxRotation: 45, minRotation: 45 } }
+                }
+            }
+        });
+    } else {
+        document.getElementById('chartHebChambresLine').parentElement.innerHTML = '<p class="text-muted text-center py-5">Aucune donnée</p>';
+    }
+
+    // 2) Pie: Hébergements par catégorie
+    const hebPieLabels = {{ hebergementChartLabels|default([])|json_encode|raw }};
+    const hebPieData = {{ hebergementChartData|default([])|json_encode|raw }};
+    if (hebPieLabels.length > 0) {
+        new Chart(document.getElementById('chartHebPie'), {
+            type: 'pie',
+            data: {
+                labels: hebPieLabels,
+                datasets: [{ data: hebPieData, backgroundColor: pieColors.slice(0, hebPieLabels.length) }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    } else {
+        document.getElementById('chartHebPie').parentElement.innerHTML = '<p class="text-muted text-center py-5">Aucune donnée</p>';
+    }
+
+    // 3) Pie: Chambres par type
+    const typeLabels = {{ chambresByTypeLabels|default([])|json_encode|raw }};
+    const typeData = {{ chambresByTypeData|default([])|json_encode|raw }};
+    if (typeLabels.length > 0) {
+        new Chart(document.getElementById('chartChambreTypePie'), {
+            type: 'doughnut',
+            data: {
+                labels: typeLabels,
+                datasets: [{ data: typeData, backgroundColor: pieColors.slice(0, typeLabels.length) }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    } else {
+        document.getElementById('chartChambreTypePie').parentElement.innerHTML = '<p class="text-muted text-center py-5">Aucune donnée</p>';
+    }
+
+    // 4) Bar: Résumé Hébergements vs Chambres
+    new Chart(document.getElementById('chartHebBar'), {
+        type: 'bar',
+        data: {
+            labels: ['Hébergements', 'Chambres'],
+            datasets: [{
+                label: 'Total',
+                data: [{{ totalHebergements ?? 0 }}, {{ totalChambres ?? 0 }}],
+                backgroundColor: ['#2563eb', '#16a34a'],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+            }
+        }
+    });
+})();
+</script>
 {% endblock %}

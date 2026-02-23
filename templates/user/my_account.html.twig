@@ -156,8 +156,13 @@
 }
 .action-card.edit .icon-box { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: var(--eco-primary); }
 .action-card.password .icon-box { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #2563eb; }
+.action-card.face .icon-box { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
 .action-card h4 { font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: var(--text-primary); }
 .action-card p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+.face-status { font-size: 0.8rem; color: #15803d; margin-top: 6px; }
+.face-modal .modal-dialog { max-width: 480px; }
+.face-modal video { width: 100%; border-radius: 12px; background: #000; }
+.face-modal .btn-capture { margin-top: 12px; }
 </style>
 {% endblock %}
 
@@ -221,6 +226,160 @@
                 <p>Sécuriser votre compte</p>
             </div>
         </a>
+        <div class="action-card face" id="faceCard" style="cursor:pointer;">
+            <div class="icon-box"><i class="fa fa-camera"></i></div>
+            <div>
+                <h4>Reconnaissance faciale</h4>
+                <p>Connexion par le visage</p>
+                <span class="face-status" id="faceStatus">{% if app.user.faceDescriptor %}Visage enregistré{% else %}Enregistrer mon visage{% endif %}</span>
+                {% if app.user.faceDescriptor %}
+                <br><a href="#" class="face-delete-link text-danger small" id="faceDeleteBtn">Supprimer mon visage</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Modal Enregistrer visage -->
+<div class="modal face-modal" id="faceEnrollModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enregistrer mon visage</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-1">Autorisez la caméra, positionnez votre visage, puis cliquez Capturer. L'image est envoyée au serveur (Hugging Face).</p>
+                <div id="faceEnrollStatus" class="small mb-2" style="min-height:20px;font-weight:600;"></div>
+                <video id="faceEnrollVideo" autoplay playsinline width="432" height="324" style="max-width:100%;"></video>
+                <div id="faceEnrollError" class="alert alert-danger mt-2" style="display:none;"></div>
+                <button type="button" class="btn btn-success btn-capture" id="faceEnrollCapture"><i class="fa fa-camera"></i> Capturer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    var enrollUrl = '{{ path('app_face_enroll') }}';
+    var deleteUrl = '{{ path('app_face_delete') }}';
+    var hasFace = {{ app.user.faceDescriptor is not null and app.user.faceDescriptor|length > 0 ? 'true' : 'false' }};
+
+    function stopStream(stream) {
+        if (stream && stream.getTracks) stream.getTracks().forEach(function(t) { t.stop(); });
+    }
+    function captureVideoAsBase64(video) {
+        var w = video.videoWidth || 432;
+        var h = video.videoHeight || 324;
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.85).replace(/^data:image\/jpeg;base64,/, '');
+    }
+
+    document.getElementById('faceCard').addEventListener('click', function(e) {
+        if (e.target.classList.contains('face-delete-link')) return;
+        e.preventDefault();
+        openEnrollModal();
+    });
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'faceDeleteBtn') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!confirm('Supprimer l\'enregistrement de votre visage ?')) return;
+            fetch(deleteUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        hasFace = false;
+                        document.getElementById('faceStatus').textContent = 'Enregistrer mon visage';
+                        var link = document.getElementById('faceDeleteBtn');
+                        if (link && link.parentNode) link.parentNode.removeChild(link);
+                    }
+                });
+        }
+    });
+
+    var enrollStream = null;
+    function openEnrollModal() {
+        var modal = $('#faceEnrollModal');
+        var video = document.getElementById('faceEnrollVideo');
+        var errEl = document.getElementById('faceEnrollError');
+        var statusEl = document.getElementById('faceEnrollStatus');
+        errEl.style.display = 'none';
+        statusEl.textContent = 'Chargement caméra...';
+        statusEl.style.color = '#64748b';
+        modal.modal('show');
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } })
+            .then(function(stream) {
+                enrollStream = stream;
+                video.srcObject = stream;
+                video.muted = true;
+                video.playsInline = true;
+                return video.play();
+            })
+            .then(function() {
+                statusEl.textContent = 'Positionnez votre visage puis cliquez Capturer.';
+            })
+            .catch(function(err) {
+                statusEl.textContent = '';
+                errEl.textContent = err.message || 'Impossible d\'accéder à la caméra.';
+                errEl.style.display = 'block';
+            });
+        modal.off('hidden.bs.modal').on('hidden.bs.modal', function() {
+            if (enrollStream) { stopStream(enrollStream); enrollStream = null; }
+            video.srcObject = null;
+        });
+    }
+
+    document.getElementById('faceEnrollCapture').addEventListener('click', function() {
+        var video = document.getElementById('faceEnrollVideo');
+        var errEl = document.getElementById('faceEnrollError');
+        var statusEl = document.getElementById('faceEnrollStatus');
+        var btn = this;
+        var btnText = btn.innerHTML;
+        if (!video.srcObject || video.readyState < 2) {
+            errEl.textContent = 'Attendez que la vidéo soit prête.';
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+        statusEl.textContent = 'Envoi de l\'image au serveur...';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Envoi...';
+        var base64 = captureVideoAsBase64(video);
+        fetch(enrollUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 })
+        })
+        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+        .then(function(r) {
+            if (r.data.success) {
+                document.getElementById('faceStatus').textContent = 'Visage enregistré';
+                hasFace = true;
+                $('#faceEnrollModal').modal('hide');
+                alert(r.data.message || 'Visage enregistré.');
+            } else {
+                errEl.textContent = r.data.message || 'Erreur';
+                errEl.style.display = 'block';
+            }
+        })
+        .catch(function(err) {
+            errEl.textContent = err.message || 'Erreur réseau';
+            errEl.style.display = 'block';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = btnText;
+            statusEl.textContent = 'Positionnez votre visage puis cliquez Capturer.';
+        });
+    });
+})();
+</script>
 {% endblock %}

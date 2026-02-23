@@ -6,6 +6,7 @@ use App\Entity\Activity;
 use App\Entity\Commande;
 use App\Entity\Enum\PaymentMethod;
 use App\Entity\Enum\PaymentStatus;
+use App\Entity\Enum\ReservationStatus;
 use App\Entity\Enum\ReservationType;
 use App\Entity\Hebergement;
 use App\Entity\LigneDeCommande;
@@ -23,7 +24,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Stripe\Checkout\Session as StripeSession;
+use TCPDF;
 use Stripe\Stripe;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,38 +51,144 @@ class PanierController extends AbstractController
     ): Response {
         $cart = $cartService->getCart();
         $items = [];
-        $types = [
-            'hebergements' => ['type' => 'hebergement', 'repo' => $hebergementRepo, 'idField' => 'id'],
-            'activities' => ['type' => 'activity', 'repo' => $activityRepo, 'idField' => 'id'],
-            'transports' => ['type' => 'transport', 'repo' => $transportRepo, 'idField' => 'id'],
-            'produits' => ['type' => 'produit', 'repo' => $produitRepo, 'idField' => 'idProduit'],
-        ];
-        foreach ($types as $key => $config) {
-            foreach ($cart[$key] ?? [] as $cartKey => $data) {
-                $id = $data['id'] ?? 0;
-                $entity = $config['repo']->find($id);
-                $items[] = [
-                    'cartKey' => $cartKey,
-                    'type' => $config['type'],
-                    'entity' => $entity,
-                    'data' => $data,
-                ];
-            }
+
+        // Batch-load entities (one query per type instead of per item)
+        $hebergementIds = array_unique(array_column($cart['hebergements'] ?? [], 'id'));
+        $activityIds = array_unique(array_column($cart['activities'] ?? [], 'id'));
+        $transportIds = array_unique(array_column($cart['transports'] ?? [], 'id'));
+        $produitIds = array_unique(array_column($cart['produits'] ?? [], 'id'));
+
+        $hebergementsMap = $hebergementIds ? array_column($hebergementRepo->findBy(['id' => $hebergementIds]), null, 'id') : [];
+        $activitiesMap = $activityIds ? array_column($activityRepo->findBy(['id' => $activityIds]), null, 'id') : [];
+        $transportsMap = $transportIds ? array_column($transportRepo->findBy(['id' => $transportIds]), null, 'id') : [];
+        $produitsMap = $produitIds ? array_column($produitRepo->findBy(['idProduit' => $produitIds]), null, 'idProduit') : [];
+
+        foreach ($cart['hebergements'] ?? [] as $cartKey => $data) {
+            $id = $data['id'] ?? 0;
+            $items[] = ['cartKey' => $cartKey, 'type' => 'hebergement', 'entity' => $hebergementsMap[$id] ?? null, 'data' => $data];
         }
+        foreach ($cart['activities'] ?? [] as $cartKey => $data) {
+            $id = $data['id'] ?? 0;
+            $items[] = ['cartKey' => $cartKey, 'type' => 'activity', 'entity' => $activitiesMap[$id] ?? null, 'data' => $data];
+        }
+        foreach ($cart['transports'] ?? [] as $cartKey => $data) {
+            $id = $data['id'] ?? 0;
+            $items[] = ['cartKey' => $cartKey, 'type' => 'transport', 'entity' => $transportsMap[$id] ?? null, 'data' => $data];
+        }
+        foreach ($cart['produits'] ?? [] as $cartKey => $data) {
+            $id = $data['id'] ?? 0;
+            $items[] = ['cartKey' => $cartKey, 'type' => 'produit', 'entity' => $produitsMap[$id] ?? null, 'data' => $data];
+        }
+
         return $this->render('FrontOffice/panier/index.html.twig', [
             'cartItems' => $items,
             'total' => $cartService->getTotal(),
         ]);
     }
 
+    /**
+     * Re-add a PENDING reservation to the cart so the user can pay (redirects to panier).
+     */
+    #[Route('/restore-reservation/{id}', name: 'app_panier_restore_reservation', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function restoreReservation(
+        Reservation $reservation,
+        Request $request,
+        CartService $cartService,
+        HebergementRepository $hebergementRepo,
+        ActivityRepository $activityRepo,
+        TransportRepository $transportRepo
+    ): Response {
+        if (!$this->isCsrfTokenValid('restore_reservation', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide.');
+            return $this->redirectToRoute('app_mes_reservations');
+        }
+        $user = $this->getUser();
+        if (!$user || $reservation->getUser() !== $user) {
+            $this->addFlash('error', 'Accès refusé.');
+            return $this->redirectToRoute('app_mes_reservations');
+        }
+        if ($reservation->getStatus() !== ReservationStatus::PENDING) {
+            $this->addFlash('info', 'Cette réservation est déjà payée ou annulée.');
+            return $this->redirectToRoute('app_mes_reservations');
+        }
+
+        $id = $reservation->getReservationId();
+        $totalPrice = (float) $reservation->getTotalPrice();
+        $persons = $reservation->getNumberOfPersons() ?: 1;
+        $details = $reservation->getDetails() ?? [];
+        $dateFrom = $reservation->getDateFrom();
+        $dateTo = $reservation->getDateTo();
+
+        switch ($reservation->getReservationType()) {
+            case ReservationType::HEBERGEMENT:
+                $hebergement = $hebergementRepo->find($id);
+                if (!$hebergement) {
+                    $this->addFlash('error', 'Hébergement introuvable.');
+                    return $this->redirectToRoute('app_mes_reservations');
+                }
+                $nights = (int) ($details['nights'] ?? 1);
+                $pricePerNight = $nights > 0 ? $totalPrice / $nights : $totalPrice;
+                $options = [
+                    'guests' => $persons,
+                ];
+                if ($dateFrom) {
+                    $options['dateFrom'] = $dateFrom->format('Y-m-d');
+                }
+                if ($dateTo) {
+                    $options['dateTo'] = $dateTo->format('Y-m-d');
+                }
+                $cartService->addHebergement($id, (float) $pricePerNight, $hebergement->getNom(), $nights, $options);
+                break;
+            case ReservationType::ACTIVITY:
+                $activity = $activityRepo->find($id);
+                if (!$activity) {
+                    $this->addFlash('error', 'Activité introuvable.');
+                    return $this->redirectToRoute('app_mes_reservations');
+                }
+                $pricePerPerson = $persons > 0 ? $totalPrice / $persons : (float) $activity->getPrice();
+                $options = ['participants' => $persons];
+                if ($dateFrom) {
+                    $options['reservedAt'] = $dateFrom->format(\DateTimeInterface::ATOM);
+                }
+                $cartService->addActivity($id, $pricePerPerson, $activity->getTitle(), $persons, $options);
+                break;
+            case ReservationType::TRANSPORT:
+                $transport = $transportRepo->find($id);
+                if (!$transport) {
+                    $this->addFlash('error', 'Transport introuvable.');
+                    return $this->redirectToRoute('app_mes_reservations');
+                }
+                $pricePerPerson = $persons > 0 ? $totalPrice / $persons : (float) $transport->getPrixparpersonne();
+                $options = [
+                    'passengers' => $persons,
+                    'depart' => $details['depart'] ?? null,
+                    'arrivee' => $details['arrivee'] ?? null,
+                ];
+                if ($dateFrom) {
+                    $options['travelDate'] = $dateFrom->format('Y-m-d');
+                }
+                $cartService->addTransport($id, (float) $pricePerPerson, $transport->getType(), $persons, $options);
+                break;
+            default:
+                $this->addFlash('error', 'Type de réservation non géré.');
+                return $this->redirectToRoute('app_mes_reservations');
+        }
+
+        $this->addFlash('success', 'Réservation ajoutée au panier. Vous pouvez procéder au paiement.');
+        return $this->redirectToRoute('app_panier_index');
+    }
+
     #[Route('/add/hebergement/{id}', name: 'app_panier_add_hebergement', methods: ['POST'])]
     public function addHebergement(int $id, Request $request, CartService $cartService, HebergementRepository $repo): JsonResponse
     {
-        $hebergement = $repo->find($id);
+        $hebergement = $repo->findWithChambres($id);
         if (!$hebergement) {
             return new JsonResponse(['success' => false, 'message' => 'Hébergement introuvable'], 404);
         }
         $nights = max(1, (int) ($request->request->get('nights', 1)));
+        $dateFrom = $request->request->get('dateFrom');
+        $dateTo = $request->request->get('dateTo');
+        $guests = $request->request->get('guests');
         $price = 0;
         foreach ($hebergement->getChambres() as $chambre) {
             if ($chambre->getPrixParNuit() && (!$price || $chambre->getPrixParNuit() < $price)) {
@@ -85,31 +198,48 @@ class PanierController extends AbstractController
         if ($price <= 0) {
             $price = 50; // fallback
         }
-        $cartService->addHebergement($id, $price, $hebergement->getNom(), $nights);
+        $options = array_filter([
+            'dateFrom' => $dateFrom ?: null,
+            'dateTo' => $dateTo ?: null,
+            'guests' => $guests !== null && $guests !== '' ? (int) $guests : null,
+        ], fn ($v) => $v !== null);
+        $cartService->addHebergement($id, $price, $hebergement->getNom(), $nights, $options);
         return new JsonResponse(['success' => true, 'count' => $cartService->getCount()]);
     }
 
     #[Route('/add/activity/{id}', name: 'app_panier_add_activity', methods: ['POST'])]
-    public function addActivity(int $id, CartService $cartService, ActivityRepository $repo): JsonResponse
+    public function addActivity(int $id, Request $request, CartService $cartService, ActivityRepository $repo): JsonResponse
     {
         $activity = $repo->find($id);
         if (!$activity) {
             return new JsonResponse(['success' => false, 'message' => 'Activité introuvable'], 404);
         }
+        $quantity = max(1, (int) ($request->request->get('participants', 1)));
         $price = (float) $activity->getPrice();
-        $cartService->addActivity($id, $price, $activity->getTitle());
+        $options = array_filter([
+            'reservedAt' => $request->request->get('reservedAt') ?: null,
+            'participants' => $quantity,
+        ], fn ($v) => $v !== null);
+        $cartService->addActivity($id, $price, $activity->getTitle(), $quantity, $options);
         return new JsonResponse(['success' => true, 'count' => $cartService->getCount()]);
     }
 
     #[Route('/add/transport/{id}', name: 'app_panier_add_transport', methods: ['POST'])]
-    public function addTransport(int $id, CartService $cartService, TransportRepository $repo): JsonResponse
+    public function addTransport(int $id, Request $request, CartService $cartService, TransportRepository $repo): JsonResponse
     {
         $transport = $repo->find($id);
         if (!$transport) {
             return new JsonResponse(['success' => false, 'message' => 'Transport introuvable'], 404);
         }
+        $quantity = max(1, (int) ($request->request->get('passengers', 1)));
         $price = (float) $transport->getPrixparpersonne();
-        $cartService->addTransport($id, $price, $transport->getType());
+        $options = array_filter([
+            'depart' => $request->request->get('depart') ?: null,
+            'arrivee' => $request->request->get('arrivee') ?: null,
+            'travelDate' => $request->request->get('travelDate') ?: null,
+            'passengers' => $quantity,
+        ], fn ($v) => $v !== null);
+        $cartService->addTransport($id, $price, $transport->getType(), $quantity, $options);
         return new JsonResponse(['success' => true, 'count' => $cartService->getCount()]);
     }
 
@@ -266,35 +396,176 @@ class PanierController extends AbstractController
         return $this->redirectToRoute('app_panier_payment');
     }
 
-    #[Route('/facture/{id}/pdf', name: 'app_panier_facture_pdf', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function facturePdf(Commande $commande): Response
+    #[Route('/facture/{id}/pdf', name: 'app_panier_facture_pdf', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function facturePdf(Commande $commande, Request $request): Response
     {
         $user = $this->getUser();
         if (!$user || $commande->getIdUser() !== $user->getId()) {
             throw $this->createAccessDeniedException('Vous ne pouvez pas accéder à cette facture.');
         }
 
-        $options = new Options();
-        $options->set('defaultFont', 'DejaVu Sans');
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isPhpEnabled', true);
+        $generatedAt = new \DateTime();
+        $signatureHash = strtoupper(substr(md5($commande->getIdCommande() . '-' . $generatedAt->format('YmdHis')), 0, 12));
+        $signatureData = $request->request->get('signature');
 
-        $dompdf = new Dompdf($options);
+        // Créer le PDF avec TCPDF
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        
+        // Configuration du document
+        $pdf->SetCreator('EcoTrip');
+        $pdf->SetAuthor('EcoTrip Tunisie');
+        $pdf->SetTitle('Facture #' . $commande->getIdCommande());
+        $pdf->SetSubject('Facture de commande');
+        
+        // Supprimer header/footer par défaut
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        
+        // Ajouter une page
+        $pdf->AddPage();
+        
+        // Styles
+        $pdf->SetFont('helvetica', '', 11);
+        
+        // En-tête
+        $pdf->SetFillColor(45, 80, 22);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->Rect(0, 0, 210, 40, 'F');
+        $pdf->SetXY(15, 10);
+        $pdf->SetFont('helvetica', 'B', 20);
+        $pdf->Cell(0, 10, 'Facture EcoTrip', 0, 1);
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetXY(15, 20);
+        $pdf->Cell(0, 5, 'Paiement confirmé - Reçu officiel', 0, 1);
+        
+        // Réinitialiser la couleur du texte
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetY(50);
+        
+        // Informations client et facture
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetFillColor(249, 250, 251);
+        $pdf->Rect(15, 50, 85, 40, 'F');
+        $pdf->SetXY(15, 52);
+        $pdf->SetFont('helvetica', 'B', 11);
+        $pdf->Cell(0, 6, 'Client', 0, 1);
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetXY(15, 60);
+        $pdf->Cell(0, 5, $user->getUsername() ?? 'Client', 0, 1);
+        $pdf->SetXY(15, 66);
+        $pdf->Cell(0, 5, $user->getEmail(), 0, 1);
+        
+        $pdf->SetFillColor(249, 250, 251);
+        $pdf->Rect(110, 50, 85, 40, 'F');
+        $pdf->SetXY(110, 52);
+        $pdf->SetFont('helvetica', 'B', 11);
+        $pdf->Cell(0, 6, 'Facture', 0, 1);
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetXY(110, 60);
+        $pdf->Cell(0, 5, 'Numéro : #' . $commande->getIdCommande(), 0, 1);
+        $pdf->SetXY(110, 66);
+        $pdf->Cell(0, 5, 'Date : ' . $commande->getDateCommande()->format('d/m/Y H:i'), 0, 1);
+        $pdf->SetXY(110, 72);
+        $pdf->SetFillColor(16, 185, 129);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->Cell(30, 8, 'Payé', 0, 0, 'C', true);
+        $pdf->SetTextColor(0, 0, 0);
+        
+        // Tableau des produits
+        $pdf->SetY(100);
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->SetFillColor(243, 244, 246);
+        $pdf->Cell(80, 8, 'Produit / Service', 1, 0, 'L', true);
+        $pdf->Cell(30, 8, 'Quantité', 1, 0, 'C', true);
+        $pdf->Cell(35, 8, 'Prix unitaire', 1, 0, 'R', true);
+        $pdf->Cell(35, 8, 'Sous-total', 1, 1, 'R', true);
+        
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetFillColor(255, 255, 255);
+        foreach ($commande->getLigneDeCommandes() as $ligne) {
+            $pdf->Cell(80, 7, $ligne->getIdProduct()->getNom() ?? 'Produit', 1, 0, 'L', true);
+            $pdf->Cell(30, 7, (string)$ligne->getQuantite(), 1, 0, 'C', true);
+            $pdf->Cell(35, 7, number_format($ligne->getUnitPrice(), 2, ',', ' ') . ' TND', 1, 0, 'R', true);
+            $pdf->Cell(35, 7, number_format($ligne->getSubtotal(), 2, ',', ' ') . ' TND', 1, 1, 'R', true);
+        }
+        
+        // Total
+        $pdf->SetFont('helvetica', 'B', 11);
+        $pdf->SetFillColor(17, 24, 39);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->Cell(145, 8, 'Total TTC', 1, 0, 'R', true);
+        $pdf->Cell(35, 8, number_format((float)$commande->getTotal(), 2, ',', ' ') . ' TND', 1, 1, 'R', true);
+        $pdf->SetTextColor(0, 0, 0);
+        
+        // Zone de signature
+        $pdf->SetY(180);
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->Cell(0, 5, 'EcoTrip Tunisie - Plateforme de voyages écoresponsables', 0, 1);
+        $pdf->Cell(0, 5, 'Reçu généré le ' . $generatedAt->format('d/m/Y H:i'), 0, 1);
+        $pdf->Cell(0, 5, 'Ce document a été généré automatiquement et signé électroniquement.', 0, 1);
+        
+        // Zone de signature avec image si fournie
+        $pdf->SetY(200);
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->SetXY(120, 200);
+        $pdf->Cell(0, 6, 'Signature du client', 0, 1);
 
-        $html = $this->renderView('FrontOffice/panier/facture_pdf.html.twig', [
-            'commande' => $commande,
-            'generatedAt' => new \DateTime(),
-            'user' => $user,
-        ]);
+        if ($signatureData && \is_string($signatureData)) {
+            $signatureRaw = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $signatureData), true);
+            if ($signatureRaw !== false && $signatureRaw !== '') {
+                $pdf->Image('@' . $signatureRaw, 120, 208, 70, 28, 'PNG');
+            }
+        }
 
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
+        // --- GÉNÉRATION DU QR CODE ---
+        $qrContent = sprintf(
+            "EcoTrip Invoice #%s\nClient: %s\nTotal: %s TND\nDate: %s\nSignature: %s",
+            $commande->getIdCommande(),
+            $user->getUsername() ?? 'Client',
+            $commande->getTotal(),
+            $commande->getDateCommande()->format('d/m/Y'),
+            $signatureHash
+        );
 
+        $builder = new Builder(
+            writer: new PngWriter(),
+            writerOptions: [],
+            data: $qrContent,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 300,
+            margin: 10,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin
+        );
+        $result = $builder->build();
+
+        $qrCodeData = $result->getString();
+        // Afficher le QR code en bas à gauche
+        $pdf->Image('@'.$qrCodeData, 15, 200, 40, 40, 'PNG');
+        $pdf->SetXY(15, 240);
+        $pdf->SetFont('helvetica', 'I', 7);
+        $pdf->Cell(40, 5, 'Scanner pour vérifier', 0, 0, 'C');
+        // -----------------------------
+        
+        // Hash de sécurité
+        $pdf->SetY(255);
+        $pdf->SetFont('helvetica', '', 8);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFillColor(240, 253, 244);
+        $pdf->SetDrawColor(16, 185, 129);
+        $pdf->Rect(120, 255, 70, 15, 'DF');
+        $pdf->SetXY(120, 257);
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->Cell(0, 4, 'SCELLE ELECTRONIQUEMENT', 0, 1, 'C');
+        $pdf->SetFont('helvetica', '', 7);
+        $pdf->SetXY(120, 263);
+        $pdf->Cell(0, 4, 'Hash: ' . $signatureHash, 0, 1, 'C');
+        
+        // Générer le PDF
         $filename = sprintf('facture-%s.pdf', $commande->getIdCommande());
-
+        
         return new Response(
-            $dompdf->output(),
+            $pdf->Output($filename, 'S'),
             Response::HTTP_OK,
             [
                 'Content-Type' => 'application/pdf',
@@ -313,12 +584,29 @@ class PanierController extends AbstractController
         foreach ($cart['hebergements'] ?? [] as $key => $data) {
             $hebergement = $em->getRepository(Hebergement::class)->find($data['id']);
             if ($hebergement) {
-                $price = ($data['price'] ?? 0) * ($data['nights'] ?? 1);
+                $nights = (int) ($data['nights'] ?? 1);
+                $price = ($data['price'] ?? 0) * $nights;
+                $dateFrom = isset($data['dateFrom']) ? \DateTimeImmutable::createFromFormat('Y-m-d', $data['dateFrom']) : null;
+                $dateTo = isset($data['dateTo']) ? \DateTimeImmutable::createFromFormat('Y-m-d', $data['dateTo']) : null;
+                if (!$dateFrom) {
+                    $dateFrom = new \DateTimeImmutable();
+                    $dateTo = $dateFrom->modify('+' . $nights . ' days');
+                } elseif (!$dateTo) {
+                    $dateTo = $dateFrom->modify('+' . $nights . ' days');
+                }
+                $guests = (int) ($data['guests'] ?? 1);
+                if ($guests < 1) {
+                    $guests = 1;
+                }
                 $reservation = new Reservation();
                 $reservation->setUser($user);
                 $reservation->setReservationType(ReservationType::HEBERGEMENT);
                 $reservation->setReservationId($data['id']);
                 $reservation->setTotalPrice($price);
+                $reservation->setDateFrom($dateFrom);
+                $reservation->setDateTo($dateTo);
+                $reservation->setNumberOfPersons($guests);
+                $reservation->setDetails(array_filter(['nights' => $nights, 'guests' => $guests]));
                 $em->persist($reservation);
                 $payment = new PaymentReservation();
                 $payment->setReservation($reservation);
@@ -331,12 +619,27 @@ class PanierController extends AbstractController
         }
 
         foreach ($cart['activities'] ?? [] as $key => $data) {
-            $price = ($data['price'] ?? 0) * ($data['quantity'] ?? 1);
+            $quantity = (int) ($data['quantity'] ?? 1);
+            $price = ($data['price'] ?? 0) * $quantity;
+            $dateFrom = isset($data['reservedAt']) ? \DateTimeImmutable::createFromFormat(\DateTimeInterface::ATOM, $data['reservedAt']) : null;
+            if (!$dateFrom && isset($data['reservedAt'])) {
+                $dateFrom = new \DateTimeImmutable($data['reservedAt']);
+            }
+            if (!$dateFrom) {
+                $dateFrom = new \DateTimeImmutable();
+            }
+            $participants = (int) ($data['participants'] ?? $quantity);
+            if ($participants < 1) {
+                $participants = 1;
+            }
             $reservation = new Reservation();
             $reservation->setUser($user);
             $reservation->setReservationType(ReservationType::ACTIVITY);
             $reservation->setReservationId($data['id']);
             $reservation->setTotalPrice($price);
+            $reservation->setDateFrom($dateFrom);
+            $reservation->setNumberOfPersons($participants);
+            $reservation->setDetails(array_filter(['participants' => $participants]));
             $em->persist($reservation);
             $payment = new PaymentReservation();
             $payment->setReservation($reservation);
@@ -348,12 +651,28 @@ class PanierController extends AbstractController
         }
 
         foreach ($cart['transports'] ?? [] as $key => $data) {
-            $price = ($data['price'] ?? 0) * ($data['quantity'] ?? 1);
+            $quantity = (int) ($data['quantity'] ?? 1);
+            $price = ($data['price'] ?? 0) * $quantity;
+            $dateFrom = isset($data['travelDate']) ? \DateTimeImmutable::createFromFormat('Y-m-d', $data['travelDate']) : null;
+            if (!$dateFrom && isset($data['travelDate'])) {
+                $dateFrom = new \DateTimeImmutable($data['travelDate']);
+            }
+            if (!$dateFrom) {
+                $dateFrom = new \DateTimeImmutable();
+            }
+            $passengers = (int) ($data['passengers'] ?? $quantity);
+            if ($passengers < 1) {
+                $passengers = 1;
+            }
+            $details = array_filter(['passengers' => $passengers, 'depart' => $data['depart'] ?? null, 'arrivee' => $data['arrivee'] ?? null]);
             $reservation = new Reservation();
             $reservation->setUser($user);
             $reservation->setReservationType(ReservationType::TRANSPORT);
             $reservation->setReservationId($data['id']);
             $reservation->setTotalPrice($price);
+            $reservation->setDateFrom($dateFrom);
+            $reservation->setNumberOfPersons($passengers);
+            $reservation->setDetails($details);
             $em->persist($reservation);
             $payment = new PaymentReservation();
             $payment->setReservation($reservation);

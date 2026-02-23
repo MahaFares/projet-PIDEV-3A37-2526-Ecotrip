@@ -28,42 +28,63 @@ class CartService
         $this->requestStack->getSession()->set(self::SESSION_KEY, $cart);
     }
 
-    public function addHebergement(int $id, float $price, string $label, int $nights = 1): void
+    /**
+     * @param array{dateFrom?: string, dateTo?: string, guests?: int} $options Y-m-d dates, number of guests
+     */
+    public function addHebergement(int $id, float $price, string $label, int $nights = 1, array $options = []): void
     {
         $cart = $this->getCart();
         $key = 'h_' . $id;
-        $cart['hebergements'][$key] = [
+        $cart['hebergements'][$key] = array_merge([
             'id' => $id,
             'price' => $price,
             'label' => $label,
             'nights' => $nights,
-        ];
+        ], array_filter([
+            'dateFrom' => $options['dateFrom'] ?? null,
+            'dateTo' => $options['dateTo'] ?? null,
+            'guests' => isset($options['guests']) ? (int) $options['guests'] : null,
+        ], fn ($v) => $v !== null));
         $this->setCart($cart);
     }
 
-    public function addActivity(int $id, float $price, string $label, int $quantity = 1): void
+    /**
+     * @param array{reservedAt?: string, participants?: int} $options DateTime string, number of participants
+     */
+    public function addActivity(int $id, float $price, string $label, int $quantity = 1, array $options = []): void
     {
         $cart = $this->getCart();
         $key = 'a_' . $id;
-        $cart['activities'][$key] = [
+        $cart['activities'][$key] = array_merge([
             'id' => $id,
             'price' => $price,
             'label' => $label,
             'quantity' => $quantity,
-        ];
+        ], array_filter([
+            'reservedAt' => $options['reservedAt'] ?? null,
+            'participants' => isset($options['participants']) ? (int) $options['participants'] : null,
+        ], fn ($v) => $v !== null));
         $this->setCart($cart);
     }
 
-    public function addTransport(int $id, float $price, string $label, int $quantity = 1): void
+    /**
+     * @param array{depart?: string, arrivee?: string, travelDate?: string, passengers?: int} $options
+     */
+    public function addTransport(int $id, float $price, string $label, int $quantity = 1, array $options = []): void
     {
         $cart = $this->getCart();
         $key = 't_' . $id;
-        $cart['transports'][$key] = [
+        $cart['transports'][$key] = array_merge([
             'id' => $id,
             'price' => $price,
             'label' => $label,
             'quantity' => $quantity,
-        ];
+        ], array_filter([
+            'depart' => $options['depart'] ?? null,
+            'arrivee' => $options['arrivee'] ?? null,
+            'travelDate' => $options['travelDate'] ?? null,
+            'passengers' => isset($options['passengers']) ? (int) $options['passengers'] : null,
+        ], fn ($v) => $v !== null));
         $this->setCart($cart);
     }
 

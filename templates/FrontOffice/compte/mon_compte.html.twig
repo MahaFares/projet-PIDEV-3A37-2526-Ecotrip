@@ -1,0 +1,332 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte | EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.compte-hero {
+    background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+    padding: 48px 0;
+    color: #fff;
+    text-align: center;
+}
+.compte-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+.compte-hero p { opacity: 0.92; font-size: 1rem; margin: 0; }
+
+.compte-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+.compte-card .card-header-custom {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+    color: #111;
+    font-size: 0.95rem;
+}
+.compte-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0;
+}
+.compte-info-item {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+.compte-info-item:nth-child(even) { background: #f8faf9; }
+.compte-info-item:last-child { border-bottom: none; }
+.compte-info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(45,80,22,0.1);
+    color: #2d5016;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.compte-info-content label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+.compte-info-content span { font-weight: 500; color: #111; }
+.compte-info-content .empty { color: #94a3b8; font-style: italic; }
+
+.compte-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+.compte-action-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+.compte-action-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #2d5016;
+    color: inherit;
+}
+.compte-action-card .icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+.compte-action-card.edit .icon-box { background: #eff6ec; color: #2d5016; }
+.compte-action-card.password .icon-box { background: #eff6ff; color: #2563eb; }
+.compte-action-card.face .icon-box { background: #fef3c7; color: #b45309; }
+.compte-action-card h4 { font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: #111; }
+.compte-action-card p { font-size: 0.85rem; color: #64748b; margin: 0; }
+
+.face-status { font-size: 0.8rem; color: #15803d; margin-top: 6px; }
+.face-modal .modal-dialog { max-width: 480px; }
+.face-modal video { width: 100%; border-radius: 12px; background: #000; }
+.face-modal .btn-capture { margin-top: 12px; }
+
+.profile-avatar-wrap { margin-bottom: 16px; }
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.5);
+}
+.alert-success { background: #dcfce7; color: #166534; padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; border: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="compte-hero">
+    <div class="container">
+        <div class="profile-avatar-wrap">
+            {% if app.user.image %}
+                <img src="{{ asset(app.user.image) }}" alt="Photo" class="profile-avatar">
+            {% else %}
+                <img src="{{ asset('images/about_banner.jpg') }}" alt="Avatar" class="profile-avatar">
+            {% endif %}
+        </div>
+        <h1 class="mb-0">Bonjour, {{ app.user.username }}</h1>
+        <p class="mb-0">Bienvenue sur votre espace personnel EcoTrip</p>
+    </div>
+</section>
+
+<section class="section_gap">
+    <div class="container">
+        {% for flash in app.flashes('success') %}
+            <div class="alert-success">{{ flash }}</div>
+        {% endfor %}
+
+        <div class="compte-card">
+            <div class="card-header-custom"><i class="fa fa-id-card"></i> Informations du profil</div>
+            <div class="compte-grid">
+                <div class="compte-info-item">
+                    <div class="compte-info-icon"><i class="fa fa-envelope"></i></div>
+                    <div class="compte-info-content"><label>Email</label><span>{{ app.user.email }}</span></div>
+                </div>
+                <div class="compte-info-item">
+                    <div class="compte-info-icon"><i class="fa fa-user"></i></div>
+                    <div class="compte-info-content"><label>Nom d'utilisateur</label><span>{{ app.user.username }}</span></div>
+                </div>
+                <div class="compte-info-item">
+                    <div class="compte-info-icon"><i class="fa fa-map-marker"></i></div>
+                    <div class="compte-info-content"><label>Adresse</label><span class="{{ app.user.address ? '' : 'empty' }}">{{ app.user.address ?? 'Non renseignée' }}</span></div>
+                </div>
+                <div class="compte-info-item">
+                    <div class="compte-info-icon"><i class="fa fa-phone"></i></div>
+                    <div class="compte-info-content"><label>Téléphone</label><span class="{{ app.user.telephone ? '' : 'empty' }}">{{ app.user.telephone ?? 'Non renseigné' }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="compte-actions">
+            <a href="{{ path('app_front_update_account') }}" class="compte-action-card edit">
+                <div class="icon-box"><i class="fa fa-pencil"></i></div>
+                <div>
+                    <h4>Modifier mon profil</h4>
+                    <p>Mettre à jour vos informations personnelles</p>
+                </div>
+            </a>
+            <a href="{{ path('app_front_change_password') }}" class="compte-action-card password">
+                <div class="icon-box"><i class="fa fa-lock"></i></div>
+                <div>
+                    <h4>Changer le mot de passe</h4>
+                    <p>Sécuriser votre compte</p>
+                </div>
+            </a>
+            <div class="compte-action-card face" id="faceCard" style="cursor:pointer;">
+                <div class="icon-box"><i class="fa fa-camera"></i></div>
+                <div>
+                    <h4>Reconnaissance faciale</h4>
+                    <p>Connexion par le visage</p>
+                    <span class="face-status" id="faceStatus">{% if app.user.faceDescriptor %}Visage enregistré{% else %}Enregistrer mon visage{% endif %}</span>
+                    {% if app.user.faceDescriptor %}
+                    <br><a href="#" class="face-delete-link text-danger small" id="faceDeleteBtn">Supprimer mon visage</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Enregistrer visage -->
+<div class="modal face-modal" id="faceEnrollModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enregistrer mon visage</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-1">Autorisez la caméra, positionnez votre visage, puis cliquez Capturer. L'image est envoyée au serveur (Hugging Face).</p>
+                <div id="faceEnrollStatus" class="small mb-2" style="min-height:20px;font-weight:600;"></div>
+                <video id="faceEnrollVideo" autoplay playsinline width="432" height="324" style="max-width:100%;"></video>
+                <div id="faceEnrollError" class="alert alert-danger mt-2" style="display:none;"></div>
+                <button type="button" class="btn theme_btn btn-capture" id="faceEnrollCapture"><i class="fa fa-camera"></i> Capturer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    var enrollUrl = '{{ path('app_face_enroll') }}';
+    var deleteUrl = '{{ path('app_face_delete') }}';
+    var hasFace = {{ app.user.faceDescriptor is not null and app.user.faceDescriptor|length > 0 ? 'true' : 'false' }};
+
+    function stopStream(stream) {
+        if (stream && stream.getTracks) stream.getTracks().forEach(function(t) { t.stop(); });
+    }
+    function captureVideoAsBase64(video) {
+        var w = video.videoWidth || 432;
+        var h = video.videoHeight || 324;
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.85).replace(/^data:image\/jpeg;base64,/, '');
+    }
+
+    document.getElementById('faceCard').addEventListener('click', function(e) {
+        if (e.target.classList.contains('face-delete-link')) return;
+        e.preventDefault();
+        openEnrollModal();
+    });
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'faceDeleteBtn') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!confirm('Supprimer l\'enregistrement de votre visage ?')) return;
+            fetch(deleteUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        hasFace = false;
+                        document.getElementById('faceStatus').textContent = 'Enregistrer mon visage';
+                        if (typeof showToast === 'function') showToast(data.message, 'success');
+                    }
+                });
+        }
+    });
+
+    var enrollStream = null;
+    function openEnrollModal() {
+        var modal = $('#faceEnrollModal');
+        var video = document.getElementById('faceEnrollVideo');
+        var errEl = document.getElementById('faceEnrollError');
+        var statusEl = document.getElementById('faceEnrollStatus');
+        errEl.style.display = 'none';
+        statusEl.textContent = 'Chargement caméra...';
+        statusEl.style.color = '#64748b';
+        modal.modal('show');
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } })
+            .then(function(stream) {
+                enrollStream = stream;
+                video.srcObject = stream;
+                video.muted = true;
+                video.playsInline = true;
+                return video.play();
+            })
+            .then(function() {
+                statusEl.textContent = 'Positionnez votre visage puis cliquez Capturer.';
+            })
+            .catch(function(err) {
+                statusEl.textContent = '';
+                errEl.textContent = err.message || 'Impossible d\'accéder à la caméra.';
+                errEl.style.display = 'block';
+            });
+        modal.off('hidden.bs.modal').on('hidden.bs.modal', function() {
+            if (enrollStream) { stopStream(enrollStream); enrollStream = null; }
+            video.srcObject = null;
+        });
+    }
+
+    document.getElementById('faceEnrollCapture').addEventListener('click', function() {
+        var video = document.getElementById('faceEnrollVideo');
+        var errEl = document.getElementById('faceEnrollError');
+        var statusEl = document.getElementById('faceEnrollStatus');
+        var btn = this;
+        var btnText = btn.innerHTML;
+        if (!video.srcObject || video.readyState < 2) {
+            errEl.textContent = 'Attendez que la vidéo soit prête.';
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+        statusEl.textContent = 'Envoi de l\'image au serveur...';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Envoi...';
+        var base64 = captureVideoAsBase64(video);
+        fetch(enrollUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 })
+        })
+        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+        .then(function(r) {
+            if (r.data.success) {
+                document.getElementById('faceStatus').textContent = 'Visage enregistré';
+                hasFace = true;
+                $('#faceEnrollModal').modal('hide');
+                if (typeof showToast === 'function') showToast(r.data.message || 'Visage enregistré.', 'success');
+            } else {
+                errEl.textContent = r.data.message || 'Erreur';
+                errEl.style.display = 'block';
+            }
+        })
+        .catch(function(err) {
+            errEl.textContent = err.message || 'Erreur réseau';
+            errEl.style.display = 'block';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = btnText;
+            statusEl.textContent = 'Positionnez votre visage puis cliquez Capturer.';
+        });
+    });
+})();
+</script>
+{% endblock %}

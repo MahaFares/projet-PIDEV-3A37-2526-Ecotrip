@@ -16,13 +16,52 @@
     <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
     <!-- Global theme overrides (logo, buttons) -->
     <style>
-        .navbar-brand.logo_h img { max-height: 100px !important; width: auto !important; object-fit: contain; }
+        .navbar-brand.logo_h img { max-height: 120px !important; width: auto !important; object-fit: contain; }
         .theme_btn, .button_hover, .btn.theme_btn, .book_now_btn, .theme_btn_two {
             background-color: #2d5016 !important; border-color: #2d5016 !important; color: #fff !important;
         }
         .theme_btn:hover, .button_hover:hover, .btn.theme_btn:hover, .book_now_btn:hover, .theme_btn_two:hover {
             background-color: #1e4620 !important; border-color: #1e4620 !important;
         }
+        
+        /* Navbar Layout Fixes - Force Single Row */
+        .navbar .navbar-nav.menu_nav { flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; }
+        .navbar .menu_nav .nav-item .nav-link { line-height: 100px !important; font-size: 13px !important; white-space: nowrap; padding: 0 12px; }
+        .header_area { min-height: 100px; }
+        .navbar { padding: 0px 30px !important; }
+        /* Keep language in same row: never shrink or wrap */
+        .navbar .menu_nav .nav-item.lang-dropdown { margin-left: 10px !important; flex-shrink: 0 !important; white-space: nowrap !important; }
+        
+        /* Dropdown High Z-Index & Visibility */
+        .navbar .nav-item.dropdown .dropdown-menu { 
+            position: absolute !important;
+            z-index: 99999 !important;
+            right: 0 !important;
+            left: auto !important;
+            margin-top: 0 !important;
+            border: 1px solid rgba(0,0,0,0.08) !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+            display: none;
+        }
+        .navbar .nav-item.dropdown.show .dropdown-menu { display: block !important; }
+
+        /* Ensure Clickability */
+        .lang-opt { pointer-events: auto !important; cursor: pointer !important; }
+
+        .navbar .dropdown-menu .dropdown-item { 
+            padding: 12px 20px !important; 
+            font-size: 13px;
+            color: #777;
+            transition: all 0.3s;
+        }
+        .navbar .dropdown-menu .dropdown-item:hover { 
+            background: #f8f9fa !important; 
+            color: #2d5016 !important; 
+            padding-left: 25px !important; /* Slide effect */
+        }
+        .navbar .dropdown-menu .dropdown-item img { margin-right: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .lang-opt { cursor: pointer !important; }
+        .navbar .dropdown-menu .dropdown-item.lang-opt.active { background: #e8f0e8 !important; color: #2d5016 !important; font-weight: 700 !important; }
     </style>
     {% block stylesheets %}{% endblock %}
 </head>
@@ -37,19 +76,41 @@
     {% include 'footer.html.twig' %}
     <!--================End Footer Area =================-->
 
-    <!-- Global JavaScript -->
-    <script src="{{ asset('js/jquery-3.2.1.min.js') }}"></script>
-    <script src="{{ asset('js/popper.js') }}"></script>
-    <script src="{{ asset('js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('vendors/owl-carousel/owl.carousel.min.js') }}"></script>
-    <script src="{{ asset('js/jquery.ajaxchimp.min.js') }}"></script>
-    <script src="{{ asset('vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.js') }}"></script>
-    <script src="{{ asset('vendors/nice-select/js/jquery.nice-select.js') }}"></script>
-    <script src="{{ asset('js/mail-script.js') }}"></script>
-    <script src="{{ asset('js/stellar.js') }}"></script>
-    <script src="{{ asset('vendors/lightbox/simpleLightbox.min.js') }}"></script>
-    <script src="{{ asset('js/custom.js') }}"></script>
+    <!-- Global JavaScript (defer = load in parallel, run after DOM) -->
+    <script src="{{ asset('js/jquery-3.2.1.min.js') }}" defer></script>
+    <script src="{{ asset('js/popper.js') }}" defer></script>
+    <script src="{{ asset('js/bootstrap.min.js') }}" defer></script>
+    <script src="{{ asset('vendors/owl-carousel/owl.carousel.min.js') }}" defer></script>
+    <script src="{{ asset('js/jquery.ajaxchimp.min.js') }}" defer></script>
+    <script src="{{ asset('vendors/bootstrap-datepicker/bootstrap-datetimepicker.min.js') }}" defer></script>
+    <script src="{{ asset('vendors/nice-select/js/jquery.nice-select.js') }}" defer></script>
+    <script src="{{ asset('js/mail-script.js') }}" defer></script>
+    <script src="{{ asset('js/stellar.js') }}" defer></script>
+    <script src="{{ asset('vendors/lightbox/simpleLightbox.min.js') }}" defer></script>
+    <script src="{{ asset('js/custom.js') }}" defer></script>
     <script>window.updateCartBadge = function(c) { var b = document.getElementById('cartBadge'); if(b) { b.textContent = c; b.style.display = c > 0 ? '' : 'none'; } };</script>
+    <div id="ecotripToastContainer" aria-live="polite" style="position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;max-width:360px;pointer-events:none;"></div>
+    <script>
+    window.showToast = function(msg, type) {
+        type = type || 'success';
+        var container = document.getElementById('ecotripToastContainer');
+        if (!container) return;
+        var el = document.createElement('div');
+        el.setAttribute('role', 'alert');
+        el.className = 'ecotrip-toast ecotrip-toast-' + type;
+        el.style.cssText = 'pointer-events:auto;padding:14px 20px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);font-size:0.95rem;font-weight:500;animation:ecotripToastIn 0.35s ease;display:flex;align-items:center;gap:10px;';
+        el.style.background = type === 'success' ? 'linear-gradient(135deg,#166534 0%,#15803d 100%)' : type === 'error' ? 'linear-gradient(135deg,#b91c1c 0%,#dc2626 100%)' : 'linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%)';
+        el.style.color = '#fff';
+        el.innerHTML = (type === 'success' ? '<i class="fa fa-check-circle" style="font-size:1.2rem;flex-shrink:0;"></i>' : type === 'error' ? '<i class="fa fa-exclamation-circle" style="font-size:1.2rem;flex-shrink:0;"></i>' : '<i class="fa fa-info-circle" style="font-size:1.2rem;flex-shrink:0;"></i>') + '<span>' + (msg || '') + '</span>';
+        container.appendChild(el);
+        setTimeout(function() { el.style.animation = 'ecotripToastOut 0.3s ease forwards'; setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300); }, 3800);
+    };
+    </script>
+    <style>
+    @keyframes ecotripToastIn { from { opacity:0; transform: translateX(100%); } to { opacity:1; transform: translateX(0); } }
+    @keyframes ecotripToastOut { from { opacity:1; transform: translateX(0); } to { opacity:0; transform: translateX(100%); } }
+    </style>
+    <script src="{{ asset('js/translator.js') }}"></script>
     {% block javascripts %}{% endblock %}
 </body>
 </html>

@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Enum\Role;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -60,6 +61,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Length(max: 255, maxMessage: 'L\'URL de l\'image ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $image = null;
+
+    /** Face descriptor (128 floats) from Face-API.js for 1:1 verification. Stored as JSON. */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $faceDescriptor = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reservation::class)]
     private Collection $reservations;
@@ -179,6 +184,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setImage(?string $image): static
     {
         $this->image = $image;
+        return $this;
+    }
+
+    public function getFaceDescriptor(): ?array
+    {
+        return $this->faceDescriptor;
+    }
+
+    public function setFaceDescriptor(?array $faceDescriptor): static
+    {
+        $this->faceDescriptor = $faceDescriptor;
         return $this;
     }
 

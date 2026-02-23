@@ -149,6 +149,14 @@
             </li>
         </div>
         
+        <!-- RÉSERVATIONS -->
+        <li class="menu-section">RÉSERVATIONS</li>
+        <li>
+            <a href="{{ path('app_reservation_index') }}" class="{{ 'app_reservation' in (app.request.attributes.get('_route')|default('')) ? 'active' : '' }}">
+                <i class="fa fa-calendar-check-o"></i> Réservations
+            </a>
+        </li>
+        
         <!-- UTILISATEURS -->
         <li class="menu-section">UTILISATEURS</li>
         <li>

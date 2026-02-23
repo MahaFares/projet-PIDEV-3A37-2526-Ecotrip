@@ -134,11 +134,7 @@
     <div class="detail-card">
         <div class="hero-section">
             {% if hebergement.imagePrincipale %}
-                {% if hebergement.imagePrincipale starts with 'http' %}
-                    <img src="{{ hebergement.imagePrincipale }}" alt="{{ hebergement.nom }}" class="hero-image">
-                {% else %}
-                    <img src="{{ asset('uploads/' ~ hebergement.imagePrincipale) }}" alt="{{ hebergement.nom }}" class="hero-image">
-                {% endif %}
+                <img src="{{ hebergement.imagePrincipale starts with 'http' ? hebergement.imagePrincipale : asset(hebergement.imagePrincipale) }}" alt="{{ hebergement.nom }}" class="hero-image">
             {% else %}
                 <div class="hero-image d-flex align-items-center justify-content-center bg-light text-muted">
                     <i class="fas fa-hotel fa-4x"></i>
