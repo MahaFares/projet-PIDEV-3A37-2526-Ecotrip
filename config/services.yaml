@@ -32,7 +32,7 @@ services:
     App\Service\SmsService:
         arguments:
             $sid:   '%env(TWILIO_SID)%'
-            $token: '%env(TWILIO_AUTH_TOKEN)%'  # ← FIXED
+            $token: '%env(TWILIO_AUTH_TOKEN)%'
             $from:  '%env(TWILIO_FROM)%'
 
     App\Service\HuggingFaceFaceService:
