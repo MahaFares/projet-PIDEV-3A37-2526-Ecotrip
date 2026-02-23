@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout | EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.checkout-hero { background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%); padding: 40px 0; color: #fff; }
+.step-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 32px; margin-bottom: 24px; }
+.step-number { width: 48px; height: 48px; background: #2d5016; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(45,80,22,0.4); } 50% { box-shadow: 0 0 0 12px rgba(45,80,22,0); } }
+.step-line { height: 4px; background: #e5e7eb; border-radius: 2px; flex: 1; max-width: 80px; }
+.step-line.active { background: #2d5016; animation: fillIn 0.8s ease; }
+@keyframes fillIn { from { width: 0; } to { width: 100%; } }
+.anim-slide { animation: slideIn 0.6s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+.btn-payment { background: #2d5016; color: #fff; font-weight: 700; padding: 16px 32px; border-radius: 12px; font-size: 1.1rem; }
+.btn-payment:hover { background: #1e4620; color: #fff; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="checkout-hero">
+    <div class="container">
+        <h1 class="mb-0"><i class="fa fa-credit-card"></i> Finaliser la commande</h1>
+        <p class="mb-0 opacity-90">Étape 1 sur 2 - Récapitulatif</p>
+    </div>
+</section>
+
+<section class="section_gap">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-5">
+            <div class="step-number">1</div>
+            <div class="step-line active"></div>
+            <div class="step-number" style="background:#ccc;animation:none;">2</div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="step-card anim-slide">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h4 class="mb-0">Récapitulatif</h4>
+                            <p class="text-muted mb-0">Vérifiez votre panier avant de payer</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-success">
+                        <strong>Total à payer : {{ total|number_format(2, ',', ' ') }} TND</strong>
+                    </div>
+                    <p class="text-muted">Vous serez redirigé vers la page de paiement pour choisir votre moyen de paiement.</p>
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{{ path('app_panier_index') }}" class="btn btn-outline-secondary">← Retour au panier</a>
+                        <a href="{{ path('app_panier_payment') }}" class="btn btn-payment">Procéder au paiement →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

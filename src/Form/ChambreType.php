@@ -20,17 +20,17 @@ class ChambreType extends AbstractType
             ->add('prixParNuit')
             ->add('description')
             ->add('disponible')
-            ->add('hebergement', EntityType::class, [
-                'class' => Hebergement::class,
-                'choice_label' => 'id',
-            ])
-        ;
+            ->add('hebergement', EntityType::class , [
+            'class' => Hebergement::class ,
+            'choice_label' => 'nom',
+        ])
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Chambre::class,
+            'data_class' => Chambre::class ,
         ]);
     }
 }

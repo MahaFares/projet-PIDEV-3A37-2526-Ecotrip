@@ -1,0 +1,301 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement réussi | EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.success-hero {
+    background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+    padding: 50px 0;
+    color: #fff;
+    text-align: center;
+}
+.success-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    padding: 40px 30px;
+    max-width: 520px;
+    margin: -60px auto 40px auto;
+    position: relative;
+    overflow: hidden;
+}
+.success-badge {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #2d5016;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 38px;
+    margin: 0 auto 20px auto;
+    animation: popIn 0.6s ease-out, bounce 1.2s ease-in-out infinite;
+}
+@keyframes popIn {
+    0% { transform: scale(0.2); opacity: 0; }
+    80% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+.cart-confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 10% 20%, rgba(46, 204, 113, 0.25) 0, transparent 50%),
+        radial-gradient(circle at 80% 0, rgba(52, 152, 219, 0.2) 0, transparent 55%),
+        radial-gradient(circle at 0 100%, rgba(241, 196, 15, 0.25) 0, transparent 60%);
+    opacity: 0;
+    animation: fadeBg 1.2s ease-out forwards;
+}
+@keyframes fadeBg {
+    to { opacity: 1; }
+}
+.total-success {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #2d5016;
+    margin: 10px 0 4px 0;
+}
+.subtext-success {
+    color: #6b7280;
+}
+.btn-main {
+    background: #2d5016;
+    color: #fff;
+    border-radius: 999px;
+    padding: 12px 26px;
+    font-weight: 700;
+}
+.btn-main:hover {
+    background: #1e4620;
+    color: #fff;
+}
+.btn-ghost {
+    border-radius: 999px;
+    padding: 12px 24px;
+}
+.mini-cart {
+    margin: 25px auto 10px auto;
+    width: 80px;
+    height: 80px;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #2d5016, #3c6b24);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 36px;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.20);
+    animation: slideCart 0.9s ease-out;
+}
+@keyframes slideCart {
+    0% { transform: translateX(-40px) rotate(-10deg); opacity: 0; }
+    70% { transform: translateX(5px) rotate(3deg); opacity: 1; }
+    100% { transform: translateX(0) rotate(0); opacity: 1; }
+}
+.signature-block {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px dashed #d1d5db;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+.signature-name {
+    font-weight: 700;
+    color: #111827;
+}
+
+/* Signature Pad Styles */
+.sig-container {
+    margin: 20px auto;
+    padding: 15px;
+    border: 2px dashed #2d5016;
+    border-radius: 12px;
+    background: #f8faf5;
+    max-width: 400px;
+}
+.sig-canvas {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: crosshair;
+    touch-action: none;
+    width: 100%;
+    height: 150px;
+}
+.sig-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+.btn-clear {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-clear:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="success-hero">
+    <div class="container">
+        <h1 class="mb-2">Paiement réussi ✨</h1>
+        <p class="mb-0">Merci pour votre confiance, votre expérience EcoTrip est confirmée.</p>
+    </div>
+</section>
+
+<div class="container">
+    <div class="success-card text-center">
+        <div class="cart-confetti"></div>
+        <div class="success-badge">
+            <i class="fa fa-check"></i>
+        </div>
+        <div class="mini-cart mt-2">
+            <i class="fa fa-shopping-cart"></i>
+        </div>
+        <h3 class="mt-3">Votre commande a bien été payée</h3>
+        <div class="total-success">
+            {{ total|number_format(2, ',', ' ') }} TND
+        </div>
+        <p class="subtext-success">
+            Un e-mail de confirmation vous sera envoyé avec le récapitulatif de votre commande.
+        </p>
+
+        {% if commande %}
+            <p class="text-muted mb-3">
+                Numéro de commande : <strong>#{{ commande.idCommande }}</strong>
+            </p>
+
+            <!-- Signature Pad Area -->
+            <div class="sig-container">
+                <div class="mb-2 text-start">
+                    <small class="fw-bold text-success"><i class="fa fa-pencil"></i> Signez ici pour votre facture :</small>
+                </div>
+                <canvas id="sig-canvas" class="sig-canvas" width="400" height="150"></canvas>
+                <div class="sig-controls">
+                    <small class="text-muted italic">Optionnel : Votre signature manuscrite</small>
+                    <button type="button" id="sig-clearBtn" class="btn-clear">Effacer</button>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column align-items-center mt-3">
+                <form id="facture-form" method="POST" action="{{ path('app_panier_facture_pdf', {id: commande.idCommande}) }}" style="width: 100%;">
+                    <input type="hidden" name="signature" id="signature-data">
+                    <button type="submit" class="btn btn-outline-secondary btn-ghost mb-3 w-100">
+                        <i class="fa fa-file-pdf-o me-1"></i> Télécharger la facture (PDF)
+                    </button>
+                </form>
+                <a href="{{ path('app_home') }}" class="btn btn-main mt-1">
+                    Continuer sur EcoTrip
+                </a>
+            </div>
+        {% else %}
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                <a href="{{ path('app_home') }}" class="btn btn-main">
+                    Continuer sur EcoTrip
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="signature-block">
+            <div class="signature-name">EcoTrip Tunisie</div>
+            <div>Facture générée électroniquement. Signature numérique appliquée.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('sig-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const clearBtn = document.getElementById('sig-clearBtn');
+    const form = document.getElementById('facture-form');
+    const signatureInput = document.getElementById('signature-data');
+
+    let drawing = false;
+    let hasSigned = false;
+
+    ctx.strokeStyle = '#2d5016';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    function startDrawing(e) {
+        drawing = true;
+        draw(e);
+    }
+
+    function stopDrawing() {
+        drawing = false;
+        ctx.beginPath();
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        hasSigned = true;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDrawing);
+
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    window.addEventListener('touchend', stopDrawing);
+
+    clearBtn.addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSigned = false;
+    });
+
+    form.addEventListener('submit', function() {
+        if (hasSigned) {
+            signatureInput.value = canvas.toDataURL('image/png');
+        }
+    });
+
+    // Handle responsive canvas
+    function resizeCanvas() {
+        const containerWidth = canvas.parentElement.clientWidth - 30;
+        if (containerWidth < 400) {
+            const ratio = canvas.height / canvas.width;
+            canvas.width = containerWidth;
+            canvas.height = containerWidth * ratio;
+            // Reducer stroke relative to size
+            ctx.lineWidth = 2 * (containerWidth / 400);
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#2d5016';
+        }
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+});
+</script>
+{% endblock %}

@@ -1,67 +1,291 @@
 {% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Produits - Admin{% endblock %}
+{% block title %}Produits | EcoTrip Admin{% endblock %}
+{% block page_title %}Gestion des Produits{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .produit-mgmt { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .main-stat-box,
+        .chart-card {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            padding: 28px 24px;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .main-stat-box h2 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            color: #1e40af;
+            margin: 0 0 12px 0;
+        }
+
+        .main-stat-box .subtitle {
+            font-size: 1.15rem;
+            color: #64748b;
+        }
+
+        .main-stat-box .details {
+            margin-top: 16px;
+            font-size: 1rem;
+            color: #334155;
+        }
+
+        .main-stat-box .details span {
+            margin: 0 12px;
+        }
+
+        .chart-card h5 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .search-wrap {
+            flex: 1 1 280px;
+            max-width: 380px;
+            position: relative;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .price-inputs {
+            display: flex;
+            gap: 8px;
+            flex: 0 0 auto;
+        }
+
+        .price-inputs input {
+            width: 110px;
+            padding: 12px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        select#availableFilter {
+            width: 160px !important;
+            flex: 0 0 160px;
+        }
+
+        .btn-export, .btn-add {
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .table-card th {
+            background: #f8fafc;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            text-decoration: none;
+        }
+
+        .btn-action:hover { color: white; }
+        .btn-action.edit:hover  { background: #2563eb; }
+        .btn-action.view:hover  { background: #16a34a; }
+
+        @media (max-width: 992px) {
+            .stats-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
+    <div class="container-fluid produit-mgmt py-4">
 
-    <h1>Produits</h1>
-
-    <form method="get" class="row g-2 mb-3">
-        <div class="col-md-4">
-            <input type="text" name="q" value="{{ filters.q|default('') }}" class="form-control" placeholder="Recherche (nom)">
-        </div>
-        <div class="col-md-2">
-            <input type="number" step="0.01" name="minPrice" value="{{ filters.minPrice is not null ? filters.minPrice : '' }}" class="form-control" placeholder="Prix min">
-        </div>
-        <div class="col-md-2">
-            <input type="number" step="0.01" name="maxPrice" value="{{ filters.maxPrice is not null ? filters.maxPrice : '' }}" class="form-control" placeholder="Prix max">
-        </div>
-        <div class="col-md-2">
-            <select name="available" class="form-select">
-                <option value="">Tous</option>
-                <option value="1" {% if filters.available is same as(true) %}selected{% endif %}>En stock</option>
-                <option value="0" {% if filters.available is same as(false) %}selected{% endif %}>Rupture</option>
-            </select>
-        </div>
-        <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-        </div>
-    </form>
-
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nom</th>
-                <th>Prix</th>
-                <th>Stock</th>
-                <th>Catégorie</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for p in produits %}
-            <tr>
-                <td>{{ p.idProduit }}</td>
-                <td>{{ p.nom }}</td>
-                <td>{{ p.prix }} EUR</td>
-                <td>{{ p.stock }}</td>
-                <td>{{ p.categorie ? p.categorie.nom : '–' }}</td>
-                <td>
-                    <a href="{{ path('app_produit_show', { id: p.idProduit }) }}">Voir</a>
-                    <a href="{{ path('app_produit_edit', { id: p.idProduit }) }}" class="ms-2">Modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6" class="text-muted">Aucun produit.</td>
-            </tr>
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
         {% endfor %}
-        </tbody>
-    </table>
 
-    <a href="{{ path('app_produit_new') }}" class="btn btn-success">Créer un produit</a>
-</div>
+        <!-- Stat card + Chart in the SAME ROW -->
+        <div class="stats-row">
+            <div class="main-stat-box">
+                <h2>{{ stats.total }}</h2>
+                <p class="subtitle">Produits enregistrés</p>
+                <div class="details">
+                    <span class="text-success">En stock : {{ stats.enStock }}</span>
+                    <span class="text-danger">Rupture : {{ stats.rupture }}</span>
+                    <span class="text-primary">Catégories : {{ stats.categories }}</span>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h5>Répartition du stock</h5>
+                <div style="height: 260px;">
+                    <canvas id="chartStock"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="search-wrap">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Rechercher nom..." value="{{ filters.q|default('') }}">
+            </div>
+
+            <div class="price-inputs">
+                <input type="number" step="0.01" id="minPrice" placeholder="Prix min" value="{{ filters.minPrice ?? '' }}">
+                <input type="number" step="0.01" id="maxPrice" placeholder="Prix max" value="{{ filters.maxPrice ?? '' }}">
+            </div>
+
+            <select id="availableFilter" class="form-select">
+                <option value="">Tous (stock)</option>
+                <option value="1" {{ filters.available is same as(true) ? 'selected' : '' }}>En stock</option>
+                <option value="0" {{ filters.available is same as(false) ? 'selected' : '' }}>Rupture</option>
+            </select>
+
+            <a href="{{ path('app_produit_csv', {q: filters.q, minPrice: filters.minPrice, maxPrice: filters.maxPrice, available: filters.available ? 1 : (filters.available === false ? 0 : '')}) }}"
+               class="btn-export">
+                <i class="fa fa-download"></i> CSV
+            </a>
+
+            <a href="{{ path('app_produit_new') }}" class="btn-add">
+                <i class="fa fa-plus"></i> Ajouter
+            </a>
+        </div>
+
+        <div class="table-card">
+            <table class="table mb-0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Prix</th>
+                    <th>Stock</th>
+                    <th>Catégorie</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="produitTableBody">
+                {% include 'ProductTemplate/produit/_produit_table.html.twig' with {produits: produits} %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('chartStock');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['En stock', 'Rupture'],
+                        datasets: [{
+                            data: [{{ stats.enStock }}, {{ stats.rupture }}],
+                            backgroundColor: ['#22c55e', '#ef4444'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            let timeout;
+            function refreshTable() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    const q = document.getElementById('searchInput').value;
+                    const minPrice = document.getElementById('minPrice').value;
+                    const maxPrice = document.getElementById('maxPrice').value;
+                    const available = document.getElementById('availableFilter').value;
+
+                    const params = new URLSearchParams({ q, minPrice, maxPrice, available });
+                    fetch('{{ path('app_produit_ajax') }}?' + params)
+                        .then(r => r.text())
+                        .then(html => {
+                            document.getElementById('produitTableBody').innerHTML = html;
+                        });
+                }, 400);
+            }
+
+            ['searchInput', 'minPrice', 'maxPrice', 'availableFilter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener(id === 'availableFilter' ? 'change' : 'input', refreshTable);
+                }
+            });
+        });
+    </script>
 {% endblock %}

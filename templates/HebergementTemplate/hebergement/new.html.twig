@@ -1,12 +1,24 @@
 {% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Créer un hébergement - Admin{% endblock %}
+{% block title %}Nouveau Hébergement | EcoTrip Admin{% endblock %}
+{% block page_title %}Ajouter un Hébergement{% endblock %}
 
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
-    <h1>Créer un hébergement</h1>
-   {{ include('HebergementTemplate/hebergement/_form_new.html.twig') }}
-    <a href="{{ path('app_hebergement_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xxl-8 col-xl-10">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">Créer un nouvel hébergement</h2>
+                    <p class="text-muted">Remplissez le formulaire ci-dessous pour ajouter un établissement à la plateforme.</p>
+                </div>
+                <a href="{{ path('app_hebergement_index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                </a>
+            </div>
+
+            {{ include('HebergementTemplate/hebergement/_form_new.html.twig') }}
+        </div>
+    </div>
 </div>
 {% endblock %}

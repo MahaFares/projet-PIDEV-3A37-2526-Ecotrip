@@ -1,65 +1,65 @@
 {% extends 'BackOffice/base.html.twig' %}
 
 {% block title %}Utilisateur {{ user.username }} | Admin{% endblock %}
+{% block page_title %}Détails: {{ user.username }}{% endblock %}
 
-{% block page_title %}Détails Utilisateur: {{ user.username }}{% endblock %}
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.detail-card { background: white; border-radius: 20px; padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); max-width: 560px; }
+.detail-row { display: flex; padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+.detail-row:last-child { border-bottom: none; }
+.detail-row label { font-weight: 600; color: #64748b; min-width: 140px; }
+.badge-admin { background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+.badge-user { background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+.badge-yes { background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; }
+.badge-no { background: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; }
+</style>
+{% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Nom d'utilisateur:</label>
-                        <p>{{ user.username }}</p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Email:</label>
-                        <p>
-                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-                        </p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Rôle:</label>
-                        <p>
-                            {% if user.roles.name == 'ADMIN' %}
-                                <span class="badge bg-danger">ADMINISTRATEUR</span>
-                            {% else %}
-                                <span class="badge bg-primary">UTILISATEUR</span>
-                            {% endif %}
-                        </p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Email Vérifié:</label>
-                        <p>
-                            {% if user.isVerified %}
-                                <span class="badge bg-success">Oui</span>
-                            {% else %}
-                                <span class="badge bg-warning">Non</span>
-                            {% endif %}
-                        </p>
-                    </div>
-
-                    <hr>
-
-                    <a href="{{ path('app_user_edit', {id: user.id}) }}" class="btn btn-warning">
-                        <i class="fa fa-edit"></i> Éditer
-                    </a>
-                    <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
-                        <i class="fa fa-arrow-left"></i> Retour à la liste
-                    </a>
-                    <form method="POST" action="{{ path('app_user_delete', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur?');">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa fa-trash"></i> Supprimer
-                        </button>
-                    </form>
-                </div>
-            </div>
+<div class="container-fluid">
+    <div class="detail-card">
+        <div class="detail-row">
+            <label>Nom d'utilisateur</label>
+            <span>{{ user.username }}</span>
+        </div>
+        <div class="detail-row">
+            <label>Email</label>
+            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+        </div>
+        <div class="detail-row">
+            <label>Adresse</label>
+            <span>{{ user.address ?? '—' }}</span>
+        </div>
+        <div class="detail-row">
+            <label>Téléphone</label>
+            <span>{{ user.telephone ?? '—' }}</span>
+        </div>
+        <div class="detail-row">
+            <label>Rôle</label>
+            {% if user.roles[0] is defined and 'ADMIN' in (user.roles[0] ?? '') %}
+                <span class="badge-admin">Administrateur</span>
+            {% else %}
+                <span class="badge-user">Utilisateur</span>
+            {% endif %}
+        </div>
+        <div class="detail-row">
+            <label>Email vérifié</label>
+            {% if user.isVerified %}
+                <span class="badge-yes">Oui</span>
+            {% else %}
+                <span class="badge-no">Non</span>
+            {% endif %}
+        </div>
+        <hr class="my-4">
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_user_edit', {id: user.id}) }}" class="btn btn-primary"><i class="fa fa-pencil"></i> Éditer</a>
+            <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Liste</a>
+            <form method="POST" action="{{ path('app_user_delete', {id: user.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Supprimer</button>
+            </form>
         </div>
     </div>
 </div>

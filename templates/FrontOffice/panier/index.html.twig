@@ -1,0 +1,146 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Panier | EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.panier-hero { background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%); padding: 40px 0; color: #fff; }
+.cart-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
+.cart-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+.cart-item { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #f0f0f0; }
+.cart-item:last-child { border-bottom: 0; }
+.cart-item-img { width: 80px; height: 80px; object-fit: cover; border-radius: 12px; }
+.cart-item-body { flex: 1; padding: 0 20px; }
+.cart-item-type { font-size: 0.75rem; text-transform: uppercase; color: #2d5016; font-weight: 700; }
+.cart-item-label { font-weight: 600; font-size: 1.1rem; }
+.cart-item-price { color: #2d5016; font-weight: 700; }
+.cart-remove { color: #dc3545; background: none; border: none; cursor: pointer; padding: 8px; }
+.cart-remove:hover { color: #c82333; }
+.total-card { background: linear-gradient(135deg, #2d5016, #1e4620); color: #fff; border-radius: 16px; padding: 24px; }
+.total-card h4 { margin: 0 0 16px 0; }
+.btn-checkout { background: #fff; color: #2d5016; font-weight: 700; padding: 14px 28px; border-radius: 10px; }
+.btn-checkout:hover { background: #f8f9fa; color: #1e4620; }
+.empty-cart { text-align: center; padding: 60px 20px; }
+.empty-cart i { font-size: 4rem; color: #ddd; margin-bottom: 20px; }
+.anim-fade { animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.qty-control { display: inline-flex; align-items: center; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+.qty-control button { width: 32px; height: 32px; border: none; background: #f5f5f5; cursor: pointer; }
+.qty-control input { width: 50px; text-align: center; border: none; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="panier-hero">
+    <div class="container">
+        <h1 class="mb-0"><i class="fa fa-shopping-cart"></i> Mon Panier</h1>
+        <p class="mb-0 opacity-90">{{ cartItems|length }} article(s)</p>
+    </div>
+</section>
+
+<section class="section_gap">
+    <div class="container">
+        {% if cartItems|length > 0 %}
+        <div class="row">
+            <div class="col-lg-8">
+                {% for item in cartItems %}
+                <div class="cart-card anim-fade" data-key="{{ item.cartKey }}" data-type="{{ item.type }}">
+                    <div class="cart-item">
+                        <div>
+                            {% if item.entity %}
+                                {% if item.type == 'hebergement' and item.entity.imagePrincipale %}
+                                    <img src="{{ item.entity.imagePrincipale starts with 'http' ? item.entity.imagePrincipale : asset(item.entity.imagePrincipale) }}" alt="" class="cart-item-img">
+                                {% elseif item.type == 'activity' and item.entity.image %}
+                                    <img src="{{ asset(item.entity.image) }}" alt="" class="cart-item-img">
+                                {% elseif item.type == 'transport' and item.entity.image %}
+                                    <img src="{{ item.entity.image starts with 'http' ? item.entity.image : asset('uploads/transports/' ~ item.entity.image) }}" alt="" class="cart-item-img">
+                                {% elseif item.type == 'produit' and item.entity.image %}
+                                    <img src="{{ item.entity.image starts with 'http' ? item.entity.image : asset('uploads/' ~ item.entity.image) }}" alt="" class="cart-item-img">
+                                {% else %}
+                                    <div class="cart-item-img bg-light d-flex align-items-center justify-content-center"><i class="fa fa-image text-muted"></i></div>
+                                {% endif %}
+                            {% else %}
+                                <div class="cart-item-img bg-light d-flex align-items-center justify-content-center"><i class="fa fa-image text-muted"></i></div>
+                            {% endif %}
+                        </div>
+                        <div class="cart-item-body">
+                            <span class="cart-item-type">{{ item.type|capitalize }}</span>
+                            <div class="cart-item-label">{{ item.data.label }}</div>
+                            {% if item.type == 'hebergement' %}
+                                <small class="text-muted">{{ item.data.nights|default(1) }} nuit(s)</small>
+                            {% elseif item.type == 'produit' %}
+                                <div class="qty-control mt-2">
+                                    <button type="button" onclick="updateQty('{{ item.cartKey }}', -1)">−</button>
+                                    <input type="number" value="{{ item.data.quantity|default(1) }}" min="1" readonly id="qty-{{ item.cartKey }}">
+                                    <button type="button" onclick="updateQty('{{ item.cartKey }}', 1)">+</button>
+                                </div>
+                            {% else %}
+                                <small class="text-muted">Qté: {{ item.data.quantity|default(1) }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="cart-item-price">
+                            {% if item.type == 'hebergement' %}
+                                {{ ((item.data.price|default(0)) * (item.data.nights|default(1)))|number_format(2, ',', ' ') }} TND
+                            {% else %}
+                                {{ ((item.data.price|default(0)) * (item.data.quantity|default(1)))|number_format(2, ',', ' ') }} TND
+                            {% endif %}
+                        </div>
+                        <button type="button" class="cart-remove" onclick="removeItem('{{ item.type }}', '{{ item.cartKey }}')" title="Supprimer">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-lg-4">
+                <div class="total-card sticky-top">
+                    <h4>Total à payer</h4>
+                    <h2 class="mb-4" id="cartTotal">{{ total|number_format(2, ',', ' ') }} TND</h2>
+                    <a href="{{ path('app_panier_checkout') }}" class="btn btn-checkout btn-lg w-100 mb-2">
+                        <i class="fa fa-credit-card"></i> Payer Classique
+                    </a>
+                    <a href="{{ path('app_panier_payment') }}
+" class="btn btn-lg w-100" style="background: #635bff; color: white; border-radius: 10px; font-weight: 700;">
+                        <i class="fab fa-stripe-s fa-lg me-2"></i> Payer avec Stripe
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-cart">
+            <i class="fa fa-shopping-cart"></i>
+            <h3>Votre panier est vide</h3>
+            <p class="text-muted mb-4">Découvrez nos hébergements, activités, transports et produits.</p>
+            <a href="{{ path('app_home') }}" class="btn btn-primary">Continuer mes achats</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+function removeItem(type, key) {
+    fetch('{{ path('app_panier_remove', {type: '__TYPE__', key: '__KEY__'}) }}'.replace('__TYPE__', type).replace('__KEY__', encodeURIComponent(key)), {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' }
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            document.querySelector('[data-key="' + key + '"]')?.remove();
+            if (typeof updateCartBadge === 'function') updateCartBadge(d.count);
+            if (d.count === 0) location.reload();
+        }
+    });
+}
+function updateQty(key, delta) {
+    const inp = document.getElementById('qty-' + key);
+    const v = Math.max(1, parseInt(inp.value) + delta);
+    fetch('{{ path('app_panier_update_quantity', {key: '__KEY__'}) }}'.replace('__KEY__', encodeURIComponent(key)), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'quantity=' + v
+    }).then(r => r.json()).then(d => {
+        if (d.success) { inp.value = v; var el = document.getElementById('cartTotal'); if (el) el.textContent = d.total.toFixed(2).replace('.', ',') + ' TND'; }
+    });
+}
+</script>
+{% endblock %}

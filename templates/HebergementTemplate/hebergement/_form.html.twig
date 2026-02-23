@@ -42,8 +42,13 @@
         </div>
 
         <div class="mb-3">
-            {{ form_label(form.description) }}
-            {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : ''), 'rows': '4'}}) }}
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                {{ form_label(form.description) }}
+                <button type="button" class="btn btn-sm btn-outline-info rounded-pill" id="btn-generate-desc">
+                    <i class="fas fa-magic me-1"></i> Générer avec IA
+                </button>
+            </div>
+            {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length > 0 ? ' is-invalid' : ''), 'rows': '4', 'id': 'hebergement_description'}}) }}
             {% if form.description.vars.errors|length > 0 %}
                 <div class="invalid-feedback d-block">
                     {% for error in form.description.vars.errors %}
@@ -52,6 +57,59 @@
                 </div>
             {% endif %}
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const btnGenerate = document.getElementById('btn-generate-desc');
+                const descInput = document.getElementById('hebergement_description'); // Ensure ID matches
+                
+                if(btnGenerate) {
+                    btnGenerate.addEventListener('click', function() {
+                        const originalText = btnGenerate.innerHTML;
+                        btnGenerate.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Génération...';
+                        btnGenerate.disabled = true;
+
+                        // Gather data from form
+                        const form = btnGenerate.closest('form');
+                        const data = {
+                            nom: form.querySelector('[name$="[nom]"]').value,
+                            ville: form.querySelector('[name$="[ville]"]').value,
+                            nbEtoiles: form.querySelector('[name$="[nbEtoiles]"]').value,
+                            // Handle select fields safely
+                            categorie: form.querySelector('select[name$="[categorie]"]') ? form.querySelector('select[name$="[categorie]"] option:checked').text : '',
+                             // Handle multiple select for equipements if possible, or just skip for now
+                            equipements: 'Standard' 
+                        };
+
+                        fetch('{{ path('app_hebergement_ai_description') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.description) {
+                                // Add typing effect or just set value
+                                descInput.value = data.description;
+                            } else {
+                                alert('Erreur lors de la génération.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Erreur technique.');
+                        })
+                        .finally(() => {
+                            btnGenerate.innerHTML = originalText;
+                            btnGenerate.disabled = false;
+                        });
+                    });
+                }
+            });
+        </script>
 
         <div class="row">
             <div class="col-md-6">
@@ -82,11 +140,19 @@
             </div>
         </div>
 
+        <div class="row mb-4">
+            <div class="col-12">
+                <label class="form-label">Sélectionnez la localisation sur la carte</label>
+                <div id="map" style="height: 300px; border-radius: 12px; border: 1px solid #e2e8f0;"></div>
+                <small class="text-muted">Faites glisser le marqueur pour définir les coordonnées précisément.</small>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
                     {{ form_label(form.latitude) }}
-                    {{ form_widget(form.latitude, {'attr': {'class': 'form-control' ~ (form.latitude.vars.errors|length > 0 ? ' is-invalid' : ''), 'step': '0.000001'}}) }}
+                    {{ form_widget(form.latitude, {'attr': {'class': 'form-control' ~ (form.latitude.vars.errors|length > 0 ? ' is-invalid' : ''), 'step': '0.000001', 'id': 'lat_input'}}) }}
                     {% if form.latitude.vars.errors|length > 0 %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.latitude.vars.errors %}
@@ -99,7 +165,7 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     {{ form_label(form.longitude) }}
-                    {{ form_widget(form.longitude, {'attr': {'class': 'form-control' ~ (form.longitude.vars.errors|length > 0 ? ' is-invalid' : ''), 'step': '0.000001'}}) }}
+                    {{ form_widget(form.longitude, {'attr': {'class': 'form-control' ~ (form.longitude.vars.errors|length > 0 ? ' is-invalid' : ''), 'step': '0.000001', 'id': 'lng_input'}}) }}
                     {% if form.longitude.vars.errors|length > 0 %}
                         <div class="invalid-feedback d-block">
                             {% for error in form.longitude.vars.errors %}
@@ -110,6 +176,37 @@
                 </div>
             </div>
         </div>
+
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const latInput = document.getElementById('lat_input');
+                const lngInput = document.getElementById('lng_input');
+                
+                let initialLat = latInput.value || 36.8065;
+                let initialLng = lngInput.value || 10.1815;
+                
+                var map = L.map('map').setView([initialLat, initialLng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                var marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
+
+                marker.on('dragend', function() {
+                    var position = marker.getLatLng();
+                    latInput.value = position.lat.toFixed(6);
+                    lngInput.value = position.lng.toFixed(6);
+                });
+
+                map.on('click', function(e) {
+                    marker.setLatLng(e.latlng);
+                    latInput.value = e.latlng.lat.toFixed(6);
+                    lngInput.value = e.latlng.lng.toFixed(6);
+                });
+            });
+        </script>
 
         <div class="row">
             <div class="col-md-6">

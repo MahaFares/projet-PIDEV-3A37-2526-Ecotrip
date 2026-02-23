@@ -1,35 +1,198 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Modifier mon compte | Eco Trip{% endblock %}
+{% block title %}Modifier mon compte | EcoTrip{% endblock %}
+{% block page_title %}Modifier mon profil{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --eco-primary: #1a5f2a;
+    --eco-primary-light: #2d8a3e;
+    --eco-surface: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+}
+
+.user-form-page { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.form-panel {
+    background: var(--eco-surface);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    max-width: 720px;
+    margin: 0 auto;
+}
+.form-panel-header {
+    padding: 24px 32px;
+    background: linear-gradient(135deg, #0d3d18 0%, #1a5f2a 100%);
+    color: white;
+}
+.form-panel-header h3 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+.form-panel-header p { margin: 6px 0 0 0; opacity: 0.9; font-size: 0.9rem; }
+.form-panel-body { padding: 32px; }
+
+.form-group {
+    margin-bottom: 24px;
+}
+.form-group label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+.form-control-modern {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+.form-control-modern:focus {
+    outline: none;
+    border-color: var(--eco-primary);
+    box-shadow: 0 0 0 4px rgba(26,95,42,0.15);
+}
+.form-control-modern.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239,68,68,0.15);
+}
+.invalid-feedback { color: #ef4444; font-size: 0.85rem; margin-top: 6px; }
+
+.photo-preview {
+    width: 96px;
+    height: 96px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 2px solid var(--border);
+}
+.file-input-wrap {
+    position: relative;
+    padding: 16px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    text-align: center;
+    background: #f8faf9;
+}
+.file-input-wrap input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0; left: 0;
+    cursor: pointer;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-light) 100%);
+    color: white;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+.btn-primary-modern:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26,95,42,0.4);
+}
+.btn-outline-modern {
+    padding: 14px 28px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    color: var(--text-primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.btn-outline-modern:hover { background: #f8faf9; border-color: var(--eco-primary); color: var(--eco-primary); }
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: none;
+}
+</style>
+{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_area">
-    <div class="overlay bg-parallax"></div>
-    <div class="container">
-        <div class="page-cover text-center">
-            <h2 class="page-cover-tittle">Modifier mon compte</h2>
-            <ol class="breadcrumb">
-                <li><a href="{{ path('app_home') }}">Home</a></li>
-                <li><a href="{{ path('app_my_account') }}">Mon compte</a></li>
-                <li class="active">Modifier</li>
-            </ol>
+<div class="container-fluid user-form-page">
+    <div class="form-panel">
+        <div class="form-panel-header">
+            <h3><i class="fa fa-user-edit"></i> Informations personnelles</h3>
+            <p>Mettez à jour vos coordonnées et votre photo de profil</p>
         </div>
-    </div>
-</section>
-
-<section class="accomodation_area section_gap">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                {{ form_start(form) }}
-                    {{ form_row(form.username) }}
-
-                    <button class="btn theme_btn button_hover w-100">
-                        Enregistrer les modifications
+        <div class="form-panel-body">
+            {% for flash in app.flashes('success') %}
+                <div class="alert-success">{{ flash }}</div>
+            {% endfor %}
+            {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.email) }}
+                            {{ form_widget(form.email, { attr: { class: 'form-control form-control-modern' ~ (form.email.vars.errors|length ? ' is-invalid' : '') } }) }}
+                            <div class="invalid-feedback d-block">{{ form_errors(form.email) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.username) }}
+                            {{ form_widget(form.username, { attr: { class: 'form-control form-control-modern' ~ (form.username.vars.errors|length ? ' is-invalid' : '') } }) }}
+                            <div class="invalid-feedback d-block">{{ form_errors(form.username) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            {{ form_label(form.address) }}
+                            {{ form_widget(form.address, { attr: { class: 'form-control form-control-modern' ~ (form.address.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Adresse complète' } }) }}
+                            <div class="invalid-feedback d-block">{{ form_errors(form.address) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.telephone) }}
+                            {{ form_widget(form.telephone, { attr: { class: 'form-control form-control-modern' ~ (form.telephone.vars.errors|length ? ' is-invalid' : ''), placeholder: '+33 6 12 34 56 78' } }) }}
+                            <div class="invalid-feedback d-block">{{ form_errors(form.telephone) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(form.imageFile) }}
+                            {% if app.user.image %}
+                                <div class="mb-3">
+                                    <img src="{{ asset(app.user.image) }}" alt="Photo actuelle" class="photo-preview">
+                                    <small class="d-block text-muted mt-2">Photo actuelle</small>
+                                </div>
+                            {% endif %}
+                            <div class="file-input-wrap">
+                                <i class="fa fa-cloud-upload fa-2x text-muted mb-2"></i>
+                                <p class="mb-0 text-muted"><small>Cliquez pour choisir une image (JPG, PNG, max 2 Mo)</small></p>
+                                {{ form_widget(form.imageFile, { attr: { class: (form.imageFile.vars.errors|length ? 'is-invalid' : '') } }) }}
+                            </div>
+                            <div class="invalid-feedback d-block">{{ form_errors(form.imageFile) }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary-modern">
+                        <i class="fa fa-save"></i> Enregistrer les modifications
                     </button>
-                {{ form_end(form) }}
-            </div>
+                    <a href="{{ path('app_my_account') }}" class="btn btn-outline-modern">Annuler</a>
+                </div>
+            {{ form_end(form) }}
         </div>
     </div>
-</section>
+</div>
 {% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'BackOffice/base.html.twig' %}
+
+{% block title %}Modifier {{ user.username }} | EcoTrip Admin{% endblock %}
+{% block page_title %}Modifier l'utilisateur{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.form-panel { background: white; border-radius: 20px; padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); max-width: 640px; }
+.form-panel h3 { margin: 0 0 24px 0; font-size: 1.25rem; color: #0f172a; }
+.form-control { border-radius: 12px; padding: 12px 16px; border: 1.5px solid #e2e8f0; }
+.form-control:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.form-control.is-invalid { border-color: #ef4444; }
+.invalid-feedback { color: #ef4444; font-size: 0.85rem; margin-top: 6px; }
+label { font-weight: 500; color: #334155; margin-bottom: 6px; }
+.btn-save { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 600; border: none; }
+.btn-save:hover { color: white; opacity: 0.95; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="form-panel">
+        <h3><i class="fa fa-pencil"></i> Modifier {{ user.username }}</h3>
+        {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, { attr: { class: 'form-control' ~ (form.email.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.email) }}</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.username) }}
+                {{ form_widget(form.username, { attr: { class: 'form-control' ~ (form.username.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.username) }}</div>
+            </div>
+            <div class="col-12 mb-3">
+                {{ form_label(form.password) }}
+                {{ form_widget(form.password, { attr: { class: 'form-control' ~ (form.password.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.password) }}</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.address) }}
+                {{ form_widget(form.address, { attr: { class: 'form-control' ~ (form.address.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.address) }}</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.telephone) }}
+                {{ form_widget(form.telephone, { attr: { class: 'form-control' ~ (form.telephone.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.telephone) }}</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form_label(form.roles) }}
+                {{ form_widget(form.roles, { attr: { class: 'form-control' ~ (form.roles.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.roles) }}</div>
+            </div>
+            <div class="col-md-6 mb-3 d-flex align-items-end">
+                <div class="form-check">
+                    {{ form_widget(form.isVerified) }}
+                    {{ form_label(form.isVerified) }}
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-save"><i class="fa fa-save"></i> Enregistrer</button>
+            <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">Annuler</a>
+            <a href="{{ path('app_user_show', {id: user.id}) }}" class="btn btn-outline-primary">Voir</a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

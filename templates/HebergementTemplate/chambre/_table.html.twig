@@ -1,0 +1,53 @@
+{% for chambre in chambres %}
+    <tr>
+        <td>
+            <div class="d-flex align-items-center">
+                <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #8b5cf6, #a78bfa); display: flex; align-items: center; justify-content: center; margin-right: 12px; color: white; font-weight: bold;">
+                    <i class="bi bi-door-open"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600; color: #0f172a;">{{ chambre.numero }}</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">{{ chambre.type }}</div>
+                </div>
+            </div>
+        </td>
+        <td>
+           <div style="font-weight: 500; color: #475569;">{{ chambre.hebergement.nom }}</div>
+           <div style="font-size: 0.75rem; color: #94a3b8;"><i class="bi bi-geo-alt small"></i> {{ chambre.hebergement.ville }}</div>
+        </td>
+        <td style="color: #64748b;">{{ chambre.capacite }} pers.</td>
+        <td style="font-weight: 600; color: #0f172a;">{{ chambre.prixParNuit }} DT</td>
+        <td>
+            {% if chambre.disponible %}
+                <span class="badge-verified yes">Disponible</span>
+            {% else %}
+                <span class="badge-verified no">Occupé</span>
+            {% endif %}
+        </td>
+        <td class="actions">
+            <div class="d-flex gap-1">
+                <a href="{{ path('app_chambre_show', {'id': chambre.id}) }}" class="btn-action view" title="Voir">
+                    <i class="bi bi-eye"></i>
+                </a>
+                <a href="{{ path('app_chambre_edit', {'id': chambre.id}) }}" class="btn-action edit" title="Modifier">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <form method="post" action="{{ path('app_chambre_delete', {'id': chambre.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette chambre ?');" style="display: inline-block;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chambre.id) }}">
+                    <button class="btn-action delete" title="Supprimer">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="6" class="text-center py-5">
+            <div style="color: #94a3b8;">
+                <i class="bi bi-inbox fa-3x mb-3"></i>
+                <p>Aucune chambre trouvée.</p>
+            </div>
+        </td>
+    </tr>
+{% endfor %}

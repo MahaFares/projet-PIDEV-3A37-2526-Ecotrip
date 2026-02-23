@@ -21,31 +21,36 @@ class HebergementType extends AbstractType
             ->add('adresse')
             ->add('ville')
             ->add('nbEtoiles')
-            ->add('imagePrincipale')
+            ->add('imagePrincipale', \Symfony\Component\Form\Extension\Core\Type\FileType::class , [
+            'label' => 'Image Principale',
+            'mapped' => false,
+            'required' => false,
+            'attr' => ['class' => 'form-control']
+        ])
             ->add('labelEco')
             ->add('latitude')
             ->add('longitude')
             ->add('actif')
-            ->add('categorie', EntityType::class, [
-                'class' => CategorieHebergement::class,
-                'choice_label' => 'id',
-            ])
-            ->add('equipements', EntityType::class, [
-                'class' => Equipement::class,
-                'choice_label' => 'id',
-                'multiple' => true,
-            ])
-            ->add('propietaire', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'id',
-            ])
-        ;
+            ->add('categorie', EntityType::class , [
+            'class' => CategorieHebergement::class ,
+            'choice_label' => 'nom',
+        ])
+            ->add('equipements', EntityType::class , [
+            'class' => Equipement::class ,
+            'choice_label' => 'nom',
+            'multiple' => true,
+        ])
+            ->add('propietaire', EntityType::class , [
+            'class' => User::class ,
+            'choice_label' => 'username',
+        ])
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Hebergement::class,
+            'data_class' => Hebergement::class ,
         ]);
     }
 }

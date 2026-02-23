@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -21,13 +22,67 @@ class CategorieCrudController extends AbstractController
         private readonly ValidatorInterface $validator,
     ) {
     }
+
     #[Route(name: 'app_categorie_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $items = $this->repository->findBy([], ['nom' => 'ASC']);
+        // If it's an AJAX request, return JSON
+        if ($request->isXmlHttpRequest()) {
+            return $this->searchCategories($request);
+        }
+
+        // Get stats
+        $totalCategories = $this->repository->count([]);
+        $aLouerCount = $this->repository->count(['nom' => 'A louer']);
+        $aVendreCount = $this->repository->count(['nom' => 'A vendre']);
 
         return $this->render('ProductTemplate/categorie/index.html.twig', [
-            'categories' => $items,
+            'categories' => [],
+            'stats' => [
+                'total' => $totalCategories,
+                'aLouer' => $aLouerCount,
+                'aVendre' => $aVendreCount,
+            ],
+        ]);
+    }
+
+    #[Route('/search', name: 'app_categorie_search', methods: ['GET'])]
+    public function searchCategories(Request $request): JsonResponse
+    {
+        $searchTerm = $request->query->get('q', '');
+        $filterType = $request->query->get('type', '');
+
+        $qb = $this->repository->createQueryBuilder('c')
+            ->orderBy('c.nom', 'ASC');
+
+        // Search by name or description
+        if (!empty($searchTerm)) {
+            $qb->andWhere('c.nom LIKE :search OR c.description LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
+        }
+
+        // Filter by type (A louer / A vendre)
+        if (!empty($filterType)) {
+            $qb->andWhere('c.nom = :type')
+                ->setParameter('type', $filterType);
+        }
+
+        $categories = $qb->getQuery()->getResult();
+
+        // Transform to JSON-friendly array
+        $data = array_map(function($categorie) {
+            return [
+                'id' => $categorie->getId(),
+                'nom' => $categorie->getNom(),
+                'description' => $categorie->getDescription(),
+                'produitsCount' => $categorie->getProduits()->count(),
+            ];
+        }, $categories);
+
+        return $this->json([
+            'success' => true,
+            'categories' => $data,
+            'count' => count($data)
         ]);
     }
 
@@ -51,7 +106,7 @@ class CategorieCrudController extends AbstractController
             }
             $this->em->persist($categorie);
             $this->em->flush();
-            $this->addFlash('success', 'Catégorie créée.');
+            $this->addFlash('success', 'Catégorie créée avec succès!');
             return $this->redirectToRoute('app_categorie_index');
         }
 
@@ -97,7 +152,7 @@ class CategorieCrudController extends AbstractController
                 ]);
             }
             $this->em->flush();
-            $this->addFlash('success', 'Catégorie mise à jour.');
+            $this->addFlash('success', 'Catégorie mise à jour avec succès!');
             return $this->redirectToRoute('app_categorie_index');
         }
 
@@ -123,7 +178,7 @@ class CategorieCrudController extends AbstractController
 
         $this->em->remove($categorie);
         $this->em->flush();
-        $this->addFlash('success', 'Catégorie supprimée.');
+        $this->addFlash('success', 'Catégorie supprimée avec succès!');
 
         return $this->redirectToRoute('app_categorie_index');
     }

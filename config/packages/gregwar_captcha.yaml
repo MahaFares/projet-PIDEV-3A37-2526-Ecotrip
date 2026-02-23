@@ -1,0 +1,8 @@
+gregwar_captcha:
+    width: 200
+    height: 50
+    length: 6
+    quality: 90
+    font: null # you can specify a ttf font path here if you have one
+    keep_value: true # keeps the captcha value in session after a fail
+    as_url: true # generate captcha as a URL (easier for some setups)

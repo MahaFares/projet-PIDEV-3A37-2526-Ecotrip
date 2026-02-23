@@ -72,7 +72,6 @@ class Commande
     {
         $this->paiements = new ArrayCollection();
         $this->idUser = self::DEFAULT_USER_ID;
-        $this->idProduct = new ArrayCollection();
         $this->ligneDeCommandes = new ArrayCollection();
     }
 

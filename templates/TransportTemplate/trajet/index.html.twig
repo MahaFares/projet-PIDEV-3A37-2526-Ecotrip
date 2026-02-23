@@ -2,44 +2,727 @@
 
 {% block title %}Trajets - Admin{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-blue: #4A90E2;
+            --success-green: #4CAF50;
+            --warning-orange: #FF9800;
+            --danger-red: #F44336;
+            --text-dark: #333;
+            --text-muted: #666;
+            --border-color: #e0e0e0;
+            --bg-light: #f8f9fa;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        body {
+            background-color: #f5f6fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.blue { background-color: #E3F2FD; color: #1976D2; }
+        .stat-icon.green { background-color: #E8F5E9; color: #388E3C; }
+        .stat-icon.orange { background-color: #FFF3E0; color: #F57C00; }
+        .stat-icon.red { background-color: #FFEBEE; color: #D32F2F; }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Search and Filters */
+        .filters-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3d7cc1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-success {
+            background-color: var(--success-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-reset {
+            background-color: #f0f0f0;
+            color: var(--text-dark);
+        }
+
+        .btn-reset:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-count {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            background-color: var(--bg-light);
+        }
+
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .data-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .row-id {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-camping { background-color: #E3F2FD; color: #1976D2; }
+        .badge-kayak { background-color: #E8F5E9; color: #388E3C; }
+        .badge-journee { background-color: #FFF3E0; color: #F57C00; }
+        .badge-astronomie { background-color: #FFEBEE; color: #D32F2F; }
+        .badge-test { background-color: #F3E5F5; color: #7B1FA2; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        .status-active {
+            color: var(--success-green);
+        }
+
+        /* Actions */
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .action-btn-view {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .action-btn-view:hover {
+            background-color: #1976D2;
+            color: white;
+        }
+
+        .action-btn-edit {
+            background-color: #FFF3E0;
+            color: #F57C00;
+        }
+
+        .action-btn-edit:hover {
+            background-color: #F57C00;
+            color: white;
+        }
+
+        .action-btn-delete {
+            background-color: #FFEBEE;
+            color: #D32F2F;
+        }
+
+        .action-btn-delete:hover {
+            background-color: #D32F2F;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .filters-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
+    <div class="container">
+        {{ include('admin_nav.html.twig') }}
 
-    <h1>Trajets</h1>
+        <div class="page-header">
+            <h1>📍 Gestion des Trajets</h1>
+        </div>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Type</th>
-                <th>Capacité</th>
-                <th>Prix/Personne</th>
-                <th>CO2</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for transport in transports %}
-            <tr>
-                <td>{{ transport.id }}</td>
-                <td>{{ transport.type }}</td>
-                <td>{{ transport.capacite }}</td>
-                <td>{{ transport.prixparpersonne }} DT</td>
-                <td>{{ transport.emissionco2 }} kg</td>
-                <td>
-                    <a href="{{ path('app_trajet_show', {'id': transport.id}) }}">Voir</a>
-                    <a href="{{ path('app_trajet_edit', {'id': transport.id}) }}" class="ms-2">Modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6" class="text-muted">Aucun trajet.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <!-- Stats Cards -->
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon blue">🚐</div>
+                </div>
+                <div class="stat-value" id="totalTrajets">{{ transports|length }}</div>
+                <div class="stat-label">Total Trajets</div>
+            </div>
 
-    <a href="{{ path('app_trajet_new') }}" class="btn btn-success">Créer un trajet</a>
-</div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon green">✓</div>
+                </div>
+                <div class="stat-value" id="activeTrajets">{{ transports|length }}</div>
+                <div class="stat-label">Actifs</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon orange">👥</div>
+                </div>
+                <div class="stat-value" id="totalCapacity">
+                    {% set totalCapacity = 0 %}
+                    {% for transport in transports %}
+                        {% set totalCapacity = totalCapacity + transport.capacite %}
+                    {% endfor %}
+                    {{ totalCapacity }}
+                </div>
+                <div class="stat-label">Capacité Totale</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon red">🌍</div>
+                </div>
+                <div class="stat-value" id="totalCO2">
+                    {% set totalCO2 = 0 %}
+                    {% for transport in transports %}
+                        {% set totalCO2 = totalCO2 + transport.emissionco2 %}
+                    {% endfor %}
+                    {{ totalCO2|number_format(1) }}
+                </div>
+                <div class="stat-label">CO2 Total (kg)</div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <form id="filterForm">
+                <div class="filters-row">
+                    <div class="form-group">
+                        <label>🔍 Recherche</label>
+                        <input type="text" class="form-control" id="searchInput" name="search" placeholder="Rechercher par type ou description...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>💰 Prix min</label>
+                        <input type="number" class="form-control" id="priceMin" name="price_min" placeholder="0.00" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>💰 Prix max</label>
+                        <input type="number" class="form-control" id="priceMax" name="price_max" placeholder="0.00" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📊 Disponibilité</label>
+                        <select class="form-control" id="statusFilter" name="status">
+                            <option value="">Tous</option>
+                            <option value="active">Actif</option>
+                            <option value="inactive">Inactif</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button type="button" class="btn btn-reset" id="resetBtn">🔄 Réinitialiser</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <div class="table-header">
+                <div class="results-count" id="resultsCount">
+                    ≡ {{ transports|length }} trajet(s) trouvé(s)
+                </div>
+                <a href="{{ path('app_trajet_new') }}" class="btn btn-success">
+                    ➕ Créer un trajet
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="spinner"></div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Capacité</th>
+                        <th>Prix</th>
+                        <th>CO2</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    {% for transport in transports %}
+                        <tr data-transport-id="{{ transport.id }}"
+                            data-csrf="{{ csrf_token('delete' ~ transport.id) }}"
+                            data-type="{{ transport.type|lower }}"
+                            data-price="{{ transport.prixparpersonne }}"
+                            data-capacity="{{ transport.capacite }}"
+                            data-co2="{{ transport.emissionco2 }}">
+                            <td>
+                                {% set badgeClass = 'badge-camping' %}
+                                {% set typeLower = transport.type|lower %}
+                                {% if 'kayak' in typeLower %}
+                                    {% set badgeClass = 'badge-kayak' %}
+                                {% elseif 'journée' in typeLower or 'journee' in typeLower %}
+                                    {% set badgeClass = 'badge-journee' %}
+                                {% elseif 'astronomie' in typeLower %}
+                                    {% set badgeClass = 'badge-astronomie' %}
+                                {% elseif 'test' in typeLower %}
+                                    {% set badgeClass = 'badge-test' %}
+                                {% endif %}
+                                <span class="badge {{ badgeClass }}">{{ transport.type }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ transport.capacite }}</strong> personnes
+                            </td>
+                            <td>
+                                <strong>{{ transport.prixparpersonne }}</strong> DT
+                            </td>
+                            <td>
+                                {{ transport.emissionco2 }} kg
+                            </td>
+                            <td>
+                                <div class="status-badge status-active">
+                                    Actif
+                                </div>
+                            </td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="{{ path('app_trajet_show', {'id': transport.id}) }}" class="action-btn action-btn-view" title="Voir">
+                                        👁
+                                    </a>
+                                    <a href="{{ path('app_trajet_edit', {'id': transport.id}) }}" class="action-btn action-btn-edit" title="Modifier">
+                                        ✏️
+                                    </a>
+                                    <button type="button" class="action-btn action-btn-delete" title="Supprimer" onclick="confirmDelete({{ transport.id }}, '{{ csrf_token('delete' ~ transport.id)|e('js') }}')">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr id="emptyRow">
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📦</div>
+                                    <p>Aucun trajet trouvé.</p>
+                                    <a href="{{ path('app_trajet_new') }}" class="btn btn-primary">Créer votre premier trajet</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store all original rows for filtering
+        let allTransports = [];
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store all transport rows
+            const rows = document.querySelectorAll('#tableBody tr[data-transport-id]');
+            allTransports = Array.from(rows).map(row => ({
+                element: row.cloneNode(true),
+                type: row.dataset.type,
+                price: parseFloat(row.dataset.price),
+                capacity: parseInt(row.dataset.capacity),
+                co2: parseFloat(row.dataset.co2),
+                id: row.dataset.transportId
+            }));
+
+            // Add event listeners
+            document.getElementById('searchInput').addEventListener('input', debounce(filterTransports, 300));
+            document.getElementById('priceMin').addEventListener('input', debounce(filterTransports, 300));
+            document.getElementById('priceMax').addEventListener('input', debounce(filterTransports, 300));
+            document.getElementById('statusFilter').addEventListener('change', filterTransports);
+            document.getElementById('resetBtn').addEventListener('click', resetFilters);
+        });
+
+        // Debounce function to limit API calls
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Filter transports based on current filter values
+        function filterTransports() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const priceMin = parseFloat(document.getElementById('priceMin').value) || 0;
+            const priceMax = parseFloat(document.getElementById('priceMax').value) || Infinity;
+            const status = document.getElementById('statusFilter').value;
+
+            // Show loading overlay
+            document.getElementById('loadingOverlay').classList.add('active');
+
+            // Simulate slight delay for smooth UX
+            setTimeout(() => {
+                // Filter transports
+                const filtered = allTransports.filter(transport => {
+                    // Search filter
+                    const matchesSearch = !searchTerm || transport.type.includes(searchTerm);
+
+                    // Price filter
+                    const matchesPrice = transport.price >= priceMin && transport.price <= priceMax;
+
+                    // Status filter (currently all are active)
+                    const matchesStatus = !status || status === 'active';
+
+                    return matchesSearch && matchesPrice && matchesStatus;
+                });
+
+                // Update table
+                updateTable(filtered);
+
+                // Update stats
+                updateStats(filtered);
+
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').classList.remove('active');
+            }, 200);
+        }
+
+        // Update table with filtered results
+        function updateTable(filtered) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔍</div>
+                                <p>Aucun trajet ne correspond à vos critères.</p>
+                                <button class="btn btn-primary" onclick="resetFilters()">Réinitialiser les filtres</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                filtered.forEach(transport => {
+                    const row = transport.element.cloneNode(true);
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update results count
+            document.getElementById('resultsCount').textContent = `≡ ${filtered.length} trajet(s) trouvé(s)`;
+        }
+
+        // Update stats based on filtered results
+        function updateStats(filtered) {
+            const totalCapacity = filtered.reduce((sum, t) => sum + t.capacity, 0);
+            const totalCO2 = filtered.reduce((sum, t) => sum + t.co2, 0);
+
+            document.getElementById('totalTrajets').textContent = filtered.length;
+            document.getElementById('activeTrajets').textContent = filtered.length;
+            document.getElementById('totalCapacity').textContent = totalCapacity;
+            document.getElementById('totalCO2').textContent = totalCO2.toFixed(1);
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('priceMin').value = '';
+            document.getElementById('priceMax').value = '';
+            document.getElementById('statusFilter').value = '';
+
+            filterTransports();
+        }
+
+        // Delete confirmation
+        function confirmDelete(id, csrfToken) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce trajet ?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ path('app_trajet_delete', {'id': '__ID__'}) }}'.replace('__ID__', id);
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken || '';
+
+                form.appendChild(csrfInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
 {% endblock %}

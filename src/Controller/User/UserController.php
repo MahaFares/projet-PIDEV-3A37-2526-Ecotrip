@@ -1,19 +1,21 @@
 <?php
 
 namespace App\Controller\User;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use App\Form\ChangePasswordType;
-use App\Form\UserType;
+
 use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Form\ChangePasswordType;
+use App\Form\ProfileType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
-#[isGranted('ROLE_USER','ROLE_ADMIN')]
+#[IsGranted('ROLE_USER')]
 final class UserController extends AbstractController
 {
     #[Route('/my-account', name: 'app_my_account', methods: ['GET'])]
@@ -23,7 +25,7 @@ final class UserController extends AbstractController
     }
 
 #[Route('/update-account', name: 'app_update_account', methods: ['GET','POST'])]
-public function updateAccount(Request $request, EntityManagerInterface $em): Response
+public function updateAccount(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
 {
     /** @var User $user */
     $user = $this->getUser();
@@ -32,10 +34,31 @@ public function updateAccount(Request $request, EntityManagerInterface $em): Res
         throw $this->createAccessDeniedException();
     }
 
-    $form = $this->createForm(UserType::class, $user);
+    $form = $this->createForm(ProfileType::class, $user);
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
+        // Handle image upload
+        $imageFile = $form->get('imageFile')->getData();
+        if ($imageFile) {
+            $filesystem = new Filesystem();
+            if ($user->getImage()) {
+                $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/' . $user->getImage();
+                if ($filesystem->exists($oldImagePath)) {
+                    $filesystem->remove($oldImagePath);
+                }
+            }
+            $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/users';
+            if (!$filesystem->exists($uploadDir)) {
+                $filesystem->mkdir($uploadDir, 0755);
+            }
+            $imageFile->move($uploadDir, $newFilename);
+            $user->setImage('uploads/users/' . $newFilename);
+        }
+
         $em->flush();
 
         $this->addFlash('success', 'Vos informations ont été mises à jour.');

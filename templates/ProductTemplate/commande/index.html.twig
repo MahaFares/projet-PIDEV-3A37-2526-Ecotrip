@@ -2,48 +2,615 @@
 
 {% block title %}Commandes - Admin{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .stats-container {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 25px !important;
+            margin-bottom: 30px !important;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+            padding: 30px !important;
+            border-radius: 15px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            text-align: center !important;
+            border: none !important;
+            border-top: none !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .stat-card::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: 5px !important;
+            background: linear-gradient(90deg, #6c757d, #495057) !important;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+
+        .stat-card.orders::before {
+            background: linear-gradient(90deg, #17a2b8, #138496) !important;
+        }
+
+        .stat-card.revenue::before {
+            background: linear-gradient(90deg, #28a745, #218838) !important;
+        }
+
+        .stat-card.today::before {
+            background: linear-gradient(90deg, #ffc107, #e0a800) !important;
+        }
+
+        .stat-icon {
+            font-size: 3rem !important;
+            margin-bottom: 15px !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)) !important;
+        }
+
+        .stat-value {
+            font-size: 2.5rem !important;
+            font-weight: 700 !important;
+            color: #2d3436 !important;
+            margin: 10px 0 !important;
+            letter-spacing: -1px !important;
+        }
+
+        .stat-label {
+            color: #6c757d !important;
+            font-size: 0.95rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1.5px !important;
+            font-weight: 600 !important;
+        }
+
+        .search-container {
+            background: #f8f9fa !important;
+            padding: 1.5rem !important;
+            border-radius: 10px !important;
+            margin-bottom: 2rem !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        }
+
+        .table-container {
+            background: white !important;
+            border-radius: 10px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+            overflow: hidden !important;
+        }
+
+        .table thead {
+            background: #6c757d;
+            color: white;
+        }
+
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #6c757d;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            margin: 0 0.2rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-view { background: #6c757d; color: white; }
+        .btn-edit { background: #17a2b8; color: white; }
+        .btn-delete { background: #dc3545; color: white; }
+
+        .pagination-container {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 25px !important;
+            gap: 8px !important;
+            background: #f8f9fa !important;
+            border-radius: 0 0 10px 10px !important;
+        }
+
+        .pagination-btn {
+            padding: 10px 18px !important;
+            border: 2px solid #dee2e6 !important;
+            background: white !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            font-weight: 600 !important;
+            color: #495057 !important;
+            min-width: 45px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #6c757d !important;
+            color: white !important;
+            border-color: #6c757d !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.4 !important;
+            cursor: not-allowed !important;
+            background: #e9ecef !important;
+            border-color: #dee2e6 !important;
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+            color: white !important;
+            border-color: #495057 !important;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4) !important;
+            transform: scale(1.05) !important;
+        }
+
+        .pagination-btn i {
+            font-size: 0.9rem !important;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .results-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: #e9ecef;
+            color: #495057;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.2rem;
+        }
+
+        .price-badge {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: 600;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
+    <div class="container-fluid py-4">
+        {{ include('admin_nav.html.twig') }}
 
-    <h1>Commandes</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">
+                <i class="bi bi-cart-check"></i> Gestion des Commandes
+            </h1>
+            <a href="{{ path('app_commande_new') }}" class="btn btn-success btn-lg">
+                <i class="bi bi-plus-circle"></i> Nouvelle commande
+            </a>
+        </div>
 
-    <table class="table table-striped">
-        <thead>
+        <!-- Statistics Cards -->
+        <div class="stats-container">
+            <div class="stat-card orders">
+                <div class="stat-icon">📦</div>
+                <div class="stat-value">{{ stats.total }}</div>
+                <div class="stat-label">Total Commandes</div>
+            </div>
+            <div class="stat-card revenue">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value">{{ stats.revenue|number_format(2) }} DT</div>
+                <div class="stat-label">Revenu Total</div>
+            </div>
+            <div class="stat-card today">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value">{{ stats.todayRevenue|number_format(2) }} DT</div>
+                <div class="stat-label">Aujourd'hui</div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-container">
+            <form id="searchForm">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-box"></i> Produit
+                        </label>
+                        <select name="produit" id="filterProduit" class="form-select">
+                            <option value="">Tous les produits</option>
+                            {% for produit in produits %}
+                                <option value="{{ produit.id }}">{{ produit.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-currency-dollar"></i> Total Min
+                        </label>
+                        <input
+                                type="number"
+                                step="0.01"
+                                name="minTotal"
+                                id="minTotal"
+                                class="form-control"
+                                placeholder="0.00">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-currency-dollar"></i> Total Max
+                        </label>
+                        <input
+                                type="number"
+                                step="0.01"
+                                name="maxTotal"
+                                id="maxTotal"
+                                class="form-control"
+                                placeholder="0.00">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-calendar"></i> Date Début
+                        </label>
+                        <input
+                                type="date"
+                                name="dateFrom"
+                                id="dateFrom"
+                                class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-calendar"></i> Date Fin
+                        </label>
+                        <input
+                                type="date"
+                                name="dateTo"
+                                id="dateTo"
+                                class="form-control">
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-md-12 text-end">
+                        <button type="button" id="clearFilters" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Réinitialiser les filtres
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Filters Display -->
+                <div id="activeFilters" class="mt-3"></div>
+            </form>
+        </div>
+
+        <!-- Results Count -->
+        <div class="results-count" id="resultsCount"></div>
+
+        <!-- Commandes Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Produit</th>
+                        <th>Quantité</th>
+                        <th>Prix Unitaire</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="commandesTableBody">
+                    <!-- Content loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" id="paginationContainer"></div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('commandesTableBody');
+            const resultsCount = document.getElementById('resultsCount');
+            const activeFiltersDiv = document.getElementById('activeFilters');
+            const paginationContainer = document.getElementById('paginationContainer');
+
+            // Input elements
+            const filterProduit = document.getElementById('filterProduit');
+            const minTotal = document.getElementById('minTotal');
+            const maxTotal = document.getElementById('maxTotal');
+            const dateFrom = document.getElementById('dateFrom');
+            const dateTo = document.getElementById('dateTo');
+            const clearFiltersBtn = document.getElementById('clearFilters');
+
+            // Base URL
+            const baseUrl = '{{ path('app_commande_index') }}'.replace(/\/$/, '');
+
+            let currentPage = 1;
+
+            // Debounce function
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Load commandes via AJAX
+            function loadCommandes(page = 1) {
+                currentPage = page;
+                const params = new URLSearchParams();
+                params.append('page', page);
+
+                if (filterProduit.value) params.append('produit', filterProduit.value);
+                if (minTotal.value) params.append('minTotal', minTotal.value);
+                if (maxTotal.value) params.append('maxTotal', maxTotal.value);
+                if (dateFrom.value) params.append('dateFrom', dateFrom.value);
+                if (dateTo.value) params.append('dateTo', dateTo.value);
+
+                fetch('{{ path('app_commande_search') }}?' + params.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        displayCommandes(data.commandes);
+                        updateResultsCount(data.total);
+                        displayPagination(data.page, data.totalPages, data.total);
+                        displayActiveFilters();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Erreur lors du chargement
+                    </td>
+                </tr>
+            `;
+                    });
+            }
+
+            // Display commandes
+            function displayCommandes(commandes) {
+                if (commandes.length === 0) {
+                    tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <h4>Aucune commande trouvée</h4>
+                            <p>Essayez de modifier vos critères de recherche.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+                    return;
+                }
+
+                tableBody.innerHTML = commandes.map(cmd => {
+                    const showUrl = `${baseUrl}/${cmd.id}`;
+                    const editUrl = `${baseUrl}/${cmd.id}/edit`;
+
+                    return `
             <tr>
-                <th>Id</th>
-                <th>Utilisateur</th>
-                <th>Produit</th>
-                <th>Quantité</th>
-                <th>Total</th>
-                <th>Statut</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for c in commandes %}
-            <tr>
-                <td>{{ c.idCommande }}</td>
-                <td>{{ c.idUser ?? '–' }}</td>
-                <td>{{ c.produit ? c.produit.nom : '–' }}</td>
-                <td>{{ c.quantite }}</td>
-                <td>{{ c.total }}</td>
-                <td>{{ c.statutCommande }}</td>
-                <td>{{ c.dateCommande ? c.dateCommande|date('d/m/Y') : '–' }}</td>
+                <td>👤 User ${cmd.idUser}</td>
+                <td>📦 ${escapeHtml(cmd.produitNom)}</td>
+                <td><strong>${cmd.quantite}</strong></td>
+                <td>${parseFloat(cmd.prixUnitaire).toFixed(2)} DT</td>
+                <td><span class="price-badge">${parseFloat(cmd.total).toFixed(2)} DT</span></td>
+                <td>📅 ${cmd.dateCommande}</td>
                 <td>
-                    <a href="{{ path('app_commande_show', { id: c.idCommande }) }}">Voir</a>
-                    <a href="{{ path('app_commande_edit', { id: c.idCommande }) }}" class="ms-2">Modifier</a>
+                    <div class="d-flex gap-1">
+                        <a href="${showUrl}" class="action-btn btn-view" title="Voir">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="${editUrl}" class="action-btn btn-edit" title="Modifier">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button onclick="deleteCommande(${cmd.id})" class="action-btn btn-delete" title="Supprimer">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="8" class="text-muted">Aucune commande.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            `;
+                }).join('');
+            }
 
-    <a href="{{ path('app_commande_new') }}" class="btn btn-success">Créer une commande</a>
-</div>
+            // Update results count
+            function updateResultsCount(total) {
+                resultsCount.innerHTML = `
+            <i class="bi bi-list-check"></i>
+            <strong>${total}</strong> commande${total !== 1 ? 's' : ''} trouvée${total !== 1 ? 's' : ''}
+        `;
+            }
+
+            // Display pagination
+            function displayPagination(page, totalPages, total) {
+                if (totalPages <= 1) {
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                let html = `
+            <button class="pagination-btn" onclick="loadPage(1)" ${page === 1 ? 'disabled' : ''}>
+                <i class="bi bi-chevron-double-left"></i>
+            </button>
+            <button class="pagination-btn" onclick="loadPage(${page - 1})" ${page === 1 ? 'disabled' : ''}>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        `;
+
+                const startPage = Math.max(1, page - 2);
+                const endPage = Math.min(totalPages, page + 2);
+
+                for (let i = startPage; i <= endPage; i++) {
+                    html += `
+                <button class="pagination-btn ${i === page ? 'active' : ''}" onclick="loadPage(${i})">
+                    ${i}
+                </button>
+            `;
+                }
+
+                html += `
+            <button class="pagination-btn" onclick="loadPage(${page + 1})" ${page === totalPages ? 'disabled' : ''}>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+            <button class="pagination-btn" onclick="loadPage(${totalPages})" ${page === totalPages ? 'disabled' : ''}>
+                <i class="bi bi-chevron-double-right"></i>
+            </button>
+        `;
+
+                paginationContainer.innerHTML = html;
+            }
+
+            // Load specific page
+            window.loadPage = function(page) {
+                loadCommandes(page);
+            };
+
+            // Display active filters
+            function displayActiveFilters() {
+                const filters = [];
+
+                if (filterProduit.value) {
+                    const produitText = filterProduit.options[filterProduit.selectedIndex].text;
+                    filters.push(`<span class="filter-badge"><i class="bi bi-box"></i> ${escapeHtml(produitText)}</span>`);
+                }
+                if (minTotal.value) {
+                    filters.push(`<span class="filter-badge"><i class="bi bi-currency-dollar"></i> Min: ${minTotal.value} DT</span>`);
+                }
+                if (maxTotal.value) {
+                    filters.push(`<span class="filter-badge"><i class="bi bi-currency-dollar"></i> Max: ${maxTotal.value} DT</span>`);
+                }
+                if (dateFrom.value) {
+                    filters.push(`<span class="filter-badge"><i class="bi bi-calendar"></i> Depuis: ${dateFrom.value}</span>`);
+                }
+                if (dateTo.value) {
+                    filters.push(`<span class="filter-badge"><i class="bi bi-calendar"></i> Jusqu'à: ${dateTo.value}</span>`);
+                }
+
+                if (filters.length > 0) {
+                    activeFiltersDiv.innerHTML = `
+                <div class="mt-2">
+                    <small class="text-muted">Filtres actifs:</small> ${filters.join(' ')}
+                </div>
+            `;
+                } else {
+                    activeFiltersDiv.innerHTML = '';
+                }
+            }
+
+            // Escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Delete commande
+            window.deleteCommande = function(id) {
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+                    return;
+                }
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `${baseUrl}/${id}/delete`;
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = '{{ csrf_token("delete_commande_") }}' + id;
+                form.appendChild(csrfInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            };
+
+            // Clear filters
+            clearFiltersBtn.addEventListener('click', function() {
+                filterProduit.value = '';
+                minTotal.value = '';
+                maxTotal.value = '';
+                dateFrom.value = '';
+                dateTo.value = '';
+                loadCommandes(1);
+            });
+
+            // Event listeners
+            const debouncedLoad = debounce(() => loadCommandes(1), 500);
+            minTotal.addEventListener('input', debouncedLoad);
+            maxTotal.addEventListener('input', debouncedLoad);
+
+            filterProduit.addEventListener('change', () => loadCommandes(1));
+            dateFrom.addEventListener('change', () => loadCommandes(1));
+            dateTo.addEventListener('change', () => loadCommandes(1));
+
+            // Initial load
+            loadCommandes(1);
+        });
+    </script>
 {% endblock %}

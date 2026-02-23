@@ -2,46 +2,713 @@
 
 {% block title %}Paiements - Admin{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-blue: #4A90E2;
+            --success-green: #4CAF50;
+            --warning-orange: #FF9800;
+            --danger-red: #F44336;
+            --text-dark: #333;
+            --text-muted: #666;
+            --border-color: #e0e0e0;
+            --bg-light: #f8f9fa;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        body {
+            background-color: #f5f6fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.blue { background-color: #E3F2FD; color: #1976D2; }
+        .stat-icon.green { background-color: #E8F5E9; color: #388E3C; }
+        .stat-icon.orange { background-color: #FFF3E0; color: #F57C00; }
+        .stat-icon.purple { background-color: #F3E5F5; color: #7B1FA2; }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Search and Filters */
+        .filters-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3d7cc1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-success {
+            background-color: var(--success-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-reset {
+            background-color: #f0f0f0;
+            color: var(--text-dark);
+        }
+
+        .btn-reset:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-count {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table thead {
+            background-color: var(--bg-light);
+        }
+
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .data-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-carte { background-color: #E3F2FD; color: #1976D2; }
+        .badge-especes { background-color: #E8F5E9; color: #388E3C; }
+
+        .commande-id {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .montant {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Actions */
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .action-btn-view {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .action-btn-view:hover {
+            background-color: #1976D2;
+            color: white;
+        }
+
+        .action-btn-edit {
+            background-color: #FFF3E0;
+            color: #F57C00;
+        }
+
+        .action-btn-edit:hover {
+            background-color: #F57C00;
+            color: white;
+        }
+
+        .action-btn-delete {
+            background-color: #FFEBEE;
+            color: #D32F2F;
+        }
+
+        .action-btn-delete:hover {
+            background-color: #D32F2F;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .filters-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
+    <div class="container">
+        {{ include('admin_nav.html.twig') }}
 
-    <h1>Paiements</h1>
+        <div class="page-header">
+            <h1>💳 Gestion des Paiements</h1>
+        </div>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Commande</th>
-                <th>Montant</th>
-                <th>Méthode</th>
-                <th>Statut</th>
-                <th>Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for p in paiements %}
-            <tr>
-                <td>{{ p.idPaiement }}</td>
-                <td>#{{ p.commande ? p.commande.idCommande : '–' }}</td>
-                <td>{{ p.montant }}</td>
-                <td>{{ p.methodePaiement }}</td>
-                <td>{{ p.statutPaiement }}</td>
-                <td>{{ p.datePaiement ? p.datePaiement|date('d/m/Y') : '–' }}</td>
-                <td>
-                    <a href="{{ path('app_paiement_show', { id: p.idPaiement }) }}">Voir</a>
-                    <a href="{{ path('app_paiement_edit', { id: p.idPaiement }) }}" class="ms-2">Modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7" class="text-muted">Aucun paiement.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <!-- Stats Cards -->
+        <div class="stats-container" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon blue">💳</div>
+                </div>
+                <div class="stat-value" id="totalPaiements">{{ paiements|length }}</div>
+                <div class="stat-label">Total Paiements</div>
+            </div>
 
-    <a href="{{ path('app_paiement_new') }}" class="btn btn-success">Créer un paiement</a>
-</div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon green">💰</div>
+                </div>
+                <div class="stat-value" id="totalMontant">
+                    {% set totalMontant = 0 %}
+                    {% for p in paiements %}
+                        {% set totalMontant = totalMontant + p.montant %}
+                    {% endfor %}
+                    {{ totalMontant|number_format(2) }}
+                </div>
+                <div class="stat-label">Total Montant (DT)</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon orange">🏦</div>
+                </div>
+                <div class="stat-value" id="cartePaiements">
+                    {% set carteCount = 0 %}
+                    {% for p in paiements %}
+                        {% if p.methodePaiement == 'Par carte' %}
+                            {% set carteCount = carteCount + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ carteCount }}
+                </div>
+                <div class="stat-label">Par Carte</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-icon purple">💵</div>
+                </div>
+                <div class="stat-value" id="especesPaiements">
+                    {% set especesCount = 0 %}
+                    {% for p in paiements %}
+                        {% if p.methodePaiement == 'Par espèces' %}
+                            {% set especesCount = especesCount + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ especesCount }}
+                </div>
+                <div class="stat-label">Par Espèces</div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <form id="filterForm">
+                <div class="filters-row">
+                    <div class="form-group">
+                        <label>🔍 Recherche</label>
+                        <input type="text" class="form-control" id="searchInput" name="search" placeholder="Rechercher par ID commande ou méthode...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>💰 Montant min</label>
+                        <input type="number" class="form-control" id="montantMin" name="montant_min" placeholder="0.00" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>💰 Montant max</label>
+                        <input type="number" class="form-control" id="montantMax" name="montant_max" placeholder="0.00" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label>💳 Méthode</label>
+                        <select class="form-control" id="methodeFilter" name="methode">
+                            <option value="">Toutes</option>
+                            <option value="Par carte">Par carte</option>
+                            <option value="Par espèces">Par espèces</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button type="button" class="btn btn-reset" id="resetBtn">🔄 Réinitialiser</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <div class="table-header">
+                <div class="results-count" id="resultsCount">
+                    ≡ {{ paiements|length }} paiement(s) trouvé(s)
+                </div>
+
+            </div>
+
+            <div class="table-wrapper">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="spinner"></div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Commande</th>
+                        <th>Montant</th>
+                        <th>Méthode</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    {% for p in paiements %}
+                        <tr data-paiement-id="{{ p.idPaiement }}"
+                            data-commande="{{ p.commande ? p.commande.idCommande : '' }}"
+                            data-montant="{{ p.montant }}"
+                            data-methode="{{ p.methodePaiement }}">
+                            <td>
+                                <span class="commande-id">#{{ p.commande ? p.commande.idCommande : '–' }}</span>
+                            </td>
+                            <td>
+                                <span class="montant">{{ p.montant }} DT</span>
+                            </td>
+                            <td>
+                                {% if p.methodePaiement == 'Par carte' %}
+                                    <span class="badge badge-carte">{{ p.methodePaiement }}</span>
+                                {% else %}
+                                    <span class="badge badge-especes">{{ p.methodePaiement }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ p.datePaiement ? p.datePaiement|date('d/m/Y H:i') : '–' }}
+                            </td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="{{ path('app_paiement_show', { id: p.idPaiement }) }}" class="action-btn action-btn-view" title="Voir">
+                                        👁
+                                    </a>
+                                    <a href="{{ path('app_paiement_edit', { id: p.idPaiement }) }}" class="action-btn action-btn-edit" title="Modifier">
+                                        ✏️
+                                    </a>
+                                    <button type="button" class="action-btn action-btn-delete" title="Supprimer">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr id="emptyRow">
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📦</div>
+                                    <p>Aucun paiement trouvé.</p>
+                                    <a href="{{ path('app_paiement_new') }}" class="btn btn-primary">Créer votre premier paiement</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store all original rows for filtering
+        let allPaiements = [];
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store all paiement rows
+            const rows = document.querySelectorAll('#tableBody tr[data-paiement-id]');
+            allPaiements = Array.from(rows).map(row => ({
+                element: row.cloneNode(true),
+                commande: row.dataset.commande,
+                montant: parseFloat(row.dataset.montant),
+                methode: row.dataset.methode,
+                id: row.dataset.paiementId
+            }));
+
+            // Add event listeners
+            document.getElementById('searchInput').addEventListener('input', debounce(filterPaiements, 300));
+            document.getElementById('montantMin').addEventListener('input', debounce(filterPaiements, 300));
+            document.getElementById('montantMax').addEventListener('input', debounce(filterPaiements, 300));
+            document.getElementById('methodeFilter').addEventListener('change', filterPaiements);
+            document.getElementById('resetBtn').addEventListener('click', resetFilters);
+        });
+
+        // Debounce function to limit API calls
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Filter paiements based on current filter values
+        function filterPaiements() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const montantMin = parseFloat(document.getElementById('montantMin').value) || 0;
+            const montantMax = parseFloat(document.getElementById('montantMax').value) || Infinity;
+            const methode = document.getElementById('methodeFilter').value;
+
+            // Show loading overlay
+            document.getElementById('loadingOverlay').classList.add('active');
+
+            // Simulate slight delay for smooth UX
+            setTimeout(() => {
+                // Filter paiements
+                const filtered = allPaiements.filter(paiement => {
+                    // Search filter (by commande ID or payment method)
+                    const matchesSearch = !searchTerm ||
+                        paiement.commande.includes(searchTerm) ||
+                        paiement.methode.toLowerCase().includes(searchTerm);
+
+                    // Montant filter
+                    const matchesMontant = paiement.montant >= montantMin && paiement.montant <= montantMax;
+
+                    // Methode filter
+                    const matchesMethode = !methode || paiement.methode === methode;
+
+                    return matchesSearch && matchesMontant && matchesMethode;
+                });
+
+                // Update table
+                updateTable(filtered);
+
+                // Update stats
+                updateStats(filtered);
+
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').classList.remove('active');
+            }, 200);
+        }
+
+        // Update table with filtered results
+        function updateTable(filtered) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔍</div>
+                                <p>Aucun paiement ne correspond à vos critères.</p>
+                                <button class="btn btn-primary" onclick="resetFilters()">Réinitialiser les filtres</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                filtered.forEach(paiement => {
+                    const row = paiement.element.cloneNode(true);
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update results count
+            document.getElementById('resultsCount').textContent = `≡ ${filtered.length} paiement(s) trouvé(s)`;
+        }
+
+        // Update stats based on filtered results
+        function updateStats(filtered) {
+            const totalMontant = filtered.reduce((sum, p) => sum + p.montant, 0);
+            const carteCount = filtered.filter(p => p.methode === 'Par carte').length;
+            const especesCount = filtered.filter(p => p.methode === 'Par espèces').length;
+
+            document.getElementById('totalPaiements').textContent = filtered.length;
+            document.getElementById('totalMontant').textContent = totalMontant.toFixed(2);
+            document.getElementById('cartePaiements').textContent = carteCount;
+            document.getElementById('especesPaiements').textContent = especesCount;
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('montantMin').value = '';
+            document.getElementById('montantMax').value = '';
+            document.getElementById('methodeFilter').value = '';
+
+            filterPaiements();
+        }
+
+        // Delete confirmation using event delegation
+        document.getElementById('tableBody').addEventListener('click', function(e) {
+            const deleteBtn = e.target.closest('.action-btn-delete');
+            if (deleteBtn) {
+                const row = deleteBtn.closest('tr');
+                const paiementId = row.dataset.paiementId;
+
+                if (paiementId && confirm('Êtes-vous sûr de vouloir supprimer ce paiement ?')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/admin/paiement/' + paiementId + '/delete';
+
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_token';
+                    csrfInput.value = 'delete_paiement_' + paiementId;
+
+                    form.appendChild(csrfInput);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        });
+    </script>
 {% endblock %}

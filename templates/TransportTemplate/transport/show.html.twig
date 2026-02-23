@@ -3,55 +3,396 @@
 {% block title %}{{ transport.type }} - Admin{% endblock %}
 
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
-    <h1>{{ transport.type }}</h1>
-    
-    <div class="row">
-        <div class="col-md-4">
-            {% if transport.image %}
-                <img src="{{ asset('uploads/transports/' ~ transport.image) }}" alt="{{ transport.type }}" class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
-            {% else %}
-                <div class="bg-light rounded mb-3 d-flex align-items-center justify-content-center" style="height: 300px;">
-                    <p class="text-muted">Aucune image</p>
+    <style>
+        .modern-show-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.3);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 500px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .image-wrapper {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            aspect-ratio: 4/3;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .no-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .availability-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .badge-available {
+            background: rgba(5, 150, 105, 0.95);
+            color: white;
+        }
+
+        .badge-unavailable {
+            background: rgba(107, 114, 128, 0.95);
+            color: white;
+        }
+
+        .details-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .weather-card {
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+            color: #ecfeff;
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: 0 8px 24px rgba(3, 105, 161, 0.35);
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .weather-temp {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .weather-city {
+            font-weight: 600;
+        }
+
+        .weather-extra {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .details-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .detail-label {
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .detail-value {
+            color: #475569;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .detail-label i {
+            font-size: 1.2rem;
+            color: #059669;
+        }
+
+        .actions-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .modern-btn {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .modern-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .delete-card {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid #fca5a5;
+        }
+
+        .delete-card h3 {
+            color: #991b1b;
+            margin: 0 0 1rem 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .modern-show-container {
+                padding: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .detail-row {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-row {
+                flex-direction: column;
+            }
+
+            .btn-delete {
+                margin-left: 0;
+            }
+        }
+    </style>
+
+    <div class="modern-show-container">
+        {{ include('admin_nav.html.twig') }}
+
+        <div class="page-header">
+            <h1>{{ transport.type }}</h1>
+        </div>
+
+        <div class="content-grid">
+            <div class="image-card">
+                <div class="image-wrapper">
+                    {% if transport.image %}
+                        <img src="{{ asset('uploads/transports/' ~ transport.image) }}" alt="{{ transport.type }}">
+                        {% if transport.disponible %}
+                            <div class="availability-badge badge-available">Disponible</div>
+                        {% else %}
+                            <div class="availability-badge badge-unavailable">Non disponible</div>
+                        {% endif %}
+                    {% else %}
+                        <div class="no-image-placeholder">
+                            <span>Aucune image</span>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
+
+            <div class="details-card">
+                <div class="details-grid">
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fa fa-bus"></i>
+                            <span>Type de Transport</span>
+                        </div>
+                        <div class="detail-value">{{ transport.type }}</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fa fa-folder"></i>
+                            <span>Catégorie</span>
+                        </div>
+                        <div class="detail-value">{{ transport.category ? transport.category.name : '—' }}</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fa fa-user"></i>
+                            <span>Chauffeur</span>
+                        </div>
+                        <div class="detail-value">{{ transport.chauffeur ? transport.chauffeur.fullName : '—' }}</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fa fa-users"></i>
+                            <span>Capacité</span>
+                        </div>
+                        <div class="detail-value">{{ transport.capacite }} passagers</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fa fa-money"></i>
+                            <span>Prix par Personne</span>
+                        </div>
+                        <div class="detail-value">{{ transport.prixparpersonne }} DT</div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">
+                            <i class="fa fa-leaf"></i>
+                            <span>Émission CO2</span>
+                        </div>
+                        <div class="detail-value">{{ transport.emissionco2 }} kg</div>
+                    </div>
+                </div>
+
+                {% if weather %}
+                    <div class="weather-card">
+                        <div class="weather-main">
+                            <i class="fa fa-cloud-sun fa-2x"></i>
+                            <div>
+                                <div class="weather-city">
+                                    Météo à {{ weather.name ?? transport.arrivallocation }}
+                                </div>
+                                <div class="weather-extra">
+                                    {{ weather.weather[0].description|capitalize }} — Ressenti {{ weather.main.feels_like|round(0, 'floor') }}°C
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="weather-temp">
+                                {{ weather.main.temp|round(0, 'floor') }}°C
+                            </div>
+                            <div class="weather-extra">
+                                Humidité {{ weather.main.humidity }}% · Vent {{ weather.wind.speed }} m/s
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-        <div class="col-md-8">
-            <table class="table table-borderless">
-                <tbody>
-                    <tr>
-                        <th style="color: #2d5016; font-weight: bold; width: 30%;">Id</th>
-                        <td>{{ transport.id }}</td>
-                    </tr>
-                    <tr>
-                        <th style="color: #2d5016; font-weight: bold;">Type</th>
-                        <td>{{ transport.type }}</td>
-                    </tr>
-                    <tr>
-                        <th style="color: #2d5016; font-weight: bold;">Capacité</th>
-                        <td>{{ transport.capacite }} passagers</td>
-                    </tr>
-                    <tr>
-                        <th style="color: #2d5016; font-weight: bold;">Prix/Personne</th>
-                        <td>{{ transport.prixparpersonne }} DT</td>
-                    </tr>
-                    <tr>
-                        <th style="color: #2d5016; font-weight: bold;">Émission CO2</th>
-                        <td>{{ transport.emissionco2 }} kg</td>
-                    </tr>
-                </tbody>
-            </table>
+
+        <div class="actions-container">
+            <div class="actions-row">
+                <a href="{{ path('app_transport_edit', {'id': transport.id}) }}" class="modern-btn btn-edit">
+                    <i class="fa fa-edit"></i>
+                    <span>Modifier</span>
+                </a>
+                <a href="{{ path('app_transport_index') }}" class="modern-btn btn-back">
+                    <i class="fa fa-arrow-left"></i>
+                    <span>Retour à la liste</span>
+                </a>
+                <button type="button" class="modern-btn btn-delete" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer ce transport ?')) document.getElementById('delete-form').submit();">
+                    <i class="fa fa-trash"></i>
+                    <span>Supprimer</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="delete-card" style="display: none;">
+            <h3>
+                <i class="fa fa-exclamation-triangle"></i>
+                Zone dangereuse
+            </h3>
+            {{ include('TransportTemplate/transport/_delete_form.html.twig') }}
         </div>
     </div>
-    
-    <div style="margin-top: 30px;">
-        <a href="{{ path('app_transport_edit', {'id': transport.id}) }}" class="btn btn-primary">Modifier</a>
-        <a href="{{ path('app_transport_index') }}" class="btn btn-secondary">Retour à la liste</a>
-    </div>
-    
-    <div style="margin-top: 20px;">
-        {{ include('TransportTemplate/transport/_delete_form.html.twig') }}
-    </div>
-</div>
 {% endblock %}

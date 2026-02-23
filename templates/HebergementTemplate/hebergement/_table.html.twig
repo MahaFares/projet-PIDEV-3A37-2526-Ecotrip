@@ -1,0 +1,62 @@
+{% for hebergement in hebergements %}
+    <tr>
+        <td style="width: 80px;">
+            {% if hebergement.imagePrincipale %}
+                <img src="{{ hebergement.imagePrincipale starts with 'http' ? hebergement.imagePrincipale : asset(hebergement.imagePrincipale) }}" alt="" 
+                     style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% else %}
+                <div style="width: 60px; height: 60px; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                    <i class="bi bi-image"></i>
+                </div>
+            {% endif %}
+        </td>
+        <td>
+            <div class="d-flex align-items-center">
+                {# Image removed from here #}
+                <div>
+                    <div style="font-weight: 600; color: #0f172a;">{{ hebergement.nom }}</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">{{ hebergement.categorie.nom|default('Hébergement') }}</div>
+                </div>
+            </div>
+        </td>
+        <td style="color: #64748b;">{{ hebergement.adresse }}</td>
+        <td style="color: #64748b;">{{ hebergement.ville }}</td>
+        <td>
+            <span class="badge-role stars">
+                {{ hebergement.nbEtoiles }} <i class="bi bi-star-fill" style="font-size: 0.8em; margin-left: 2px; color: #f59e0b;"></i>
+            </span>
+        </td>
+        <td>
+            {% if hebergement.actif %}
+                <span class="badge-verified yes">Actif</span>
+            {% else %}
+                <span class="badge-verified no">Inactif</span>
+            {% endif %}
+        </td>
+        <td class="actions">
+            <div class="d-flex gap-1">
+                <a href="{{ path('app_hebergement_show', {'id': hebergement.id}) }}" class="btn-action view" title="Voir">
+                    <i class="bi bi-eye"></i>
+                </a>
+                <a href="{{ path('app_hebergement_edit', {'id': hebergement.id}) }}" class="btn-action edit" title="Modifier">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <form method="post" action="{{ path('app_hebergement_delete', {'id': hebergement.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet hébergement ?');" style="display: inline-block;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ hebergement.id) }}">
+                    <button class="btn-action delete" title="Supprimer">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="6" class="text-center py-5">
+            <div style="color: #94a3b8;">
+                <i class="bi bi-inbox fa-3x mb-3"></i>
+                <p>Aucun hébergement trouvé.</p>
+            </div>
+        </td>
+    </tr>
+{% endfor %}

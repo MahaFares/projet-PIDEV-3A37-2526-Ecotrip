@@ -3,3 +3,7 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Captcha image generation (inscription)
+gregwar_captcha:
+    resource: "@GregwarCaptchaBundle/Resources/config/routing/routing.yml"

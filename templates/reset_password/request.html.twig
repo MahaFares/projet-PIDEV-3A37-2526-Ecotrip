@@ -1,21 +1,62 @@
+{% extends 'base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
+{% block title %}Mot de passe oublié | EcoTrip Admin{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .auth-card { max-width: 420px; margin: 0 auto; padding: 2rem; border: 1px solid #e8e8e8; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); background: white; }
+        .auth-card h2 { margin-bottom: 1.5rem; color: #2d5016; }
+        .theme_btn { background: #2d5016; color: #fff; border: 1px solid #2d5016; }
+        .theme_btn:hover { background: transparent; color: #2d5016; }
+    </style>
+{% endblock %}
 
 {% block body %}
-    {% for flash_error in app.flashes('reset_password_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
-    <h1>Reset your password</h1>
-
-    {{ form_start(requestForm) }}
-        {{ form_row(requestForm.email) }}
-        <div>
-            <small>
-                Enter your email address, and we will send you a
-                link to reset your password.
-            </small>
+    <!--================Breadcrumb Area =================-->
+    <section class="breadcrumb_area">
+        <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background=""></div>
+        <div class="container">
+            <div class="page-cover text-center">
+                <h2 class="page-cover-tittle">Récupération</h2>
+                <ol class="breadcrumb">
+                    <li><a href="{{ path('app_home') }}">Home</a></li>
+                    <li class="active">Oubli</li>
+                </ol>
+            </div>
         </div>
+    </section>
+    <!--================Breadcrumb Area =================-->
 
-        <button class="btn btn-primary">Send password reset email</button>
-    {{ form_end(requestForm) }}
+    <section class="accomodation_area section_gap">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="auth-card">
+                        <h2 class="text-center">Réinitialisation</h2>
+                        
+                        {% for flash_error in app.flashes('reset_password_error') %}
+                            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+                        {% endfor %}
+
+                        <p class="text-muted small mb-4">
+                            Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+                        </p>
+
+                        {{ form_start(requestForm) }}
+                            <div class="form-group">
+                                {{ form_label(requestForm.email, 'Email') }}
+                                {{ form_widget(requestForm.email, {'attr': {'class': 'form-control', 'placeholder': 'votre@email.com'}}) }}
+                                {{ form_errors(requestForm.email) }}
+                            </div>
+                            <button class="btn theme_btn button_hover btn-block mt-3">Envoyer le lien</button>
+                        {{ form_end(requestForm) }}
+                        
+                        <p class="text-center mt-3 mb-0">
+                            <a href="{{ path('app_login') }}">Retour à la connexion</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}

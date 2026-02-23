@@ -7,6 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Enum\Role;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -22,6 +24,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: 'L\'email est requis.')]
+    #[Assert\Email(message: 'L\'email {{ value }} n\'est pas valide.')]
+    #[Assert\Length(max: 180)]
     private ?string $email = null;
 
     /**
@@ -40,7 +45,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $isVerified = false;
 
     #[ORM\Column]
-    private ?string $username=null;
+    #[Assert\NotBlank(message: 'Le nom d\'utilisateur est requis.')]
+    #[Assert\Length(min: 2, max: 50, minMessage: 'Le nom d\'utilisateur doit contenir au moins {{ limit }} caractères.', maxMessage: 'Le nom d\'utilisateur ne peut pas dépasser {{ limit }} caractères.')]
+    private ?string $username = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255, maxMessage: 'L\'adresse ne peut pas dépasser {{ limit }} caractères.')]
+    private ?string $address = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Regex(pattern: '/^[0-9\+\s\-\(\)]*$/', message: 'Le numéro de téléphone n\'est pas valide (chiffres, +, -, espaces, parenthèses uniquement).')]
+    #[Assert\Length(max: 20, maxMessage: 'Le téléphone ne peut pas dépasser {{ limit }} caractères.')]
+    private ?string $telephone = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(max: 255, maxMessage: 'L\'URL de l\'image ne peut pas dépasser {{ limit }} caractères.')]
+    private ?string $image = null;
+
+    /** Face descriptor (128 floats) from Face-API.js for 1:1 verification. Stored as JSON. */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $faceDescriptor = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reservation::class)]
     private Collection $reservations;
@@ -126,7 +150,51 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setUsername(string $username): static
     {
-        $this->username=$username;
+        $this->username = $username;
+        return $this;
+    }
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): static
+    {
+        $this->address = $address;
+        return $this;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function getFaceDescriptor(): ?array
+    {
+        return $this->faceDescriptor;
+    }
+
+    public function setFaceDescriptor(?array $faceDescriptor): static
+    {
+        $this->faceDescriptor = $faceDescriptor;
         return $this;
     }
 
