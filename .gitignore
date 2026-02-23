@@ -1,16 +1,8 @@
 
-###> env files (never commit secrets) ###
-.env
-.env.local
-.env.local.php
-.env.*.local
-.env.dev
-.env.test
-.env.prod
-.env.staging
-###< env files ###
-
 ###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
@@ -28,4 +20,3 @@ yarn-error.log
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
-
