@@ -23,8 +23,7 @@ class LigneDeCommande
     private ?int $subtotal = null;
 
     #[ORM\ManyToOne(inversedBy: 'ligneDeCommandes')]
-    #[ORM\JoinColumn(name: 'id_product', referencedColumnName: 'id_produit')]
-
+    #[ORM\JoinColumn(name: 'id_product', referencedColumnName: 'id_produit', nullable: true, onDelete: 'SET NULL')]
     private ?Produit $idProduct = null;
 
     #[ORM\ManyToOne(inversedBy: 'ligneDeCommandes')]

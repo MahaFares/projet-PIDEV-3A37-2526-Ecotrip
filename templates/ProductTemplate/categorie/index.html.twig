@@ -225,6 +225,13 @@
             </div>
         </div>
 
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        {% endfor %}
+
         <!-- Search and Filter Section -->
         <div class="search-container">
             <form id="searchForm">
@@ -391,13 +398,10 @@
                 </td>
                 <td>
                     <div class="d-flex gap-1">
-                        <a href="${showUrl}" class="action-btn btn-view" title="Voir">
-                            <i class="bi bi-eye"></i>
-                        </a>
                         <a href="${editUrl}" class="action-btn btn-edit" title="Modifier">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <button onclick="deleteCategorie(${categorie.id})" class="action-btn btn-delete" title="Supprimer">
+                        <button type="button" class="action-btn btn-delete" title="Supprimer" data-id="${categorie.id}" data-delete-token="${escapeHtml(categorie.deleteToken || '')}" onclick="deleteCategorie(this)">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -445,22 +449,21 @@
                 return div.innerHTML;
             }
 
-            // Delete category
-            window.deleteCategorie = function(id) {
-                if (!confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-                    return;
-                }
+            // Delete category from table (no redirect to show page)
+            window.deleteCategorie = function(btn) {
+                const id = btn.dataset.id;
+                const token = btn.dataset.deleteToken;
+                if (!id || !token) return;
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) return;
 
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `${baseUrl}/${id}/delete`;
-
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = '_token';
-                csrfInput.value = '{{ csrf_token("delete_categorie_") }}' + id;
+                csrfInput.value = token;
                 form.appendChild(csrfInput);
-
                 document.body.appendChild(form);
                 form.submit();
             };

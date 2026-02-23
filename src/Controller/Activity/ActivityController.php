@@ -16,6 +16,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use App\Service\GeminiService;
 
 #[Route('/activity')]
 final class ActivityController extends AbstractController
@@ -177,6 +178,31 @@ final class ActivityController extends AbstractController
             'activity' => $activity,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/ai/generate-description', name: 'app_activity_ai_description', methods: ['POST'])]
+    public function generateDescription(Request $request, GeminiService $geminiService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?? [];
+        $title = $data['title'] ?? 'une activité';
+        $location = $data['location'] ?? 'Tunisie';
+        $category = $data['category'] ?? 'Activité';
+        $durationMinutes = $data['durationMinutes'] ?? '';
+        $price = $data['price'] ?? '';
+        $maxParticipants = $data['maxParticipants'] ?? '';
+
+        $prompt = "Rédige une description attrayante et professionnelle pour une activité de tourisme (environ 80-120 mots) :
+Titre : $title
+Lieu : $location
+Catégorie : $category
+Durée (minutes) : $durationMinutes
+Prix : $price
+Nombre max de participants : $maxParticipants
+Mets en valeur l'expérience, l'aventure et l'aspect découverte. Ton accueillant et engageant. Pour le site EcoTrip.";
+
+        $description = $geminiService->generateText($prompt);
+
+        return $this->json(['description' => $description]);
     }
 
     #[Route('/{id}', name: 'app_activity_show', methods: ['GET'], requirements: ['id' => '\d+'])]

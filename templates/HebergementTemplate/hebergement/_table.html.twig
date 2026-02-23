@@ -1,20 +1,18 @@
 {% for hebergement in hebergements %}
     <tr>
+        <td style="width: 80px;">
+            {% if hebergement.imagePrincipale %}
+                <img src="{{ hebergement.imagePrincipale starts with 'http' ? hebergement.imagePrincipale : asset(hebergement.imagePrincipale) }}" alt="" 
+                     style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% else %}
+                <div style="width: 60px; height: 60px; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                    <i class="bi bi-image"></i>
+                </div>
+            {% endif %}
+        </td>
         <td>
             <div class="d-flex align-items-center">
-                {% if hebergement.imagePrincipale %}
-                    {% if hebergement.imagePrincipale starts with 'http' %}
-                        <img src="{{ hebergement.imagePrincipale }}" alt="" 
-                             style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover; margin-right: 12px; border: 1px solid #e2e8f0;">
-                    {% else %}
-                        <img src="{{ asset('uploads/' ~ hebergement.imagePrincipale) }}" alt="" 
-                             style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover; margin-right: 12px; border: 1px solid #e2e8f0;">
-                    {% endif %}
-                {% else %}
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1); display: flex; align-items: center; justify-content: center; margin-right: 12px; color: #64748b; font-weight: bold;">
-                        {{ hebergement.nom|slice(0,1)|upper }}
-                    </div>
-                {% endif %}
+                {# Image removed from here #}
                 <div>
                     <div style="font-weight: 600; color: #0f172a;">{{ hebergement.nom }}</div>
                     <div style="font-size: 0.75rem; color: #94a3b8;">{{ hebergement.categorie.nom|default('Hébergement') }}</div>

@@ -35,7 +35,7 @@ services:
             $token: '%env(TWILIO_AUTH_TOKEN)%'
             $from:  '%env(TWILIO_FROM)%'
 
-    App\Service\AiTransportRecommendationService:
+    App\Service\HuggingFaceFaceService:
         arguments:
-            $openAiApiKey: '%env(OPENAI_API_KEY)%'
-            $openAiModel: '%env(OPENAI_MODEL)%'
+            $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
+            $modelId: '%env(HUGGINGFACE_FACE_MODEL)%'

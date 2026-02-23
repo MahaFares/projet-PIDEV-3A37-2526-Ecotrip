@@ -1,0 +1,494 @@
+{% extends 'basefront.html.twig' %}
+
+{% block title %}Mon Compte - EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    :root {
+        --eco-primary: #2d5016;
+        --eco-primary-light: #4ade80;
+        --eco-primary-dark: #1e4620;
+        --surface: #ffffff;
+        --surface-alt: #f8faf9;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --border: #e2e8f0;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    }
+
+    .profile-container {
+        background: linear-gradient(135deg, #f8faf9 0%, #f0f4ef 100%);
+        padding: 60px 0;
+        min-height: 100vh;
+    }
+
+    /* Hero Section */
+    .profile-hero {
+        background: linear-gradient(135deg, var(--eco-primary-dark) 0%, var(--eco-primary) 50%, var(--eco-primary-light) 100%);
+        border-radius: 20px;
+        padding: 50px 40px;
+        color: white;
+        margin-bottom: 40px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(20px); }
+    }
+
+    .profile-hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+
+    .profile-avatar-wrapper {
+        flex-shrink: 0;
+    }
+
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        border: 4px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-avatar i {
+        font-size: 60px;
+        color: white;
+    }
+
+    .profile-info h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .profile-info p {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .profile-actions .btn {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid white;
+    }
+
+    .profile-actions .btn-edit {
+        background: white;
+        color: var(--eco-primary);
+        border-color: white;
+    }
+
+    .profile-actions .btn-edit:hover {
+        background: var(--eco-primary-light);
+        color: white;
+        border-color: var(--eco-primary-light);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .profile-actions .btn-password {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-color: white;
+    }
+
+    .profile-actions .btn-password:hover {
+        background: white;
+        color: var(--eco-primary);
+        border-color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Cards */
+    .modern-card {
+        background: white;
+        border: none;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        margin-bottom: 30px;
+    }
+
+    .modern-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-5px);
+    }
+
+    .card-header-modern {
+        background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-light) 100%);
+        padding: 25px;
+        color: white;
+        border-bottom: none;
+    }
+
+    .card-header-modern h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-header-modern i {
+        font-size: 1.4rem;
+    }
+
+    .card-body-modern {
+        padding: 30px;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    .info-item {
+        padding: 20px;
+        background: transparent;
+        border-radius: 12px;
+        border-left: none;
+        transition: all 0.3s ease;
+    }
+
+    .info-item:hover {
+        background: transparent;
+        border-left-color: transparent;
+        box-shadow: none;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .info-value {
+        font-size: 1.2rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-verified {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .status-client {
+        background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-light) 100%);
+        color: white;
+    }
+
+    /* Reservations Table */
+    .reservations-table {
+        overflow: hidden;
+    }
+
+    .reservations-table table {
+        margin-bottom: 0;
+    }
+
+    .reservations-table thead {
+        background: linear-gradient(135deg, #f8faf9 0%, #f0f4ef 100%);
+    }
+
+    .reservations-table th {
+        color: var(--text-secondary);
+        font-weight: 600;
+        border-color: var(--border);
+        padding: 18px !important;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .reservations-table td {
+        padding: 16px 18px !important;
+        border-color: var(--border);
+        vertical-align: middle;
+    }
+
+    .reservations-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .reservations-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8faf9 0%, #f0f4ef 100%);
+    }
+
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .badge-confirmed {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .badge-pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .badge-cancelled {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 30px;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+
+    .empty-state-text {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .btn-browse {
+        background: linear-gradient(135deg, var(--eco-primary) 0%, var(--eco-primary-light) 100%);
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .btn-browse:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .profile-hero {
+            padding: 30px 20px;
+        }
+
+        .profile-hero-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .profile-info h1 {
+            font-size: 1.8rem;
+        }
+
+        .profile-actions {
+            justify-content: center;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-body-modern {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="container">
+        <!-- Profile Hero Section -->
+        <div class="profile-hero">
+            <div class="profile-hero-content">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        {% if app.user.image %}
+                            <img src="{{ asset(app.user.image) }}" alt="{{ app.user.username }}">
+                        {% else %}
+                            <i class="fa fa-user"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="profile-info flex-grow-1">
+                    <h1>{{ app.user.username }}</h1>
+                    <p><i class="fa fa-envelope"></i> {{ app.user.email }}</p>
+                    <div class="profile-actions">
+                        <a href="{{ path('app_update_account') }}" class="btn btn-edit">
+                            <i class="fa fa-edit"></i> Modifier mon profil
+                        </a>
+                        <a href="{{ path('app_change_password') }}" class="btn btn-password">
+                            <i class="fa fa-lock"></i> Changer le mot de passe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Information -->
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h3><i class="fa fa-info-circle"></i> Informations du compte</h3>
+            </div>
+            <div class="card-body-modern">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-envelope"></i> Email</div>
+                        <div class="info-value">{{ app.user.email }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-user"></i> Nom d'utilisateur</div>
+                        <div class="info-value">{{ app.user.username }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-check-circle"></i> Statut</div>
+                        <div class="info-value">
+                            {% if app.user.isVerified %}
+                                <span class="status-badge status-verified"><i class="fa fa-check"></i> Vérifié</span>
+                            {% else %}
+                                <span class="status-badge status-pending"><i class="fa fa-clock-o"></i> Non vérifié</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-shield"></i> Type de compte</div>
+                        <div class="info-value">
+                            <span class="status-badge status-client">Client</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservations Section -->
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h3><i class="fa fa-calendar"></i> Mes réservations</h3>
+            </div>
+            <div class="card-body-modern">
+                {% if app.user.reservations|length > 0 %}
+                    <div class="reservations-table">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID Réservation</th>
+                                    <th>Type</th>
+                                    <th>Date de réservation</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reservation in app.user.reservations|slice(0, 10) %}
+                                    <tr>
+                                        <td><strong>#{{ reservation.id }}</strong></td>
+                                        <td><i class="fa fa-ticket"></i> Activité</td>
+                                        <td>{{ reservation.createdAt|date('d/m/Y à H:i') }}</td>
+                                        <td>
+                                            <span class="badge-status badge-{{ reservation.status == 'confirmed' ? 'confirmed' : (reservation.status == 'pending' ? 'pending' : 'cancelled') }}">
+                                                <i class="fa fa-{{ reservation.status == 'confirmed' ? 'check' : (reservation.status == 'pending' ? 'hourglass-half' : 'times') }}"></i>
+                                                {{ reservation.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm" style="background: var(--eco-primary); color: white; border-radius: 6px; padding: 6px 12px; text-decoration: none; transition: all 0.3s;">
+                                                <i class="fa fa-eye"></i> Voir
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fa fa-inbox"></i>
+                        </div>
+                        <p class="empty-state-text">Vous n'avez aucune réservation pour le moment.</p>
+                        <a href="{{ path('app_activites') }}" class="btn-browse">
+                            <i class="fa fa-search"></i> Découvrir les activités
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
