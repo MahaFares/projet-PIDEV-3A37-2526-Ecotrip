@@ -1,0 +1,226 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ produit.nom }} | EcoTrip{% endblock %}
+
+{% block body %}
+    <!--================Breadcrumb Area =================-->
+    <section class="breadcrumb_area">
+        <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background=""></div>
+        <div class="container">
+            <div class="page-cover text-center">
+                <h2 class="page-cover-tittle">Détails du Produit</h2>
+                <ol class="breadcrumb">
+                    <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                    <li><a href="{{ path('front_boutique') }}">Boutique</a></li>
+                    <li class="active">{{ produit.nom }}</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+    <!--================Breadcrumb Area =================-->
+
+    <!--================ Product Details Area =================-->
+    <section class="section_gap">
+        <div class="container">
+            <div class="row">
+                <!-- Image Section -->
+                <div class="col-lg-6 col-md-6 mb-4">
+                    <div class="product-image-container" style="position: sticky; top: 100px;">
+                        <div class="main-image mb-3" style="border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); position: relative;">
+                            {% if produit.image and produit.image != '' %}
+                                {% if produit.image starts with 'http' %}
+                                    <img id="mainImage" src="{{ produit.image }}" alt="{{ produit.nom }}" class="w-100" style="object-fit: cover; max-height: 600px;">
+                                {% else %}
+                                    <img id="mainImage" src="{{ asset('uploads/' ~ produit.image) }}" alt="{{ produit.nom }}" class="w-100" style="object-fit: cover; max-height: 600px;">
+                                {% endif %}
+                            {% else %}
+                                <img id="mainImage" src="{{ asset('images/room1.jpg') }}" alt="{{ produit.nom }}" class="w-100" style="object-fit: cover; max-height: 600px;">
+                            {% endif %}
+                            
+                            {% if produit.stock <= 0 %}
+                                <div style="position: absolute; top: 20px; right: 20px;">
+                                    <span class="badge bg-danger fs-6 px-3 py-2">
+                                        <i class="fa fa-exclamation-circle"></i> Rupture de stock
+                                    </span>
+                                </div>
+                            {% elseif produit.stock < 10 %}
+                                <div style="position: absolute; top: 20px; right: 20px;">
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                        <i class="fa fa-warning"></i> Stock faible
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Info Section -->
+                <div class="col-lg-6 col-md-6">
+                    <div class="product-details-content">
+                        <!-- Product Name -->
+                        <h2 class="mb-3" style="font-size: 2.5rem; font-weight: 600; color: #2c3e50;">
+                            {{ produit.nom }}
+                        </h2>
+
+                        <!-- Category Badge -->
+                        {% if produit.categorie %}
+                            <div class="mb-3">
+                                <span class="badge bg-secondary fs-6 px-3 py-2">
+                                    <i class="fa fa-tag"></i> {{ produit.categorie.nom }}
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        <!-- Rating -->
+                        <div class="rating mb-3">
+                            <span class="text-warning fs-5">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star-o"></i>
+                            </span>
+                            <span class="text-muted ms-2">(4.0/5.0)</span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-4">
+                            <h3 class="text-primary mb-0" style="font-size: 2.5rem; font-weight: 700;">
+                                {{ produit.prix|number_format(2, ',', ' ') }} TND
+                            </h3>
+                        </div>
+
+                        <!-- Stock Info -->
+                        <div class="mb-4 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+                            <div class="d-flex align-items-center">
+                                <i class="fa fa-cubes fs-4 text-primary me-3"></i>
+                                <div>
+                                    <p class="mb-0 fw-bold">Stock disponible:</p>
+                                    {% if produit.stock > 0 %}
+                                        <span class="badge bg-success fs-6">{{ produit.stock }} unités en stock</span>
+                                    {% else %}
+                                        <span class="badge bg-danger fs-6">Épuisé</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        
+
+                        <!-- Quantity Selector -->
+                        <div class="mb-4">
+                            <h5 class="mb-3 fw-bold">Quantité</h5>
+                            <div class="input-group" style="max-width: 150px;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                <input type="number" id="quantity" class="form-control text-center" value="1" min="1" max="{{ produit.stock }}" style="font-weight: 600;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-3 mb-4">
+                            {% if produit.stock > 0 %}
+                                <button type="button" class="btn btn-success btn-lg" style="padding: 15px; font-size: 1.2rem; font-weight: 600; border-radius: 10px;" onclick="addToCart()">
+                                    <i class="fa fa-shopping-cart me-2"></i> AJOUTER AU PANIER
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-secondary btn-lg" disabled style="padding: 15px; font-size: 1.2rem; border-radius: 10px;">
+                                    <i class="fa fa-ban me-2"></i> PRODUIT INDISPONIBLE
+                                </button>
+                            {% endif %}
+
+                            <a href="{{ path('front_boutique') }}" class="btn btn-outline-secondary">
+                                <i class="fa fa-arrow-left"></i> Retour à la boutique
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================ Product Details Area =================-->
+
+    <!--================ Vous aimerez aussi (AI + fallback) =================-->
+    <section class="section_gap recommandations-section" style="background: linear-gradient(180deg, #f8faf8 0%, #fff 100%);">
+        <style>
+            .recommandations-section .card:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(45,80,22,0.15) !important; }
+        </style>
+        <div class="container">
+            <h2 class="mb-4" style="font-size: 1.75rem; font-weight: 700; color: #2d5016;">
+                <i class="fa fa-leaf me-2"></i> Vous aimerez aussi
+            </h2>
+            {% if recommended|length > 0 %}
+            <div class="row g-4">
+                {% for p in recommended %}
+                <div class="col-6 col-md-3">
+                    <a href="{{ path('front_produit_detail', { id: p.id }) }}" class="text-decoration-none text-dark">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden" style="transition: transform 0.2s, box-shadow 0.2s;">
+                            <div style="height: 180px; overflow: hidden; background: #f1f5f1;">
+                                {% if p.image and p.image != '' %}
+                                    {% if p.image starts with 'http' %}
+                                        <img src="{{ p.image }}" alt="{{ p.nom }}" class="w-100 h-100" style="object-fit: cover;">
+                                    {% else %}
+                                        <img src="{{ asset('uploads/' ~ p.image) }}" alt="{{ p.nom }}" class="w-100 h-100" style="object-fit: cover;">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{{ asset('images/room1.jpg') }}" alt="{{ p.nom }}" class="w-100 h-100" style="object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title mb-1" style="font-weight: 600; color: #2c3e50;">{{ p.nom }}</h6>
+                                {% if p.categorie %}
+                                    <span class="badge bg-secondary mb-2" style="font-size: 0.7rem;">{{ p.categorie.nom }}</span>
+                                {% endif %}
+                                <p class="mb-0 fw-bold" style="color: #2d5016;">{{ p.prix|number_format(2, ',', ' ') }} TND</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">
+                <i class="fa fa-info-circle me-1"></i> Les recommandations apparaîtront ici lorsqu’il y a plusieurs produits dans la boutique (même catégorie ou suggestions IA).
+            </p>
+            <a href="{{ path('front_boutique') }}" class="btn btn-outline-success mt-2">Voir toute la boutique</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <script>
+        function increaseQuantity() {
+            const input = document.getElementById('quantity');
+            const max = parseInt(input.max);
+            const current = parseInt(input.value);
+            if (current < max) {
+                input.value = current + 1;
+            }
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity');
+            const min = parseInt(input.min);
+            const current = parseInt(input.value);
+            if (current > min) {
+                input.value = current - 1;
+            }
+        }
+
+        function addToCart() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            fetch('{{ path('app_panier_add_produit', {id: produit.id}) }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'quantity=' + encodeURIComponent(quantity)
+            }).then(r => r.json()).then(d => {
+                if (d.success) { if (typeof updateCartBadge === 'function') updateCartBadge(d.count); if (window.showToast) showToast(quantity + ' x {{ produit.nom|e('js') }} ajouté au panier !', 'success'); }
+                else { if (window.showToast) showToast(d.message || 'Erreur', 'error'); }
+            });
+        }
+    </script>
+{% endblock %}
