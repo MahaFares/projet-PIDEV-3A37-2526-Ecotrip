@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/admin/commande')]
@@ -22,6 +23,7 @@ class CommandeCrudController extends AbstractController
         private readonly CommandeRepository $repository,
         private readonly ValidatorInterface $validator,
         private readonly ProduitRepository $produitRepository,
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
     ) {
     }
 
@@ -127,8 +129,9 @@ class CommandeCrudController extends AbstractController
 
         $commandes = $qb->getQuery()->getResult();
 
-        // Transform to JSON-friendly array
-        $data = array_map(function($commande) {
+        // Transform to JSON-friendly array (with delete CSRF token per row for delete-from-table)
+        $data = array_map(function ($commande) {
+            $tokenId = 'delete_commande_' . $commande->getIdCommande();
             return [
                 'id' => $commande->getIdCommande(),
                 'idUser' => $commande->getIdUser(),
@@ -137,6 +140,7 @@ class CommandeCrudController extends AbstractController
                 'prixUnitaire' => $commande->getPrixUnitaire(),
                 'total' => $commande->getTotal(),
                 'dateCommande' => $commande->getDateCommande()->format('d/m/Y H:i'),
+                'deleteToken' => $this->csrfTokenManager->getToken($tokenId)->getValue(),
             ];
         }, $commandes);
 

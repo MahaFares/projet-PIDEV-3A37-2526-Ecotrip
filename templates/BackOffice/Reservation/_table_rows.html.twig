@@ -1,0 +1,30 @@
+{% for item in items %}
+{% set r = item.reservation %}
+<tr>
+    <td>{{ r.id }}</td>
+    <td>
+        {{ r.user.email }}
+        {% if r.user.username %}<br><small class="text-muted">{{ r.user.username }}</small>{% endif %}
+    </td>
+    <td>{{ item.typeLabel }}</td>
+    <td>{{ item.label }}</td>
+    <td>{{ r.dateFrom ? r.dateFrom|date('d/m/Y') : '-' }}</td>
+    <td>{{ r.dateTo ? r.dateTo|date('d/m/Y') : '-' }}</td>
+    <td>{{ r.numberOfPersons }}</td>
+    <td>{{ r.totalPrice|number_format(2, ',', ' ') }} TND</td>
+    <td>
+        <span class="badge badge-{{ r.status.badge() }}">{{ r.status.label() }}</span>
+    </td>
+    <td>
+        <a href="{{ path('app_reservation_show', { id: r.id }) }}" class="btn btn-sm btn-primary"><i class="fa fa-eye"></i> Voir</a>
+        <form method="post" action="{{ path('app_reservation_delete', { id: r.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette réservation ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('reservation_delete_' ~ r.id) }}">
+            <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> Supprimer</button>
+        </form>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="10" class="text-center text-muted py-5">Aucune réservation trouvée.</td>
+</tr>
+{% endfor %}

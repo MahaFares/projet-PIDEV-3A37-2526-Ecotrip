@@ -62,6 +62,63 @@
 .reservation-status.confirmed { background: #f0fdf4; color: #15803d; }
 .reservation-status.cancelled { background: #fef2f2; color: #b91c1c; }
 
+/* Action buttons on reservation cards */
+.reservation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.reservation-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    border: none;
+}
+.reservation-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.reservation-actions .btn:active {
+    transform: translateY(0);
+}
+.reservation-actions .btn i {
+    font-size: 1rem;
+    opacity: 0.95;
+}
+.reservation-actions .btn-edit {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+.reservation-actions .btn-edit:hover {
+    background: #dbeafe;
+    color: #1e40af;
+}
+.reservation-actions .btn-delete {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+.reservation-actions .btn-delete:hover {
+    background: #fee2e2;
+    color: #991b1b;
+}
+.reservation-actions .btn-pay {
+    background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(45, 80, 22, 0.35);
+}
+.reservation-actions .btn-pay:hover {
+    background: linear-gradient(135deg, #244012 0%, #16381a 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(45, 80, 22, 0.4);
+}
+
 .empty-reservations {
     text-align: center;
     padding: 64px 24px;
@@ -104,15 +161,22 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="text-end">
+                            <div class="text-end d-flex flex-column align-items-end gap-2">
                                 <span class="reservation-status {{ r.status.value|lower }}">{{ r.status.value }}</span>
-                                <div class="reservation-price mt-2">{{ r.totalPrice|number_format(2, ',', ' ') }} TND</div>
-                                {% if r.status.value|lower == 'pending' %}
-                                <form action="{{ path('app_panier_restore_reservation', { id: r.id }) }}" method="post" class="mt-2">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('restore_reservation') }}">
-                                    <button type="submit" class="btn btn-success btn-sm"><i class="fa fa-credit-card"></i> Payer</button>
-                                </form>
-                                {% endif %}
+                                <div class="reservation-price">{{ r.totalPrice|number_format(2, ',', ' ') }} TND</div>
+                                <div class="reservation-actions">
+                                    <a href="{{ path('app_mes_reservations_edit', { id: r.id }) }}" class="btn btn-edit" title="Modifier les dates ou le nombre de personnes"><i class="fa fa-pencil"></i> Modifier</a>
+                                    <form action="{{ path('app_mes_reservations_delete', { id: r.id }) }}" method="post" class="d-inline" onsubmit="return confirm('Supprimer cette réservation ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_reservation_' ~ r.id) }}">
+                                        <button type="submit" class="btn btn-delete" title="Supprimer la réservation"><i class="fa fa-trash-o"></i> Supprimer</button>
+                                    </form>
+                                    {% if r.status.value|lower == 'pending' %}
+                                    <form action="{{ path('app_panier_restore_reservation', { id: r.id }) }}" method="post" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('restore_reservation') }}">
+                                        <button type="submit" class="btn btn-pay" title="Procéder au paiement"><i class="fa fa-credit-card"></i> Payer</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>

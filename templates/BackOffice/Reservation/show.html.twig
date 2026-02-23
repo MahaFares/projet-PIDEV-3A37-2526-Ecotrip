@@ -1,0 +1,73 @@
+{% extends 'BackOffice/base.html.twig' %}
+
+{% block title %}Réservation #{{ reservation.id }} | EcoTrip Admin{% endblock %}
+{% block page_title %}Détail réservation{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.detail-card { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+.detail-card h5 { font-size: 0.9rem; color: #64748b; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em; }
+.detail-card .value { font-size: 1.1rem; font-weight: 600; color: #0f172a; }
+.badge { padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <p class="mb-3">
+        <a href="{{ path('app_reservation_index') }}" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Retour à la liste</a>
+    </p>
+
+    <div class="detail-card">
+        <h5>Utilisateur</h5>
+        <p class="value mb-0">{{ reservation.user.email }}</p>
+        {% if reservation.user.username %}<small class="text-muted">{{ reservation.user.username }}</small>{% endif %}
+    </div>
+
+    <div class="detail-card">
+        <h5>Type & Élément</h5>
+        <p class="value mb-0">{{ reservation.reservationType.label() }} — {{ label }}</p>
+    </div>
+
+    <div class="detail-card">
+        <h5>Statut</h5>
+        <span class="badge badge-{{ reservation.status.badge() }}">{{ reservation.status.label() }}</span>
+    </div>
+
+    <div class="detail-card">
+        <h5>Dates</h5>
+        <p class="value mb-0">Du {{ reservation.dateFrom|date('d/m/Y') }}{% if reservation.dateTo %} au {{ reservation.dateTo|date('d/m/Y') }}{% endif %}</p>
+    </div>
+
+    <div class="detail-card">
+        <h5>Nombre de personnes</h5>
+        <p class="value mb-0">{{ reservation.numberOfPersons }}</p>
+    </div>
+
+    <div class="detail-card">
+        <h5>Prix total</h5>
+        <p class="value mb-0">{{ reservation.totalPrice|number_format(2, ',', ' ') }} TND</p>
+    </div>
+
+    {% if reservation.details is not empty %}
+    <div class="detail-card">
+        <h5>Détails</h5>
+        <pre class="mb-0 p-2 bg-light rounded" style="font-size: 0.9rem;">{{ reservation.details|json_encode(257) }}</pre>
+    </div>
+    {% endif %}
+
+    <div class="detail-card">
+        <h5>Créée le</h5>
+        <p class="value mb-0">{{ reservation.createdAt|date('d/m/Y H:i') }}</p>
+    </div>
+
+    <p class="mt-3">
+        <a href="{{ path('app_reservation_index') }}" class="btn btn-outline-secondary">Liste</a>
+        <form method="post" action="{{ path('app_reservation_delete', { id: reservation.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette réservation ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('reservation_delete_' ~ reservation.id) }}">
+            <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Supprimer</button>
+        </form>
+    </p>
+</div>
+{% endblock %}
