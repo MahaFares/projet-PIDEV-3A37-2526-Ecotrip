@@ -452,9 +452,8 @@
                 tableBody.innerHTML = commandes.map(cmd => {
                     const showUrl = `${baseUrl}/${cmd.id}`;
                     const editUrl = `${baseUrl}/${cmd.id}/edit`;
-
                     return `
-            <tr>
+            <tr data-id="${cmd.id}" data-delete-token="${escapeHtml(cmd.deleteToken || '')}">
                 <td>👤 User ${cmd.idUser}</td>
                 <td>📦 ${escapeHtml(cmd.produitNom)}</td>
                 <td><strong>${cmd.quantite}</strong></td>
@@ -469,7 +468,7 @@
                         <a href="${editUrl}" class="action-btn btn-edit" title="Modifier">
                             <i class="bi bi-pencil"></i>
                         </a>
-                        <button onclick="deleteCommande(${cmd.id})" class="action-btn btn-delete" title="Supprimer">
+                        <button type="button" onclick="deleteCommande(this)" class="action-btn btn-delete" title="Supprimer">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -570,22 +569,22 @@
                 return div.innerHTML;
             }
 
-            // Delete commande
-            window.deleteCommande = function(id) {
-                if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
-                    return;
-                }
+            // Delete commande (token from row data provided by API)
+            window.deleteCommande = function(btn) {
+                const row = btn.closest('tr');
+                const id = row && row.dataset.id;
+                const token = row && row.dataset.deleteToken;
+                if (!id || !token) return;
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) return;
 
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `${baseUrl}/${id}/delete`;
-
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = '_token';
-                csrfInput.value = '{{ csrf_token("delete_commande_") }}' + id;
+                csrfInput.value = token;
                 form.appendChild(csrfInput);
-
                 document.body.appendChild(form);
                 form.submit();
             };

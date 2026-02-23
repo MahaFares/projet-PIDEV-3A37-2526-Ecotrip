@@ -60,6 +60,11 @@
 | **`config/services.yaml`** | Injection de `HuggingFaceFaceService` (token + modèle). |
 | **`.env`** | `HUGGINGFACE_API_TOKEN`, optionnellement `HUGGINGFACE_FACE_MODEL`. |
 
+### Quand tu partages le projet (WeTransfer, etc.)
+
+- Chaque copie du projet doit avoir **son propre** `HUGGINGFACE_API_TOKEN` dans le `.env` (le `.env` n’est pas envoyé par WeTransfer car il est dans `.gitignore`). Ton ami doit créer un token sur [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) et l’ajouter.
+- **Erreur « Idle timeout »** : l’API gratuite Hugging Face peut être lente ou surchargée ; la connexion dépasse alors le temps d’attente. Le code attend maintenant plus longtemps (90 s) et affiche un message clair. En cas de timeout : réessayer plus tard ou vérifier la connexion internet.
+
 ### Flux
 
 1. **Enregistrement** : Mon Compte (front ou back) → ouvrir la caméra → Capturer → POST `{ "image": "base64" }` sur `/api/face/enroll` → le serveur appelle Hugging Face, enregistre le vecteur sur le `User`.

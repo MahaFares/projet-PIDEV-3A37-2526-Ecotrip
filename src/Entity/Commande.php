@@ -28,7 +28,7 @@ class Commande
     private ?int $idUser = self::DEFAULT_USER_ID;
 
     #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'commandes')]
-    #[ORM\JoinColumn(name: 'id_produit', referencedColumnName: 'id_produit')]
+    #[ORM\JoinColumn(name: 'id_produit', referencedColumnName: 'id_produit', nullable: true, onDelete: 'SET NULL')]
     private ?Produit $produit = null;
 
 

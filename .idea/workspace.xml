@@ -84,6 +84,7 @@
       <change beforePath="$PROJECT_DIR$/templates/FrontOffice/boutique/boutique.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/FrontOffice/boutique/boutique.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/FrontOffice/boutique/produit/detail.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/FrontOffice/boutique/produit/detail.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/FrontOffice/hebergement/accomodation.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/FrontOffice/hebergement/accomodation.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/FrontOffice/home/index.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/FrontOffice/home/index.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/FrontOffice/transport/accomodation.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/FrontOffice/transport/accomodation.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/HebergementTemplate/categorie_hebergement/_form.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/HebergementTemplate/categorie_hebergement/_form.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/HebergementTemplate/categorie_hebergement/edit.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/HebergementTemplate/categorie_hebergement/edit.html.twig" afterDir="false" />
@@ -328,6 +329,7 @@
       <workItem from="1771611537556" duration="1791000" />
       <workItem from="1771620653494" duration="41000" />
       <workItem from="1771736545208" duration="604000" />
+      <workItem from="1771769994735" duration="2368000" />
     </task>
     <servers />
   </component>
