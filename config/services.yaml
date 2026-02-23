@@ -32,5 +32,10 @@ services:
     App\Service\SmsService:
         arguments:
             $sid:   '%env(TWILIO_SID)%'
-            $token: '%env(TWILIO_AUTH_TOKEN)%'  # ← FIXED
+            $token: '%env(TWILIO_AUTH_TOKEN)%'
             $from:  '%env(TWILIO_FROM)%'
+
+    App\Service\AiTransportRecommendationService:
+        arguments:
+            $openAiApiKey: '%env(OPENAI_API_KEY)%'
+            $openAiModel: '%env(OPENAI_MODEL)%'
