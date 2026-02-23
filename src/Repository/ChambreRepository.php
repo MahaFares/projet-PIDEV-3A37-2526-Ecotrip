@@ -45,4 +45,25 @@ class ChambreRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * Count chambres by type (for pie chart).
+     *
+     * @return array<string, int> [ 'Type' => count, ... ]
+     */
+    public function getCountByType(): array
+    {
+        $rows = $this->createQueryBuilder('c')
+            ->select('c.type', 'COUNT(c.id) AS cnt')
+            ->groupBy('c.type')
+            ->orderBy('cnt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $out[$row['type']] = (int) $row['cnt'];
+        }
+        return $out;
+    }
 }

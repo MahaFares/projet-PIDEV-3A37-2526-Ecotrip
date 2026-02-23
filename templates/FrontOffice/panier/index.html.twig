@@ -50,7 +50,7 @@
                         <div>
                             {% if item.entity %}
                                 {% if item.type == 'hebergement' and item.entity.imagePrincipale %}
-                                    <img src="{{ item.entity.imagePrincipale starts with 'http' ? item.entity.imagePrincipale : asset('uploads/' ~ item.entity.imagePrincipale) }}" alt="" class="cart-item-img">
+                                    <img src="{{ item.entity.imagePrincipale starts with 'http' ? item.entity.imagePrincipale : asset(item.entity.imagePrincipale) }}" alt="" class="cart-item-img">
                                 {% elseif item.type == 'activity' and item.entity.image %}
                                     <img src="{{ asset(item.entity.image) }}" alt="" class="cart-item-img">
                                 {% elseif item.type == 'transport' and item.entity.image %}

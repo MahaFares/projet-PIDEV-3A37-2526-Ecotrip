@@ -1,10 +1,10 @@
-{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}, 'multipart': true}) }}
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
         <div class="card-body p-4 p-md-5">
             <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom">
                 <i class="fas fa-info-circle text-primary me-2"></i>Informations générales
             </h5>
-            
+
             <div class="row g-4">
                 <div class="col-md-8">
                     <div class="form-floating mb-3">
@@ -22,16 +22,69 @@
                 </div>
             </div>
 
-            <div class="form-floating mb-4">
-                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description', 'style': 'height: 150px;'}}) }}
-                {{ form_label(form.description) }}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    {{ form_label(form.description) }}
+                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill" id="btn-generate-desc">
+                        <i class="fas fa-magic me-1"></i> Générer avec IA
+                    </button>
+                </div>
+                {# Added 'id': 'hebergement_description' here #}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Description', 'style': 'height: 150px;', 'id': 'hebergement_description'}}) }}
                 {{ form_errors(form.description) }}
             </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const btnGenerate = document.getElementById('btn-generate-desc');
+                    const descInput = document.getElementById('hebergement_description');
+
+                    if(btnGenerate) {
+                        btnGenerate.addEventListener('click', function() {
+                            const originalText = btnGenerate.innerHTML;
+                            btnGenerate.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Génération...';
+                            btnGenerate.disabled = true;
+
+                            const form = btnGenerate.closest('form');
+                            // Gather data safely
+                            const nom = form.querySelector('[name$="[nom]"]')?.value || '';
+                            const ville = form.querySelector('[name$="[ville]"]')?.value || '';
+                            const stars = form.querySelector('[name$="[nbEtoiles]"]')?.value || '';
+                            const catSelect = form.querySelector('select[name$="[categorie]"]');
+                            const categorie = catSelect ? catSelect.options[catSelect.selectedIndex].text : '';
+
+                            const data = {
+                                nom: nom,
+                                ville: ville,
+                                nbEtoiles: stars,
+                                categorie: categorie,
+                                equipements: 'Standard'
+                            };
+
+                            fetch('{{ path('app_hebergement_ai_description') }}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                body: JSON.stringify(data)
+                            })
+                                .then(r => r.json())
+                                .then(d => {
+                                    if(d.description) descInput.value = d.description;
+                                    else alert('Erreur IA');
+                                })
+                                .catch(e => console.error(e))
+                                .finally(() => {
+                                    btnGenerate.innerHTML = originalText;
+                                    btnGenerate.disabled = false;
+                                });
+                        });
+                    }
+                });
+            </script>
 
             <h5 class="fw-bold text-dark mb-4 mt-5 pb-2 border-bottom">
                 <i class="fas fa-map-marked-alt text-info me-2"></i>Localisation
             </h5>
-            
+
             <div class="row g-4">
                 <div class="col-md-6">
                     <div class="form-floating mb-3">
@@ -66,12 +119,21 @@
             <h5 class="fw-bold text-dark mb-4 mt-5 pb-2 border-bottom">
                 <i class="fas fa-camera-retro text-success me-2"></i>Médias & Attribution
             </h5>
-            
+
             <div class="row g-4">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label class="form-label fw-600 text-muted small px-2">Image Principale (URL ou nom du fichier)</label>
-                        {{ form_widget(form.imagePrincipale, {'attr': {'class': 'form-control form-control-lg rounded-3', 'placeholder': 'Ex: hotel.jpg'}}) }}
+                        <label class="form-label fw-600 text-muted small px-2">Image Principale</label>
+                        {% if hebergement is defined and hebergement.imagePrincipale %}
+                            <div class="mb-3">
+                                <p class="small text-muted mb-1">Image actuelle :</p>
+                                <img src="{{ hebergement.imagePrincipale }}" alt="Image actuelle" class="rounded-3 shadow-sm" style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                            </div>
+                        {% endif %}
+                        <div class="border rounded-3 p-3 bg-light" style="border-style: dashed !important;">
+                            {{ form_widget(form.imagePrincipale, {'attr': {'class': 'form-control', 'accept': 'image/*', 'id': 'hebergement_image_principale'}}) }}
+                        </div>
+                        <small class="text-muted d-block mt-1">Cliquez sur « Parcourir » ci‑dessus pour choisir une image (JPG, PNG…). Obligatoire pour afficher une photo.</small>
                         {{ form_errors(form.imagePrincipale) }}
                     </div>
                 </div>
@@ -136,7 +198,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="card-footer bg-white p-4 p-md-5 border-top-0 pt-0">
             <div class="d-flex flex-column flex-md-row gap-3">
                 <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-sm transition-all hover-lift">
