@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var BATCH_SIZE = 50;
-    var FETCH_TIMEOUT_MS = 15000;
+    var BATCH_SIZE = 25;
+    var FETCH_TIMEOUT_MS = 25000;
     var CACHE_KEY = 'eco_trip_lang';
     var SUPPORTED = ['fr', 'en', 'es'];
     var defaultLang = 'fr';
@@ -12,22 +12,27 @@ document.addEventListener('DOMContentLoaded', function () {
     var langDropdown = document.getElementById('langDropdown');
     var langDropdownMenu = document.getElementById('langDropdownMenu');
 
-    var path = (window.location.pathname || '/').replace(/\/$/, '') || '/';
-    var isHomePage = path === '';
+    var path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+    var isHomePage = path === '' || path === '/';
 
-    // Always default to French – template is in French, combo always shows FR
+    // French = default, no API. Read saved lang from localStorage or from ?lang= on first load.
     var currentLang = defaultLang;
+    try {
+        var saved = localStorage.getItem(CACHE_KEY);
+        if (saved && SUPPORTED.indexOf(saved) !== -1) currentLang = saved;
+    } catch (err) {}
     if (isHomePage && window.location.search) {
         var m = window.location.search.match(/[?&]lang=([a-z]{2})/i);
         if (m && SUPPORTED.indexOf(m[1].toLowerCase()) !== -1) {
             currentLang = m[1].toLowerCase();
+            try { localStorage.setItem(CACHE_KEY, currentLang); } catch (err) {}
         }
     }
     updateLangUI(currentLang);
 
-    // Only on homepage: auto-translate if user landed with ?lang=en|es
-    if (isHomePage && currentLang !== defaultLang) {
-        setTimeout(function () { runTranslationInBackground(defaultLang, currentLang); }, 150);
+    // If user had chosen English or Spanish, translate this page (any page). French = never call API.
+    if (currentLang !== defaultLang) {
+        setTimeout(function () { runTranslationInBackground(defaultLang, currentLang); }, 200);
     }
 
     var langSelector = document.getElementById('langSelector');
@@ -39,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 langDropdown.classList.toggle('show');
                 if (langDropdownMenu) langDropdownMenu.classList.toggle('show');
             }
+            return false;
         });
     }
 
@@ -60,25 +66,24 @@ document.addEventListener('DOMContentLoaded', function () {
         var newLang = opt.getAttribute('data-lang');
         if (!newLang || newLang === currentLang) {
             closeDropdown();
-            return;
-        }
-
-        if (!isHomePage) {
-            closeDropdown();
-            window.location.href = '/' + (newLang !== defaultLang ? '?lang=' + newLang : '');
-            return;
+            return false;
         }
 
         var oldLang = currentLang;
         currentLang = newLang;
+        try { localStorage.setItem(CACHE_KEY, currentLang); } catch (err) {}
         updateLangUI(currentLang);
         closeDropdown();
 
+        // French = reload to show French content, no API
         if (currentLang === defaultLang) {
-            window.location.reload();
-            return;
+            window.location.href = path === '' || path === '/' ? '/' : window.location.pathname;
+            return false;
         }
+
+        // English or Spanish = translate current page via API (navbar + body)
         runTranslationInBackground(oldLang, currentLang);
+        return false;
     });
 
     function closeDropdown() {
@@ -117,20 +122,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function runTranslationInBackground(source, target) {
+        if (target === defaultLang) return; // French = no API
         if (isTranslating) return;
         isTranslating = true;
         showTranslatingBanner();
         translatePage(source, target)
             .then(function () { isTranslating = false; hideTranslatingBanner(); })
-            .catch(function () {
+            .catch(function (err) {
                 isTranslating = false;
                 hideTranslatingBanner();
-                if (typeof window.showToast === 'function') window.showToast('Traduction indisponible. Réessayez.', 'error');
+                var msg = 'La traduction est temporairement indisponible. Vous pouvez réessayer plus tard ou continuer en français.';
+                if (typeof window.showToast === 'function') window.showToast(msg, 'error');
             });
     }
 
     function translatePage(source, target) {
-        var root = document.getElementById('ecotrip-translate-root') || document.body;
+        var root = document.body;
         var nodes = [];
         var walker = document.createTreeWalker(
             root,
@@ -173,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
                 .then(function (r) {
                     clearTimeout(timeoutId);
-                    if (!r.ok) throw new Error('API error');
+                    if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || 'API error'); }).catch(function (e) { if (e.message) throw e; throw new Error('API error'); });
                     return r.json();
                 })
                 .then(function (result) {

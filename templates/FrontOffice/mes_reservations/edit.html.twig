@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la réservation | EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.reservations-hero { background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%); padding: 32px 0; color: #fff; text-align: center; }
+.reservations-hero h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+.reservation-edit-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 24px; margin-top: 24px; border: 1px solid #e5e7eb; }
+.reservation-edit-card .form-label { font-weight: 600; color: #334155; }
+.reservation-edit-card .btn-success { border-radius: 10px; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="reservations-hero">
+    <div class="container">
+        <h1><i class="fa fa-pencil"></i> Modifier la réservation</h1>
+        <p class="mb-0">{{ label }}</p>
+    </div>
+</section>
+
+<section class="section_gap">
+    <div class="container">
+        <div class="reservation-edit-card">
+            {{ form_start(form, { attr: { class: 'needs-validation', novalidate: true } }) }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    {{ form_row(form.dateFrom, { label_attr: { class: 'form-label' }, attr: { class: 'form-control' } }) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.dateTo, { label_attr: { class: 'form-label' }, attr: { class: 'form-control' } }) }}
+                </div>
+                <div class="col-12">
+                    {{ form_row(form.numberOfPersons, { label_attr: { class: 'form-label' }, attr: { class: 'form-control' } }) }}
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Enregistrer</button>
+                <a href="{{ path('app_mes_reservations') }}" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</section>
+{% endblock %}

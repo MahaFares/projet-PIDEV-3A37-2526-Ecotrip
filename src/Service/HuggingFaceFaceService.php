@@ -57,15 +57,27 @@ final class HuggingFaceFaceService
 
         $url = sprintf(self::API_URL, $this->modelId, $this->task);
 
-        $response = $this->httpClient->request('POST', $url, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiToken,
-                'Content-Type'  => 'application/json',
-            ],
-            'json' => [
-                'inputs' => $dataUrl,
-            ],
-        ]);
+        try {
+            $response = $this->httpClient->request('POST', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiToken,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'inputs' => $dataUrl,
+                ],
+                'timeout' => 90,
+                'max_duration' => 95,
+            ]);
+        } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+            $msg = $e->getMessage();
+            if (stripos($msg, 'timeout') !== false || stripos($msg, 'idle') !== false) {
+                throw new \RuntimeException(
+                    'Le serveur Hugging Face met trop de temps à répondre (timeout). Réessayez dans quelques instants, ou vérifiez votre connexion.'
+                );
+            }
+            throw new \RuntimeException('Erreur réseau Hugging Face: ' . $msg);
+        }
 
         $status = $response->getStatusCode();
         $body   = $response->toArray(false);
@@ -97,15 +109,27 @@ final class HuggingFaceFaceService
 
         $url = sprintf(self::API_URL, $this->modelId, $this->task);
 
-        $response = $this->httpClient->request('POST', $url, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiToken,
-                'Content-Type'  => 'application/json',
-            ],
-            'json' => [
-                'inputs' => $imageUrl,
-            ],
-        ]);
+        try {
+            $response = $this->httpClient->request('POST', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiToken,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'inputs' => $imageUrl,
+                ],
+                'timeout' => 90,
+                'max_duration' => 95,
+            ]);
+        } catch (\Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface $e) {
+            $msg = $e->getMessage();
+            if (stripos($msg, 'timeout') !== false || stripos($msg, 'idle') !== false) {
+                throw new \RuntimeException(
+                    'Le serveur Hugging Face met trop de temps à répondre (timeout). Réessayez dans quelques instants, ou vérifiez votre connexion.'
+                );
+            }
+            throw new \RuntimeException('Erreur réseau Hugging Face: ' . $msg);
+        }
 
         $status = $response->getStatusCode();
         $body   = $response->toArray(false);

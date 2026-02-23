@@ -13,11 +13,17 @@ class TranslateController extends AbstractController
     #[Route('/translate', name: 'api_translate', methods: ['POST'])]
     public function translate(Request $request): JsonResponse
     {
-        set_time_limit(30);
-        $data = json_decode($request->getContent(), true) ?? [];
-        $textOrBatch = $data['text'] ?? '';
-        $source = $data['source'] ?? 'fr';
-        $target = $data['target'] ?? 'en';
+        set_time_limit(45);
+        try {
+            $content = $request->getContent();
+            $data = \is_string($content) && $content !== '' ? json_decode($content, true) : [];
+            $data = \is_array($data) ? $data : [];
+            $textOrBatch = $data['text'] ?? '';
+            $source = $data['source'] ?? 'fr';
+            $target = $data['target'] ?? 'en';
+        } catch (\Throwable $e) {
+            return new JsonResponse(['success' => false, 'error' => 'invalid_request'], 400);
+        }
 
         if ($source === $target) {
             if (is_array($textOrBatch)) {
@@ -26,31 +32,43 @@ class TranslateController extends AbstractController
             return new JsonResponse(['success' => true, 'translatedText' => $textOrBatch]);
         }
 
-        // Batch: array of strings
-        if (is_array($textOrBatch)) {
-            $translations = [];
-            foreach ($textOrBatch as $text) {
-                $t = is_string($text) ? trim($text) : '';
-                if ($t === '') {
-                    $translations[] = '';
-                    continue;
+        try {
+            // Batch: array of strings
+            if (is_array($textOrBatch)) {
+                $translations = [];
+                foreach ($textOrBatch as $text) {
+                    $t = is_string($text) ? trim($text) : '';
+                    if ($t === '') {
+                        $translations[] = '';
+                        continue;
+                    }
+                    $translations[] = $this->callMyMemory($t, $source, $target) ?: $t;
                 }
-                $translations[] = $this->callMyMemory($t, $source, $target) ?: $t;
+                return new JsonResponse(['success' => true, 'translations' => $translations]);
             }
-            return new JsonResponse(['success' => true, 'translations' => $translations]);
-        }
 
-        // Single string
-        $text = is_string($textOrBatch) ? trim($textOrBatch) : '';
-        if ($text === '') {
-            return new JsonResponse(['success' => true, 'translatedText' => '']);
-        }
-        $translated = $this->callMyMemory($text, $source, $target);
+            // Single string
+            $text = is_string($textOrBatch) ? trim($textOrBatch) : '';
+            if ($text === '') {
+                return new JsonResponse(['success' => true, 'translatedText' => '']);
+            }
+            $translated = $this->callMyMemory($text, $source, $target);
 
-        return new JsonResponse([
-            'success' => true,
-            'translatedText' => $translated ?: $text,
-        ]);
+            return new JsonResponse([
+                'success' => true,
+                'translatedText' => $translated ?: $text,
+            ]);
+        } catch (\Throwable $e) {
+            // Always return 200 with originals so the frontend doesn't show an error
+            if (is_array($textOrBatch)) {
+                $originals = array_map(function ($t) {
+                    return is_string($t) ? trim($t) : '';
+                }, $textOrBatch);
+                return new JsonResponse(['success' => true, 'translations' => $originals]);
+            }
+            $text = is_string($textOrBatch) ? trim($textOrBatch) : '';
+            return new JsonResponse(['success' => true, 'translatedText' => $text]);
+        }
     }
 
     private function callMyMemory(string $text, string $source, string $target): ?string
@@ -62,9 +80,14 @@ class TranslateController extends AbstractController
         ]);
 
         try {
-            $response = file_get_contents($url, false, stream_context_create([
-                'http' => ['timeout' => 4, 'ignore_errors' => true],
-            ]));
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 8,
+                    'ignore_errors' => true,
+                    'user_agent' => 'EcoTrip/1.0 (Translation)',
+                ],
+            ]);
+            $response = @file_get_contents($url, false, $context);
         } catch (\Throwable) {
             return null;
         }
