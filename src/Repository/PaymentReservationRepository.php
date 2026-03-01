@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\PaymentReservation;
-use App\Entity\Enum\PaymentStatus;
+use App\Enum\PaymentStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
