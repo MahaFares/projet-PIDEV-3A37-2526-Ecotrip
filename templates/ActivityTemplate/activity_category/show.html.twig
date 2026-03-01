@@ -2,20 +2,69 @@
 
 {% block title %}{{ activity_category.name }} - Admin{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .detail-header { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 2rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 8px 24px rgba(5, 150, 105, 0.25); }
+        .detail-header h1 { margin: 0; font-size: 1.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+        .detail-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+        .info-item { padding: 1rem; background: #f8fafc; border-radius: 10px; }
+        .info-item label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.25rem; }
+        .info-item span { font-weight: 600; color: #0f172a; }
+        .form-actions { display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .modern-btn { padding: 0.75rem 1.5rem; font-weight: 600; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+        .btn-primary-custom { background: linear-gradient(135deg, #059669, #047857); color: white; }
+        .btn-secondary-custom { background: #f1f5f9; color: #475569; border: 2px solid #e2e8f0; }
+        .modern-btn:hover { transform: translateY(-2px); }
+        .icon-preview { width: 64px; height: 64px; object-fit: contain; border-radius: 12px; background: #f8fafc; padding: 8px; }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="container py-4">
+<div class="container-fluid py-4">
     {{ include('admin_nav.html.twig') }}
-    <h1>{{ activity_category.name }}</h1>
-    <table class="table">
-        <tbody>
-            <tr><th>Id</th><td>{{ activity_category.id }}</td></tr>
-            <tr><th>Nom</th><td>{{ activity_category.name }}</td></tr>
-            <tr><th>Description</th><td>{{ activity_category.description|default('–') }}</td></tr>
-            <tr><th>Icône</th><td>{{ activity_category.icon|default('–') }}</td></tr>
-        </tbody>
-    </table>
-    <a href="{{ path('app_activity_category_edit', {'id': activity_category.id}) }}" class="btn btn-primary">Modifier</a>
-    <a href="{{ path('app_activity_category_index') }}" class="btn btn-secondary">Retour à la liste</a>
-    {{ include('ActivityTemplate/activity_category/_delete_form.html.twig') }}
+
+    <div class="detail-header">
+        <h1><i class="bi bi-folder"></i> {{ activity_category.name }}</h1>
+    </div>
+
+    <div class="detail-card">
+        <div class="info-grid mb-4">
+            <div class="info-item">
+                <label>ID</label>
+                <span>#{{ activity_category.id }}</span>
+            </div>
+            <div class="info-item">
+                <label>Nom</label>
+                <span>{{ activity_category.name }}</span>
+            </div>
+            <div class="info-item">
+                <label>Icône</label>
+                <span>
+                    {% if activity_category.icon %}
+                        <img src="{{ asset(activity_category.icon) }}" alt="" class="icon-preview">
+                    {% else %}
+                        –
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="mb-0">
+            <label class="d-block fw-bold text-muted small text-uppercase mb-2">Description</label>
+            <p class="mb-0 text-secondary">{{ activity_category.description|default('Aucune description') }}</p>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('app_activity_category_edit', {'id': activity_category.id}) }}" class="modern-btn btn-primary-custom">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <a href="{{ path('app_activity_category_index') }}" class="modern-btn btn-secondary-custom">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+            {{ include('ActivityTemplate/activity_category/_delete_form.html.twig') }}
+        </div>
+    </div>
 </div>
 {% endblock %}

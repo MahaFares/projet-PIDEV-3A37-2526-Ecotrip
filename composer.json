@@ -7,15 +7,23 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "cloudinary/cloudinary_php": "^3.1",
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.6",
+        "dompdf/dompdf": "^3.1",
+        "endroid/qr-code-bundle": "^6.0",
+        "gregwar/captcha-bundle": "^2.5",
+        "knplabs/knp-paginator-bundle": "^6.10",
+        "stripe/stripe-php": "*",
         "symfony/asset": "6.4.*",
         "symfony/console": "6.4.*",
         "symfony/dotenv": "6.4.*",
         "symfony/flex": "^2",
         "symfony/form": "6.4.*",
         "symfony/framework-bundle": "6.4.*",
+        "symfony/google-mailer": "6.4.*",
+        "symfony/http-client": "6.4.*",
         "symfony/mailer": "6.4.*",
         "symfony/runtime": "6.4.*",
         "symfony/security-bundle": "6.4.*",
@@ -25,13 +33,16 @@
         "symfony/yaml": "6.4.*",
         "symfonycasts/reset-password-bundle": "^1.24",
         "symfonycasts/verify-email-bundle": "^1.18",
+        "tecnickcom/tcpdf": "^6.10",
+        "twilio/sdk": "*",
         "vich/uploader-bundle": "*"
     },
     "config": {
         "allow-plugins": {
             "php-http/discovery": true,
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "endroid/installer": true
         },
         "sort-packages": true
     },
@@ -76,9 +87,12 @@
         }
     },
     "require-dev": {
+        "ahmed-bhs/doctrine-doctor": "^1.0",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^11.5",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",
-        "symfony/maker-bundle": "^1.65"
+        "symfony/maker-bundle": "^1.65",
+        "symfony/web-profiler-bundle": "6.4.*"
     }
 }

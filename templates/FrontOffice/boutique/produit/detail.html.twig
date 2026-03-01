@@ -145,6 +145,53 @@
     </section>
     <!--================ Product Details Area =================-->
 
+    <!--================ Vous aimerez aussi (AI + fallback) =================-->
+    <section class="section_gap recommandations-section" style="background: linear-gradient(180deg, #f8faf8 0%, #fff 100%);">
+        <style>
+            .recommandations-section .card:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(45,80,22,0.15) !important; }
+        </style>
+        <div class="container">
+            <h2 class="mb-4" style="font-size: 1.75rem; font-weight: 700; color: #2d5016;">
+                <i class="fa fa-leaf me-2"></i> Vous aimerez aussi
+            </h2>
+            {% if recommended|length > 0 %}
+            <div class="row g-4">
+                {% for p in recommended %}
+                <div class="col-6 col-md-3">
+                    <a href="{{ path('front_produit_detail', { id: p.id }) }}" class="text-decoration-none text-dark">
+                        <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden" style="transition: transform 0.2s, box-shadow 0.2s;">
+                            <div style="height: 180px; overflow: hidden; background: #f1f5f1;">
+                                {% if p.image and p.image != '' %}
+                                    {% if p.image starts with 'http' %}
+                                        <img src="{{ p.image }}" alt="{{ p.nom }}" class="w-100 h-100" style="object-fit: cover;">
+                                    {% else %}
+                                        <img src="{{ asset('uploads/' ~ p.image) }}" alt="{{ p.nom }}" class="w-100 h-100" style="object-fit: cover;">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{{ asset('images/room1.jpg') }}" alt="{{ p.nom }}" class="w-100 h-100" style="object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title mb-1" style="font-weight: 600; color: #2c3e50;">{{ p.nom }}</h6>
+                                {% if p.categorie %}
+                                    <span class="badge bg-secondary mb-2" style="font-size: 0.7rem;">{{ p.categorie.nom }}</span>
+                                {% endif %}
+                                <p class="mb-0 fw-bold" style="color: #2d5016;">{{ p.prix|number_format(2, ',', ' ') }} TND</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">
+                <i class="fa fa-info-circle me-1"></i> Les recommandations apparaîtront ici lorsqu’il y a plusieurs produits dans la boutique (même catégorie ou suggestions IA).
+            </p>
+            <a href="{{ path('front_boutique') }}" class="btn btn-outline-success mt-2">Voir toute la boutique</a>
+            {% endif %}
+        </div>
+    </section>
+
     <script>
         function increaseQuantity() {
             const input = document.getElementById('quantity');
@@ -165,11 +212,15 @@
         }
 
         function addToCart() {
-            const quantity = document.getElementById('quantity').value;
-            const productName = "{{ produit.nom|e('js') }}";
-            const productPrice = {{ produit.prix }};
-            
-            alert(`${quantity} x ${productName} ajouté au panier!\nTotal: ${(quantity * productPrice).toFixed(2)} TND`);
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            fetch('{{ path('app_panier_add_produit', {id: produit.id}) }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'quantity=' + encodeURIComponent(quantity)
+            }).then(r => r.json()).then(d => {
+                if (d.success) { if (typeof updateCartBadge === 'function') updateCartBadge(d.count); if (window.showToast) showToast(quantity + ' x {{ produit.nom|e('js') }} ajouté au panier !', 'success'); }
+                else { if (window.showToast) showToast(d.message || 'Erreur', 'error'); }
+            });
         }
     </script>
 {% endblock %}

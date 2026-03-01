@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catégories | Admin{% endblock %}
+
+{% block body %}
+<section class="breadcrumb_area">
+    <div class="container">
+        <div class="page-cover text-center">
+            <h2 class="page-cover-tittle">Catégories</h2>
+            <ol class="breadcrumb">
+                <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li class="active">Catégories</li>
+            </ol>
+        </div>
+    </div>
+</section>
+<!-- Boutons de navigation -->
+<section class="py-3">
+    <div class="container">
+       <div class="text-right">
+    <a href="{{ path('app_produit_new') }}" class="btn theme_btn button_hover">Produit</a>
+    <a href="{{ path('app_commande_new') }}" class="btn theme_btn button_hover">Commandes</a>
+    <a href="{{ path('app_paiement_new') }}" class="btn theme_btn button_hover">Paiement</a>
+</div>
+    </div>
+</section>
+
+<section class="accomodation_area section_gap">
+    <div class="container">
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+
+        <p><a href="{{ path('app_categorie_new') }}" class="btn theme_btn button_hover">Nouvelle catégorie</a></p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Nom</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in categories %}
+                    <tr>
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.nom }}</td>
+                        <td>{{ (c.description|default(''))|slice(0, 80) }}{% if c.description|default('')|length > 80 %}...{% endif %}</td>
+                        <td>
+                            <a href="{{ path('app_categorie_show', { id: c.id }) }}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{{ path('app_categorie_edit', { id: c.id}) }}" class="btn btn-sm btn-secondary">Modifier</a>
+                            <form method="post" action="{{ path('app_categorie_delete', { id: c.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette catégorie ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_categorie_' ~ c.id) }}">
+                                <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4">Aucune catégorie.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

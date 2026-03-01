@@ -86,7 +86,7 @@
                 <i class="fa fa-angle-down float-right"></i>
             </div>
         </li>
-        <div id="transport-menu" class="collapse {{ 'app_transport' in app.request.attributes.get('_route') or 'app_trajet' in app.request.attributes.get('_route') ? 'show' : '' }}">
+        <div id="transport-menu" class="collapse {{ 'app_transport' in app.request.attributes.get('_route') or 'app_trajet' in app.request.attributes.get('_route') or 'app_transport_category' in app.request.attributes.get('_route') or 'app_chauffeur' in app.request.attributes.get('_route') ? 'show' : '' }}">
             <li>
                 <a href="{{ path('app_transport_index') }}" class="{{ app.request.attributes.get('_route') == 'app_transport_index' ? 'active' : '' }}">
                     <i class="fa fa-list"></i> Liste Transports
@@ -95,6 +95,16 @@
             <li>
                 <a href="{{ path('app_transport_new') }}" class="{{ app.request.attributes.get('_route') == 'app_transport_new' ? 'active' : '' }}">
                     <i class="fa fa-plus-circle"></i> Nouveau Transport
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_transport_category_index') }}" class="{{ 'app_transport_category' in app.request.attributes.get('_route') ? 'active' : '' }}">
+                    <i class="fa fa-tags"></i> Catégories
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('app_chauffeur_index') }}" class="{{ 'app_chauffeur' in app.request.attributes.get('_route') ? 'active' : '' }}">
+                    <i class="fa fa-user"></i> Chauffeurs
                 </a>
             </li>
             <li>
@@ -139,10 +149,23 @@
             </li>
         </div>
         
+        <!-- RÉSERVATIONS -->
+        <li class="menu-section">RÉSERVATIONS</li>
+        <li>
+            <a href="{{ path('app_reservation_index') }}" class="{{ 'app_reservation' in (app.request.attributes.get('_route')|default('')) ? 'active' : '' }}">
+                <i class="fa fa-calendar-check-o"></i> Réservations
+            </a>
+        </li>
+        
         <!-- UTILISATEURS -->
         <li class="menu-section">UTILISATEURS</li>
         <li>
-            <a href="{{ path('app_my_account') }}" class="{{ app.request.attributes.get('_route') == 'app_my_account' ? 'active' : '' }}">
+            <a href="{{ path('app_user_index') }}" class="{{ 'app_user' in (app.request.attributes.get('_route')|default('')) ? 'active' : '' }}">
+                <i class="fa fa-users"></i> Gestion Utilisateurs
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_my_account') }}" class="{{ app.request.attributes.get('_route') in ['app_my_account', 'app_update_account', 'app_change_password'] ? 'active' : '' }}">
                 <i class="fa fa-user-circle"></i> Mon Compte
             </a>
         </li>

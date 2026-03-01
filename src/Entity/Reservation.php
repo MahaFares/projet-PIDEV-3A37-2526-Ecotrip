@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
-use App\Entity\Enum\ReservationType;
-use App\Entity\Enum\ReservationStatus;
+use App\Enum\ReservationType;
+use App\Enum\ReservationStatus;
 use App\Repository\ReservationRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -38,6 +39,21 @@ class Reservation
     #[ORM\Column(type: 'string', enumType: ReservationStatus::class)]
     private ?ReservationStatus $status = ReservationStatus::PENDING;
 
+    #[ORM\Column(type: 'date_immutable')]
+    #[Assert\NotNull(message: 'La date de début est requise')]
+    private ?\DateTimeImmutable $dateFrom = null;
+
+    #[ORM\Column(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $dateTo = null;
+
+    #[ORM\Column]
+    #[Assert\NotNull(message: 'Le nombre de personnes est requis')]
+    #[Assert\Positive(message: 'Le nombre de personnes doit être au moins 1')]
+    private ?int $numberOfPersons = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $details = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -55,9 +71,12 @@ class Reservation
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $now = new \DateTimeImmutable();
+        $this->createdAt = $now;
+        $this->updatedAt = $now;
         $this->status = ReservationStatus::PENDING;
+        $this->dateFrom = $now;
+        $this->numberOfPersons = 1;
     }
 
     public function getId(): ?int
@@ -118,6 +137,56 @@ class Reservation
     {
         $this->status = $status;
         $this->updatedAt = new \DateTimeImmutable();
+        return $this;
+    }
+
+    public function getDateFrom(): ?\DateTimeImmutable
+    {
+        return $this->dateFrom;
+    }
+
+    public function setDateFrom(\DateTimeInterface $dateFrom): self
+    {
+        if ($dateFrom instanceof \DateTimeImmutable) {
+            $this->dateFrom = $dateFrom;
+        } else {
+            $this->dateFrom = \DateTimeImmutable::createFromMutable(
+                $dateFrom instanceof \DateTime ? $dateFrom : new \DateTime($dateFrom->format('c'))
+            );
+        }
+        return $this;
+    }
+
+    public function getDateTo(): ?\DateTimeImmutable
+    {
+        return $this->dateTo;
+    }
+
+    public function setDateTo(?\DateTimeImmutable $dateTo): self
+    {
+        $this->dateTo = $dateTo;
+        return $this;
+    }
+
+    public function getNumberOfPersons(): ?int
+    {
+        return $this->numberOfPersons;
+    }
+
+    public function setNumberOfPersons(int $numberOfPersons): self
+    {
+        $this->numberOfPersons = $numberOfPersons;
+        return $this;
+    }
+
+    public function getDetails(): ?array
+    {
+        return $this->details;
+    }
+
+    public function setDetails(?array $details): self
+    {
+        $this->details = $details;
         return $this;
     }
 

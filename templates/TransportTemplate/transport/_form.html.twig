@@ -1,77 +1,371 @@
-{{ form_start(form, {'attr': {'class': 'form', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+<style>
+    .modern-form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .modern-form-container * {
+        box-sizing: border-box;
+    }
+
+    .modern-error-banner {
+        background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
+        color: white;
+        padding: 20px 24px;
+        border-radius: 12px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 12px rgba(255, 71, 87, 0.2);
+    }
+
+    .modern-error-banner h4 {
+        margin: 0 0 12px 0;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .modern-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+        .modern-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .modern-form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .modern-form-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .modern-form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0 !important;
+        display: block;
+    }
+
+    .modern-form-input,
+    .modern-form-select {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .modern-form-input:focus,
+    .modern-form-select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .modern-form-input::placeholder {
+        color: #a0aec0;
+    }
+
+    .modern-form-input.error,
+    .modern-form-select.error {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+
+    .modern-error-message {
+        color: #ef4444;
+        font-size: 13px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .modern-error-message::before {
+        content: "⚠";
+    }
+
+    .modern-upload-area {
+        border: 3px dashed #cbd5e0;
+        border-radius: 16px;
+        padding: 32px;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        transition: all 0.3s ease;
+        margin-bottom: 24px;
+    }
+
+    .modern-upload-area:hover {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    }
+
+    .current-image-preview {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .current-image-preview p {
+        margin: 0 0 12px 0;
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 14px;
+    }
+
+    .current-image-preview img {
+        max-width: 200px;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: block;
+    }
+
+    .upload-label {
+        font-size: 16px;
+        font-weight: 700;
+        color: #3b82f6;
+        margin: 0 0 12px 0 !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .modern-form-input[type="file"] {
+        padding: 10px;
+        cursor: pointer;
+        border: 2px solid #cbd5e0;
+        background: white;
+    }
+
+    .modern-form-input[type="file"]::file-selector-button {
+        padding: 8px 16px;
+        border: none;
+        background: #3b82f6;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 12px;
+        transition: background 0.2s;
+    }
+
+    .modern-form-input[type="file"]::file-selector-button:hover {
+        background: #2563eb;
+    }
+
+    .upload-hint {
+        display: block;
+        margin-top: 10px;
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .modern-checkbox-wrapper {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        margin-bottom: 32px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .modern-checkbox-wrapper:hover {
+        background: #f1f5f9;
+        border-color: #3b82f6;
+    }
+
+    .modern-checkbox-wrapper input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        accent-color: #3b82f6;
+    }
+
+    .modern-checkbox-wrapper label {
+        margin: 0 !important;
+        font-size: 15px;
+        font-weight: 500;
+        color: #2d3748;
+        cursor: pointer;
+    }
+
+    .modern-form-actions {
+        display: flex;
+        gap: 16px;
+        padding-top: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .modern-form-actions {
+            flex-direction: column;
+        }
+    }
+
+    .modern-btn {
+        padding: 14px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        justify-content: center;
+    }
+
+    .modern-btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .modern-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .modern-btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+        border: 2px solid #e2e8f0;
+    }
+
+    .modern-btn-secondary:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e0;
+    }
+</style>
+
+<div class="modern-form-container">
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+
     {% if form.vars.errors|length > 0 %}
-        <div class="alert alert-danger" role="alert">
-            <h4 class="alert-heading"><i class="fa fa-exclamation-circle"></i> Erreurs de validation</h4>
+        <div class="modern-error-banner">
+            <h4><i class="fa fa-exclamation-circle"></i> Erreurs de validation</h4>
             {{ form_errors(form) }}
         </div>
     {% endif %}
 
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            {{ form_label(form.type, 'Type de Transport', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.type, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Bus, Voiture, Train'}}) }}
-            {{ form_errors(form.type) }}
+    <div class="modern-form-grid">
+        <div class="modern-form-field">
+            {{ form_label(form.category, null, {'label_attr': {'class': 'modern-form-label'}}) }}
+            {{ form_widget(form.category, {'attr': {'class': 'modern-form-select' ~ (form.category.vars.errors|length ? ' error' : '')}}) }}
+            {% if form.category.vars.errors|length > 0 %}
+                <div class="modern-error-message">{{ form_errors(form.category) }}</div>
+            {% endif %}
         </div>
-        <div class="col-md-6 mb-3">
-            {{ form_label(form.capacite, 'Capacité (passagers)', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.capacite, {'attr': {'class': 'form-control', 'placeholder': 'Nombre de passagers', 'type': 'number'}}) }}
-            {{ form_errors(form.capacite) }}
+
+        <div class="modern-form-field">
+            {{ form_label(form.chauffeur, null, {'label_attr': {'class': 'modern-form-label'}}) }}
+            {{ form_widget(form.chauffeur, {'attr': {'class': 'modern-form-select' ~ (form.chauffeur.vars.errors|length ? ' error' : '')}}) }}
+            {% if form.chauffeur.vars.errors|length > 0 %}
+                <div class="modern-error-message">{{ form_errors(form.chauffeur) }}</div>
+            {% endif %}
+        </div>
+
+        <div class="modern-form-field">
+            {{ form_label(form.type, 'Type de Transport', {'label_attr': {'class': 'modern-form-label'}}) }}
+            {{ form_widget(form.type, {'attr': {'class': 'modern-form-input', 'placeholder': 'Ex: Bus, Voiture, Train'}}) }}
+            {% if form.type.vars.errors|length > 0 %}
+                <div class="modern-error-message">{{ form_errors(form.type) }}</div>
+            {% endif %}
+        </div>
+
+        <div class="modern-form-field">
+            {{ form_label(form.capacite, 'Capacité (passagers)', {'label_attr': {'class': 'modern-form-label'}}) }}
+            {{ form_widget(form.capacite, {'attr': {'class': 'modern-form-input', 'placeholder': 'Nombre de passagers', 'type': 'number'}}) }}
+            {% if form.capacite.vars.errors|length > 0 %}
+                <div class="modern-error-message">{{ form_errors(form.capacite) }}</div>
+            {% endif %}
+        </div>
+
+        <div class="modern-form-field">
+            {{ form_label(form.emissionco2, 'Émission CO2 (kg)', {'label_attr': {'class': 'modern-form-label'}}) }}
+            {{ form_widget(form.emissionco2, {'attr': {'class': 'modern-form-input', 'placeholder': 'Ex: 50.5', 'step': '0.01'}}) }}
+            {% if form.emissionco2.vars.errors|length > 0 %}
+                <div class="modern-error-message">{{ form_errors(form.emissionco2) }}</div>
+            {% endif %}
+        </div>
+
+        <div class="modern-form-field">
+            {{ form_label(form.prixparpersonne, 'Prix par Personne (DT)', {'label_attr': {'class': 'modern-form-label'}}) }}
+            {{ form_widget(form.prixparpersonne, {'attr': {'class': 'modern-form-input', 'placeholder': 'Ex: 25.50 DT', 'step': '0.01'}}) }}
+            {% if form.prixparpersonne.vars.errors|length > 0 %}
+                <div class="modern-error-message">{{ form_errors(form.prixparpersonne) }}</div>
+            {% endif %}
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            {{ form_label(form.emissionco2, 'Émission CO2 (kg)', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.emissionco2, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 50.5', 'step': '0.01'}}) }}
-            {{ form_errors(form.emissionco2) }}
-        </div>
-        <div class="col-md-6 mb-3">
-            {{ form_label(form.prixparpersonne, 'Prix par Personne (DT)', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.prixparpersonne, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 25.50 DT', 'step': '0.01'}}) }}
-            {{ form_errors(form.prixparpersonne) }}
-        </div>
-    </div>
-
-    <div class="mb-3" style="border: 2px dashed #007bff; padding: 20px; border-radius: 8px; background-color: #f8f9fa;">
+    <div class="modern-upload-area">
         {% if form.vars.data.id and form.vars.data.image %}
-        <div style="margin-bottom: 15px;">
-            <p style="font-weight: bold; margin-bottom: 10px;">Image actuelle :</p>
-            <img src="{{ asset('uploads/transports/' ~ form.vars.data.image) }}" alt="{{ form.vars.data.type }}" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        </div>
+            <div class="current-image-preview">
+                <p>📷 Image actuelle</p>
+                <img src="{{ asset('uploads/transports/' ~ form.vars.data.image) }}" alt="{{ form.vars.data.type }}">
+            </div>
         {% endif %}
-        <label class="form-label" style="font-size: 1.1rem; font-weight: bold; color: #007bff;">
-            <i class="fa fa-image"></i> 
+
+        <label class="upload-label">
+            <i class="fa fa-image"></i>
             {% if form.vars.data.id %}
                 Nouvelle Image du Transport
             {% else %}
                 Image du Transport
             {% endif %}
         </label>
-        {{ form_widget(form.image, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
-        <small class="text-muted" style="display: block; margin-top: 8px;">
+        {{ form_widget(form.image, {'attr': {'class': 'modern-form-input', 'accept': 'image/*'}}) }}
+        <small class="upload-hint">
             {% if form.vars.data.id %}
-                Laissez vide pour garder l'image actuelle. • Max 5MB • Formats: JPEG, PNG, GIF, WebP
+                💡 Laissez vide pour garder l'image actuelle • Max 5MB • Formats: JPEG, PNG, GIF, WebP
             {% else %}
-                Max 5MB • Formats: JPEG, PNG, GIF, WebP
+                💡 Max 5MB • Formats: JPEG, PNG, GIF, WebP
             {% endif %}
         </small>
-        {{ form_errors(form.image) }}
+        {% if form.image.vars.errors|length > 0 %}
+            <div class="modern-error-message">{{ form_errors(form.image) }}</div>
+        {% endif %}
     </div>
 
-    <div class="mb-3">
-        <div class="form-check">
-            {{ form_widget(form.disponible, {'attr': {'class': 'form-check-input'}}) }}
-            {{ form_label(form.disponible, 'Disponible pour la réservation', {'label_attr': {'class': 'form-check-label'}}) }}
-        </div>
-        {{ form_errors(form.disponible) }}
+    <div class="modern-checkbox-wrapper">
+        {{ form_widget(form.disponible) }}
+        {{ form_label(form.disponible, 'Disponible pour la réservation') }}
     </div>
+    {% if form.disponible.vars.errors|length > 0 %}
+        <div class="modern-error-message">{{ form_errors(form.disponible) }}</div>
+    {% endif %}
 
-    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-        <button type="submit" class="btn btn-primary btn-lg">
+    <div class="modern-form-actions">
+        <button type="submit" class="modern-btn modern-btn-primary">
             <i class="fa fa-save"></i> {{ button_label|default('Enregistrer') }}
         </button>
-        <a href="{{ path('app_transport_index') }}" class="btn btn-secondary btn-lg">
+        <a href="{{ path('app_transport_index') }}" class="btn modern-btn modern-btn-secondary">
             <i class="fa fa-times"></i> Annuler
         </a>
     </div>
-{{ form_end(form) }}
+
+    {{ form_end(form) }}
+</div>

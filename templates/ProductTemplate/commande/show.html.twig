@@ -18,7 +18,7 @@
                 <dt class="col-sm-3">Produit</dt>
                 <dd class="col-sm-9">{{ commande.produit ? commande.produit.nom : '–' }}</dd>
                 <dt class="col-sm-3">Type</dt>
-                <dd class="col-sm-9">{{ commande.typeCommande ? commande.typeCommande.value : '–' }}</dd>
+                <dd class="col-sm-9">–</dd>
                 <dt class="col-sm-3">Quantité</dt>
                 <dd class="col-sm-9">{{ commande.quantite }}</dd>
                 <dt class="col-sm-3">Prix unitaire</dt>
@@ -28,7 +28,7 @@
                 <dt class="col-sm-3">Date</dt>
                 <dd class="col-sm-9">{{ commande.dateCommande ? commande.dateCommande|date('d/m/Y H:i') : '–' }}</dd>
                 <dt class="col-sm-3">Statut</dt>
-                <dd class="col-sm-9">{{ commande.statutCommande }}</dd>
+                <dd class="col-sm-9">–</dd>
             </dl>
         </div>
         <div class="col-md-4">

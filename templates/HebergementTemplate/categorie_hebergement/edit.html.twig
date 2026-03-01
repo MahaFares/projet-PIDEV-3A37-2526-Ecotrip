@@ -1,13 +1,32 @@
 {% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Modifier une catégorie - Admin{% endblock %}
+{% block title %}Modifier Catégorie | EcoTrip Admin{% endblock %}
+{% block page_title %}Modifier la Catégorie{% endblock %}
 
 {% block body %}
-    <h1>Edit CategorieHebergement</h1>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xxl-6 col-md-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">Modifier la catégorie</h2>
+                    <p class="text-muted">Mise à jour de : <strong>{{ categorie_hebergement.nom }}</strong></p>
+                </div>
+                <a href="{{ path('app_categorie_hebergement_index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-2"></i>Retour
+                </a>
+            </div>
 
-    {{ include('HebergementTemplate/categorie_hebergement/_form.html.twig', {'form': form, 'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_categorie_hebergement_index') }}">back to list</a>
-
-    {{ include('HebergementTemplate/categorie_hebergement/_delete_form.html.twig') }}
+            {{ include('HebergementTemplate/categorie_hebergement/_form.html.twig', {'button_label': 'Mettre à jour la catégorie'}) }}
+            
+            <div class="mt-4 p-4 rounded-4 bg-danger-subtle border border-danger-subtle d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="fw-bold text-danger mb-1">Zone de danger</h6>
+                    <p class="text-danger small mb-0">Supprimer une catégorie peut affecter les hébergements liés.</p>
+                </div>
+                {{ include('HebergementTemplate/categorie_hebergement/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

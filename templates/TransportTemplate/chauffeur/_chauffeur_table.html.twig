@@ -1,0 +1,36 @@
+{% for chauffeur in chauffeurs %}
+    <tr>
+        <td>{{ chauffeur.id }}</td>
+        <td>
+            <div class="user-avatar-placeholder">{{ chauffeur.firstName|slice(0, 1)|upper }}{{ chauffeur.lastName|slice(0, 1)|upper }}</div>
+            {{ chauffeur.fullName }}
+        </td>
+        <td>{{ chauffeur.phone }}</td>
+        <td>{{ chauffeur.experience }} ans</td>
+        <td>
+            <span class="badge {{ chauffeur.rating >= 4 ? 'bg-success' : (chauffeur.rating >= 2 ? 'bg-warning' : 'bg-danger') }}">
+                {{ chauffeur.rating }}/5
+            </span>
+        </td>
+        <td>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_chauffeur_show', {'id': chauffeur.id}) }}" class="btn-action view" title="Voir">
+                    <i class="fa fa-eye"></i>
+                </a>
+                <a href="{{ path('app_chauffeur_edit', {'id': chauffeur.id}) }}" class="btn-action edit" title="Modifier">
+                    <i class="fa fa-edit"></i>
+                </a>
+                <form method="post" action="{{ path('app_chauffeur_delete', {'id': chauffeur.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');" style="display:inline-block">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chauffeur.id) }}">
+                    <button class="btn-action delete" title="Supprimer">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="6" class="text-center py-4 text-muted">Aucun chauffeur trouvé.</td>
+    </tr>
+{% endfor %}

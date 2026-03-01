@@ -13,9 +13,6 @@ use App\Repository\ActivityScheduleRepository;
 use App\Repository\GuideRepository;
 use App\Repository\HebergementRepository;
 
-
-
-
 class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home')]
@@ -33,27 +30,73 @@ class HomeController extends AbstractController
     #[Route('/hebergements', name: 'app_hebergement')]
     public function hebergement(HebergementRepository $hebergementRepository): Response
     {
-        $hebergements = $hebergementRepository->findAll();
+        $hebergements = $hebergementRepository->findAllForListing();
         return $this->render('FrontOffice/hebergement/accomodation.html.twig', [
             'hebergements' => $hebergements,
         ]);
     }
 
     #[Route('/activites', name: 'app_activites')]
-    public function activites(ActivityRepository $activityRepository): Response
-    {
+    public function activites(
+        ActivityRepository $activityRepository,
+        ActivityCategoryRepository $categoryRepository,
+        Request $request
+    ): Response {
         try {
-            $activities = $activityRepository->findAll();
+            // Get filter parameters
+            $minPrice = $request->query->get('minPrice');
+            $maxPrice = $request->query->get('maxPrice');
+            $categoryId = $request->query->get('category');
+
+            // Convert to proper types
+            $minPrice = $minPrice !== null && $minPrice !== '' ? (float) $minPrice : null;
+            $maxPrice = $maxPrice !== null && $maxPrice !== '' ? (float) $maxPrice : null;
+            $categoryId = $categoryId !== null && $categoryId !== '' ? (int) $categoryId : null;
+
+            // Get all categories for the filter sidebar
+            $sidebarCategories = $categoryRepository->findAll();
+
+            // Build query
+            $qb = $activityRepository->createQueryBuilder('a')
+                ->leftJoin('a.category', 'c')
+                ->leftJoin('a.schedules', 's')
+                ->leftJoin('a.guide', 'g')
+                ->addSelect('c', 's', 'g')
+                ->where('a.isActive = :active')
+                ->setParameter('active', true)
+                ->orderBy('a.title', 'ASC');
+
+            // Apply filters
+            if ($categoryId !== null) {
+                $qb->andWhere('c.id = :categoryId')
+                    ->setParameter('categoryId', $categoryId);
+            }
+
+            if ($minPrice !== null) {
+                $qb->andWhere('a.price >= :minPrice')
+                    ->setParameter('minPrice', $minPrice);
+            }
+
+            if ($maxPrice !== null) {
+                $qb->andWhere('a.price <= :maxPrice')
+                    ->setParameter('maxPrice', $maxPrice);
+            }
+
+            $activities = $qb->getQuery()->getResult();
+
         } catch (\Exception $e) {
-            // Table may not exist yet, return empty array
             $activities = [];
+            $sidebarCategories = [];
         }
-        
+
         return $this->render('FrontOffice/activities/blog.html.twig', [
             'activities' => $activities,
+            'sidebarCategories' => $sidebarCategories,
+            'selectedCategory' => $categoryId ?? null,
+            'filterMinPrice' => $minPrice,
+            'filterMaxPrice' => $maxPrice,
         ]);
     }
-
 
     #[Route('/transport', name: 'app_transport')]
     public function transport(TransportRepository $transportRepository, Request $request): Response
@@ -84,10 +127,15 @@ class HomeController extends AbstractController
     }
 
     #[Route('/boutique', name: 'app_boutique')]
-    public function boutique(): Response
+    public function boutique(\App\Repository\ProduitRepository $produitRepo): Response
     {
+        try {
+            $produits = $produitRepo->findAll();
+        } catch (\Exception $e) {
+            $produits = [];
+        }
         return $this->render('FrontOffice/boutique/boutique.html.twig', [
-            'produits' => [],
+            'produits' => $produits,
         ]);
     }
 
@@ -102,6 +150,4 @@ class HomeController extends AbstractController
     {
         return $this->render('FrontOffice/contact/contact.html.twig');
     }
-
-   
 }

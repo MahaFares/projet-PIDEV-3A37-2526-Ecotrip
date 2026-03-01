@@ -16,28 +16,29 @@ class CategorieHebergementRepository extends ServiceEntityRepository
         parent::__construct($registry, CategorieHebergement::class);
     }
 
-    //    /**
-    //     * @return CategorieHebergement[] Returns an array of CategorieHebergement objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findBySearchQuery(string $query): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.nom LIKE :query OR c.description LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->orderBy('c.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?CategorieHebergement
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * @return CategorieHebergement[]
+     */
+    public function findByFilters(?string $q = null): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->orderBy('c.nom', 'ASC');
+
+        if ($q) {
+            $qb->andWhere('c.nom LIKE :q OR c.description LIKE :q')
+                ->setParameter('q', '%' . $q . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

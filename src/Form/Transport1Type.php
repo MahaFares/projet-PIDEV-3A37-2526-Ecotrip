@@ -2,7 +2,10 @@
 
 namespace App\Form;
 
+use App\Entity\Chauffeur;
 use App\Entity\Transport;
+use App\Entity\TransportCategory;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -18,8 +21,26 @@ class Transport1Type extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $isEdit = isset($options['data']) && $options['data']->getId();
-        
+
         $builder
+            ->add('category', EntityType::class, [
+                'class' => TransportCategory::class,
+                'choice_label' => 'name',
+                'label' => 'Catégorie',
+                'placeholder' => 'Choisir une catégorie',
+                'required' => false,
+                'attr' => ['class' => 'form-control'],
+            ])
+            ->add('chauffeur', EntityType::class, [
+                'class' => Chauffeur::class,
+                'choice_label' => function (Chauffeur $c) {
+                    return $c->getFullName() . ' (' . $c->getLicenseNumber() . ')';
+                },
+                'label' => 'Chauffeur',
+                'placeholder' => 'Choisir un chauffeur',
+                'required' => false,
+                'attr' => ['class' => 'form-control'],
+            ])
             ->add('type', TextType::class, [
                 'label' => 'Type de Transport',
                 'attr' => ['placeholder' => 'Ex: Bus, Voiture, Train'],

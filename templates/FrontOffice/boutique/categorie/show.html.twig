@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catégorie {{ categorie.nom }} | Admin{% endblock %}
+
+{% block body %}
+<section class="breadcrumb_area">
+    <div class="container">
+        <div class="page-cover text-center">
+            <h2 class="page-cover-tittle">Catégorie</h2>
+            <ol class="breadcrumb">
+                <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li><a href="{{ path('app_categorie_index') }}">Catégories</a></li>
+                <li class="active">{{ categorie.nom }}</li>
+            </ol>
+        </div>
+    </div>
+</section>
+
+
+<section class="accomodation_area section_gap">
+    <div class="container">
+        <dl class="row">
+            <dt class="col-sm-3">Id</dt>
+            <dd class="col-sm-9">{{ categorie.id }}</dd>
+            <dt class="col-sm-3">Nom</dt>
+            <dd class="col-sm-9">{{ categorie.nom }}</dd>
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">{{ categorie.description|default('—') }}</dd>
+        </dl>
+        <p>
+            <a href="{{ path('app_categorie_edit', { id: categorie.id }) }}" class="btn theme_btn button_hover">Modifier</a>
+            <form method="post" action="{{ path('app_categorie_delete', { id: categorie.id }) }}" class="d-inline" onsubmit="return confirm('Supprimer cette catégorie ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_categorie_' ~ categorie.id) }}">
+                <button type="submit" class="btn btn-danger">Supprimer</button>
+            </form>
+            <a href="{{ path('app_categorie_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

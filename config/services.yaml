@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    default_groq_model: 'llama-3.3-70b-versatile'
 
 services:
     # default configuration for services in *this* file
@@ -21,4 +22,26 @@ services:
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    App\Service\CloudinaryService:
+        arguments:
+            $cloudinaryUrl: '%env(CLOUDINARY_URL)%'
+
+    App\Service\WeatherService:
+        arguments:
+            $apiKey: '%env(OPENWEATHER_API_KEY)%'
+
+    App\Service\SmsService:
+        arguments:
+            $sid:   '%env(TWILIO_SID)%'
+            $token: '%env(TWILIO_AUTH_TOKEN)%'
+            $from:  '%env(TWILIO_FROM)%'
+
+    App\Service\AiTransportRecommendationService:
+        arguments:
+            $openAiApiKey: '%env(OPENAI_API_KEY)%'
+            $openAiModel: '%env(default:default_groq_model:OPENAI_MODEL)%'
+
+    App\Service\HuggingFaceFaceService:
+        arguments:
+            $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
+            $modelId: '%env(HUGGINGFACE_FACE_MODEL)%'

@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement | EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.payment-hero { background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%); padding: 40px 0; color: #fff; }
+.payment-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 32px; max-width: 500px; margin: 0 auto; }
+.payment-option { display: flex; align-items: center; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s; }
+.payment-option:hover { border-color: #2d5016; background: #f8faf5; }
+.payment-option.selected { border-color: #2d5016; background: #f0f7ed; }
+.payment-option input { margin-right: 12px; }
+.step-indicator { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 30px; }
+.step-dot { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.step-dot.done { background: #2d5016; color: #fff; }
+.step-dot.current { background: #2d5016; color: #fff; animation: pulse 2s infinite; }
+.step-dot.pending { background: #e5e7eb; color: #999; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(45,80,22,0.4); } 50% { box-shadow: 0 0 0 10px rgba(45,80,22,0); } }
+.total-display { font-size: 1.5rem; font-weight: 700; color: #2d5016; margin: 20px 0; }
+.btn-pay { background: #2d5016; color: #fff; font-weight: 700; padding: 16px; border-radius: 12px; width: 100%; font-size: 1.1rem; }
+.btn-pay:hover { background: #1e4620; color: #fff; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="payment-hero">
+    <div class="container">
+        <h1 class="mb-0"><i class="fa fa-lock"></i> Paiement sécurisé</h1>
+        <p class="mb-0 opacity-90">Choisissez votre moyen de paiement</p>
+    </div>
+</section>
+
+<section class="section_gap">
+    <div class="container">
+        <div class="step-indicator">
+            <div class="step-dot done">1</div>
+            <div style="width:60px;height:4px;background:#2d5016;"></div>
+            <div class="step-dot current">2</div>
+        </div>
+        <div class="payment-card">
+            <div class="total-display">Total : {{ total|number_format(2, ',', ' ') }} TND</div>
+            <form method="post" action="{{ path('app_panier_payment') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('panier_payment') }}">
+                <div class="mb-4">
+                    <div class="payment-option selected" onclick="selectPayment(this, 'CARD')">
+                        <input type="radio" name="method" value="CARD" checked>
+                        <i class="fa fa-credit-card fa-2x text-primary me-2"></i>
+                        <span><strong>Carte bancaire</strong></span>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment(this, 'CASH')">
+                        <input type="radio" name="method" value="CASH">
+                        <i class="fa fa-money fa-2x text-success me-2"></i>
+                        <span><strong>Espèces</strong></span>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-pay">
+                    <i class="fa fa-check"></i> Confirmer le paiement
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+function selectPayment(el, val) {
+    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    el.querySelector('input').checked = true;
+}
+</script>
+{% endblock %}

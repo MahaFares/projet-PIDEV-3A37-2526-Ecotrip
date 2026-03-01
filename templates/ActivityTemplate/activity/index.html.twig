@@ -2,68 +2,536 @@
 
 {% block title %}Activités - Admin{% endblock %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{ parent() }}
+    <style>
+        .search-container {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .table thead {
+            background: #6c757d;
+            color: white;
+        }
+
+        .table thead th {
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #6c757d;
+        }
+
+        .badge-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            margin: 0 0.2rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-pdf {
+            background: #dc3545;
+            color: white;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15rem;
+        }
+
+        .activity-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .results-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: #e9ecef;
+            color: #495057;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.2rem;
+        }
+
+        .stats-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-box { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); }
+        .stat-box h4 { font-size: 1.75rem; font-weight: 800; margin: 0 0 4px 0; color: #0f172a; }
+        .stat-box span { font-size: 0.85rem; color: #64748b; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (max-width: 992px) { .charts-row { grid-template-columns: 1fr; } }
+        .chart-card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); }
+        .chart-card h4 { font-size: 1rem; font-weight: 600; margin: 0 0 16px 0; color: #0f172a; }
+        .chart-wrap { height: 250px; position: relative; }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
+    <div class="container-fluid py-4">
+        {{ include('admin_nav.html.twig') }}
 
-    <h1>Activités</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">
+                <i class="bi bi-activity"></i> Gestion des Activités
+            </h1>
+            <a href="{{ path('app_activity_new') }}" class="btn btn-success btn-lg">
+                <i class="bi bi-plus-circle"></i> Créer une activité
+            </a>
+        </div>
 
-    <form method="get" class="row g-2 mb-3">
-        <div class="col-md-4">
-            <input type="text" name="q" value="{{ filters.q|default('') }}" class="form-control" placeholder="Recherche (titre/description)">
+        <!-- Stats section above search -->
+        {% set totalActivities = stats.totalActivities|default(0) %}
+        <div class="stats-section">
+            <div class="stat-box">
+                <h4>{{ totalActivities }}</h4>
+                <span>Total Activités</span>
+            </div>
+            <div class="stat-box">
+                <h4>{{ stats.chartLabels|default([])|length }}</h4>
+                <span>Catégories</span>
+            </div>
         </div>
-        <div class="col-md-2">
-            <input type="number" step="0.01" name="minPrice" value="{{ filters.minPrice is not null ? filters.minPrice : '' }}" class="form-control" placeholder="Prix min">
-        </div>
-        <div class="col-md-2">
-            <input type="number" step="0.01" name="maxPrice" value="{{ filters.maxPrice is not null ? filters.maxPrice : '' }}" class="form-control" placeholder="Prix max">
-        </div>
-        <div class="col-md-2">
-            <select name="available" class="form-select">
-                <option value="">Tous</option>
-                <option value="1" {% if filters.available is same as(true) %}selected{% endif %}>Disponible</option>
-                <option value="0" {% if filters.available is same as(false) %}selected{% endif %}>Indisponible</option>
-            </select>
-        </div>
-        <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-        </div>
-    </form>
 
-    <table class="table table-striped">
-        <thead>
+        <div class="charts-row">
+            <div class="chart-card">
+                <h4><i class="bi bi-graph-up"></i> Activités par catégorie (Ligne)</h4>
+                <div class="chart-wrap"><canvas id="chartLine"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h4><i class="bi bi-pie-chart"></i> Répartition par catégorie (Camembert)</h4>
+                <div class="chart-wrap"><canvas id="chartPie"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-container">
+            <form id="searchForm">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-search"></i> Recherche
+                        </label>
+                        <input
+                                type="text"
+                                name="q"
+                                id="searchQuery"
+                                class="form-control"
+                                placeholder="Rechercher par titre ou description...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-currency-dollar"></i> Prix min
+                        </label>
+                        <input
+                                type="number"
+                                step="0.01"
+                                name="minPrice"
+                                id="minPrice"
+                                class="form-control"
+                                placeholder="0.00">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-currency-dollar"></i> Prix max
+                        </label>
+                        <input
+                                type="number"
+                                step="0.01"
+                                name="maxPrice"
+                                id="maxPrice"
+                                class="form-control"
+                                placeholder="0.00">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-funnel"></i> Disponibilité
+                        </label>
+                        <select name="available" id="available" class="form-select">
+                            <option value="">Tous</option>
+                            <option value="1">Disponible</option>
+                            <option value="0">Indisponible</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" id="clearFilters" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-x-circle"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Filters Display -->
+                <div id="activeFilters" class="mt-3"></div>
+            </form>
+        </div>
+
+        <!-- Results Count -->
+        <div class="results-count" id="resultsCount"></div>
+
+        <!-- Activities Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Prix</th>
+                        <th>Durée</th>
+                        <th>Lieu</th>
+                        <th>Catégorie</th>
+                        <th>Guide</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="activitiesTableBody">
+                    <!-- Content loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartLabels = {{ stats.chartLabels|default([])|json_encode|raw }};
+            const chartData = {{ stats.chartData|default([])|json_encode|raw }};
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+            if (chartLabels.length > 0) {
+                const lineCtx = document.getElementById('chartLine');
+                if (lineCtx) {
+                    new Chart(lineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: 'Nombre d\'activités',
+                                data: chartData,
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                        }
+                    });
+                }
+                const pieCtx = document.getElementById('chartPie');
+                if (pieCtx) {
+                    new Chart(pieCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                data: chartData,
+                                backgroundColor: colors.slice(0, chartLabels.length),
+                                borderWidth: 2,
+                                borderColor: '#fff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+                }
+            }
+
+            const searchForm = document.getElementById('searchForm');
+            const tableBody = document.getElementById('activitiesTableBody');
+            const resultsCount = document.getElementById('resultsCount');
+            const activeFiltersDiv = document.getElementById('activeFilters');
+
+            // Input elements
+            const searchQuery = document.getElementById('searchQuery');
+            const minPrice = document.getElementById('minPrice');
+            const maxPrice = document.getElementById('maxPrice');
+            const available = document.getElementById('available');
+            const clearFiltersBtn = document.getElementById('clearFilters');
+
+            // Debounce function for search input
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Load activities via AJAX
+            function loadActivities() {
+                const params = new URLSearchParams();
+                if (searchQuery.value) params.append('q', searchQuery.value);
+                if (minPrice.value) params.append('minPrice', minPrice.value);
+                if (maxPrice.value) params.append('maxPrice', maxPrice.value);
+                if (available.value) params.append('available', available.value);
+
+                fetch('{{ path('app_activity_search') }}?' + params.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        displayActivities(data.activities);
+                        updateResultsCount(data.count);
+                        displayActiveFilters();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tableBody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Erreur lors du chargement des activités
+                    </td>
+                </tr>
+            `;
+                    });
+            }
+
+            // Base URLs for routes (generated once by Twig)
+            const baseShowUrl = '{{ path('app_activity_index') }}'.replace(/\/$/, '');
+            const basePdfUrl = baseShowUrl;
+
+            // Display activities in table
+            function displayActivities(activities) {
+                if (activities.length === 0) {
+                    tableBody.innerHTML = `
+                <tr>
+                    <td colspan="10">
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <h4>Aucune activité trouvée</h4>
+                            <p>Essayez de modifier vos critères de recherche ou créez une nouvelle activité.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+                    return;
+                }
+
+                tableBody.innerHTML = activities.map(activity => {
+                    const showUrl = `${baseShowUrl}/${activity.id}`;
+                    const editUrl = `${baseShowUrl}/${activity.id}/edit`;
+                    const pdfUrl = `${basePdfUrl}/${activity.id}/pdf`;
+
+                    return `
             <tr>
-                <th>Id</th>
-                <th>Titre</th>
-                <th>Prix</th>
-                <th>Durée</th>
-                <th>Lieu</th>
-                <th>Catégorie</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for activity in activities %}
-            <tr>
-                <td>{{ activity.id }}</td>
-                <td>{{ activity.title }}</td>
-                <td>{{ activity.price }} DT</td>
-                <td>{{ activity.durationMinutes }} min</td>
-                <td>{{ activity.location }}</td>
-                <td>{{ activity.category ? activity.category.name : '–' }}</td>
                 <td>
-                    <a href="{{ path('app_activity_show', {'id': activity.id}) }}">Voir</a>
-                    <a href="{{ path('app_activity_edit', {'id': activity.id}) }}" class="ms-2">Modifier</a>
+                    ${activity.image
+                        ? `<img src="{{ asset('') }}${activity.image}" alt="${escapeHtml(activity.title)}" class="activity-image">`
+                        : '<div class="activity-image bg-light d-flex align-items-center justify-content-center"><i class="bi bi-image text-muted"></i></div>'}
+                </td>
+                <td><strong>#${activity.id}</strong></td>
+                <td>
+                    <strong>${escapeHtml(activity.title)}</strong>
+                    ${activity.description ? `<br><small class="text-muted">${escapeHtml(activity.description.substring(0, 50))}...</small>` : ''}
+                </td>
+                <td><strong>${activity.price} DT</strong></td>
+                <td>${activity.durationMinutes} min</td>
+                <td><i class="bi bi-geo-alt"></i> ${escapeHtml(activity.location)}</td>
+                <td>
+                    ${activity.categoryName
+                        ? `<span class="badge bg-secondary">${escapeHtml(activity.categoryName)}</span>`
+                        : '<span class="text-muted">—</span>'}
+                </td>
+                <td>
+                    ${activity.guideName
+                        ? `<i class="bi bi-person"></i> ${escapeHtml(activity.guideName)}`
+                        : '<span class="text-muted">—</span>'}
+                </td>
+                <td>
+                    <span class="badge-status ${activity.isActive ? 'badge-active' : 'badge-inactive'}">
+                        ${activity.isActive ? '<i class="bi bi-check-circle"></i> Actif' : '<i class="bi bi-x-circle"></i> Inactif'}
+                    </span>
+                </td>
+                <td>
+                    <div class="d-flex gap-1">
+                        <a href="${showUrl}" class="action-btn btn-view" title="Voir">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="${editUrl}" class="action-btn btn-edit" title="Modifier">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="${pdfUrl}" class="action-btn btn-pdf" title="Exporter PDF" target="_blank">
+                            <i class="bi bi-file-pdf"></i>
+                        </a>
+                    </div>
                 </td>
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="7" class="text-muted">Aucune activité. Créez d'abord des catégories, puis des activités.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            `;
+                }).join('');
+            }
 
-    <a href="{{ path('app_activity_new') }}" class="btn btn-success">Créer une activité</a>
-</div>
+            // Update results count
+            function updateResultsCount(count) {
+                resultsCount.innerHTML = `
+            <i class="bi bi-list-check"></i>
+            <strong>${count}</strong> activité${count !== 1 ? 's' : ''} trouvée${count !== 1 ? 's' : ''}
+        `;
+            }
+
+            // Display active filters
+            function displayActiveFilters() {
+                const filters = [];
+
+                if (searchQuery.value) {
+                    filters.push(`<span class="filter-badge"><i class="bi bi-search"></i> "${escapeHtml(searchQuery.value)}"</span>`);
+                }
+                if (minPrice.value) {
+                    filters.push(`<span class="filter-badge"><i class="bi bi-currency-dollar"></i> Min: ${minPrice.value} DT</span>`);
+                }
+                if (maxPrice.value) {
+                    filters.push(`<span class="filter-badge"><i class="bi bi-currency-dollar"></i> Max: ${maxPrice.value} DT</span>`);
+                }
+                if (available.value) {
+                    const status = available.value === '1' ? 'Disponible' : 'Indisponible';
+                    filters.push(`<span class="filter-badge"><i class="bi bi-funnel"></i> ${status}</span>`);
+                }
+
+                if (filters.length > 0) {
+                    activeFiltersDiv.innerHTML = `
+                <div class="mt-2">
+                    <small class="text-muted">Filtres actifs:</small> ${filters.join(' ')}
+                </div>
+            `;
+                } else {
+                    activeFiltersDiv.innerHTML = '';
+                }
+            }
+
+            // Escape HTML to prevent XSS
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Clear all filters
+            clearFiltersBtn.addEventListener('click', function() {
+                searchQuery.value = '';
+                minPrice.value = '';
+                maxPrice.value = '';
+                available.value = '';
+                loadActivities();
+            });
+
+            // Add event listeners with debounce for text inputs
+            const debouncedLoad = debounce(loadActivities, 500);
+            searchQuery.addEventListener('input', debouncedLoad);
+            minPrice.addEventListener('input', debouncedLoad);
+            maxPrice.addEventListener('input', debouncedLoad);
+
+            // Immediate load for select
+            available.addEventListener('change', loadActivities);
+
+            // Initial load
+            loadActivities();
+        });
+    </script>
 {% endblock %}

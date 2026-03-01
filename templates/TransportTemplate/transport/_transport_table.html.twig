@@ -1,0 +1,34 @@
+{% for transport in transports %}
+    <tr>
+        <td>{{ transport.id }}</td>
+        <td>
+            <div class="user-avatar-placeholder">{{ transport.type|slice(0, 1)|upper }}</div>
+            {{ transport.type }}
+        </td>
+        <td>{{ transport.category ? transport.category.name : '—' }}</td>
+        <td>{{ transport.chauffeur ? transport.chauffeur.fullName : '—' }}</td>
+        <td>{{ transport.capacite }}</td>
+        <td>{{ transport.prixparpersonne }} DT</td>
+        <td>{{ transport.emissionco2 }} kg</td>
+        <td>
+            <div class="d-flex gap-2">
+                <a href="{{ path('app_transport_show', {'id': transport.id}) }}" class="btn-action view" title="Voir">
+                    <i class="fa fa-eye"></i>
+                </a>
+                <a href="{{ path('app_transport_edit', {'id': transport.id}) }}" class="btn-action edit" title="Modifier">
+                    <i class="fa fa-edit"></i>
+                </a>
+                <form method="post" action="{{ path('app_transport_delete', {'id': transport.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');" style="display:inline-block">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ transport.id) }}">
+                    <button class="btn-action delete" title="Supprimer">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="8" class="text-center py-4 text-muted">Aucun transport trouvé.</td>
+    </tr>
+{% endfor %}

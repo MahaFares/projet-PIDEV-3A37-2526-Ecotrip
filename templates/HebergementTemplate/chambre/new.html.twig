@@ -1,12 +1,24 @@
 {% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Créer une chambre - Admin{% endblock %}
+{% block title %}Nouvelle Chambre | EcoTrip Admin{% endblock %}
+{% block page_title %}Ajouter une Chambre{% endblock %}
 
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
-    <h1>Créer une chambre</h1>
-    {{ include('HebergementTemplate/chambre/_form.html.twig') }}
-    <a href="{{ path('app_chambre_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xxl-8 col-xl-10">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h2 class="h3 fw-bold text-dark mb-1">Ajouter une chambre</h2>
+                    <p class="text-muted">Créez une nouvelle unité d'hébergement pour votre établissement.</p>
+                </div>
+                <a href="{{ path('app_chambre_index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+
+            {{ include('HebergementTemplate/chambre/_form.html.twig') }}
+        </div>
+    </div>
 </div>
 {% endblock %}

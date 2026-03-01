@@ -3,126 +3,550 @@
 {% block title %}Produits | EcoTrip{% endblock %}
 
 {% block body %}
-    <!--================Breadcrumb Area =================-->
-    <section class="breadcrumb_area">
-        <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background=""></div>
+    <style>
+        /* Hero Section - GREEN */
+        .boutique-hero {
+            background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+            padding: 100px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .boutique-hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -250px;
+            right: -150px;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.2); opacity: 0.15; }
+        }
+
+        .boutique-hero h1 {
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .boutique-hero p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.3rem;
+            font-weight: 300;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Filters Section */
+        .filters-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            padding: 35px 40px;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2d5016;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #2d5016, #1e4620);
+            border-radius: 2px;
+        }
+
+        .filter-input {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 14px 18px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .filter-input:focus {
+            border-color: #2d5016;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-input::placeholder {
+            color: #999;
+            font-weight: 400;
+        }
+
+        .filter-input option {
+            padding: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-clear {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 14px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .btn-clear:hover {
+            border-color: #2d5016;
+            color: #2d5016;
+            transform: translateY(-2px);
+        }
+
+        /* Product Cards */
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            animation: cardSlideIn 0.6s ease-out backwards;
+        }
+
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card:nth-child(1) { animation-delay: 0.1s; }
+        .product-card:nth-child(2) { animation-delay: 0.2s; }
+        .product-card:nth-child(3) { animation-delay: 0.3s; }
+        .product-card:nth-child(4) { animation-delay: 0.4s; }
+        .product-card:nth-child(5) { animation-delay: 0.5s; }
+        .product-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .product-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(45, 80, 22, 0.25);
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.15) rotate(2deg);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(45, 80, 22, 0.95);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(45, 80, 22, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-danger {
+            background: rgba(220, 53, 69, 0.95);
+        }
+
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.95);
+            color: #1a1a1a;
+        }
+
+        .product-body {
+            padding: 25px;
+        }
+
+        .product-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2d5016;
+            margin-bottom: 15px;
+        }
+
+        .product-category {
+            display: inline-block;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: #2d5016;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .stock-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .stock-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stock-value {
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        .btn-group-product {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-view {
+            flex: 1;
+            background: white;
+            border: 2px solid #2d5016;
+            color: #2d5016;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-view:hover {
+            background: #2d5016;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(45, 80, 22, 0.3);
+        }
+
+        .btn-buy {
+            flex: 1;
+            background: linear-gradient(135deg, #2d5016 0%, #1e4620 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-buy::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-buy:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-buy:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(45, 80, 22, 0.4);
+        }
+
+        .btn-buy:disabled {
+            background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-buy:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Results Count */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .results-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 100px 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .boutique-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .filters-container {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .boutique-hero h1 {
+                font-size: 2rem;
+            }
+
+            .boutique-hero p {
+                font-size: 1.1rem;
+            }
+
+            .filters-container {
+                margin-top: -30px;
+                padding: 20px 15px;
+            }
+
+            .product-image-wrapper {
+                height: 220px;
+            }
+        }
+
+        /* Success Animation */
+        @keyframes successPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-success-animation {
+            animation: successPop 0.4s ease;
+        }
+    </style>
+
+    <!-- Hero Section -->
+    <section class="boutique-hero">
         <div class="container">
-            <div class="page-cover text-center">
-                <h2 class="page-cover-tittle">Notre Boutique</h2>
-                <ol class="breadcrumb">
-                    <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                    <li class="active">Boutique</li>
-                </ol>
+            <div class="text-center">
+                <h1>Eco-Friendly Shop</h1>
+                <p>Discover sustainable products for your eco-journey</p>
             </div>
         </div>
     </section>
-    <!--================Breadcrumb Area =================-->
 
-    <!--================ Search & Filter Area =================-->
-    <section class="py-4" style="background-color: #f8f9fa;">
-        <div class="container">
-            <div class="card p-3 shadow-sm">
-                <div class="row g-3 align-items-center">
-                    <div class="col-md-7">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa fa-search"></i></span>
-                            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom ou catégorie..." />
-                            <button id="clearSearch" class="btn btn-outline-secondary" type="button">Effacer</button>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <select id="sortSelect" class="form-select">
-                            <option value="">-- Trier par --</option>
-                            <option value="nom_asc">Nom (A-Z)</option>
-                            <option value="nom_desc">Nom (Z-A)</option>
-                            <option value="prix_asc">Prix croissant</option>
-                            <option value="prix_desc">Prix décroissant</option>
-                            <option value="stock_desc">Stock disponible</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 text-end">
-                        <small class="text-muted">{{ produits|length }} résultats</small>
-                    </div>
+    <!-- Main Content -->
+    <div class="container-fluid px-5" style="margin-top: -50px; position: relative; z-index: 10;">
+        <!-- Filters -->
+        <div class="filters-container" style="max-width: 1600px; margin: 0 auto;">
+            <div class="filters-title">
+                Search & Filter Products
+            </div>
+            <form id="filterForm" class="row g-3">
+                <div class="col-md-6">
+                    <input
+                            type="text"
+                            id="searchInput"
+                            name="search"
+                            class="form-control filter-input"
+                            placeholder="Search by name or category...">
+                </div>
+                <div class="col-md-4">
+                    <select id="sortSelect" name="sort" class="form-select filter-input">
+                        <option value="">Sort by</option>
+                        <option value="nom_asc">Name (A-Z)</option>
+                        <option value="nom_desc">Name (Z-A)</option>
+                        <option value="prix_asc">Price (Low to High)</option>
+                        <option value="prix_desc">Price (High to Low)</option>
+                        <option value="stock_desc">Stock Available</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" id="clearBtn" class="btn-clear w-100">
+                        Clear Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div style="padding: 60px 0; max-width: 1600px; margin: 0 auto;">
+            <div class="results-header">
+                <div class="results-count">
+                    <span id="productCount">{{ produits|length }}</span> Product{{ produits|length > 1 ? 's' : '' }} Found
                 </div>
             </div>
-        </div>
-    </section>
-    <!--================ Search & Filter Area =================-->
 
-    <!--================ Products Area =================-->
-    <section class="accomodation_area section_gap">
-        <div class="container">
-            <div id="noResults" class="text-center py-5" style="display: none;">
-                <p class="text-muted fs-5">Aucun produit ne correspond à votre recherche.</p>
-            </div>
-            
-            <div id="productGrid" class="row">
+            <div class="row g-4" id="productsList">
                 {% if produits|length > 0 %}
                     {% for produit in produits %}
-                        <div class="col-lg-4 col-md-6 mb-4 product-card" 
-                             data-nom="{{ produit.nom|lower }}" 
-                             data-categorie="{{ produit.categorie ? produit.categorie.nom|lower : '' }}" 
+                        <div class="col-lg-4 col-md-6"
+                             data-nom="{{ produit.nom|lower }}"
+                             data-categorie="{{ produit.categorie ? produit.categorie.nom|lower : '' }}"
                              data-prix="{{ produit.prix }}"
                              data-stock="{{ produit.stock }}">
-                            <div class="card h-100 shadow-sm border-0" style="overflow: hidden; transition: all 0.3s ease;">
-                                <div style="height: 250px; overflow: hidden; background: #e9ecef; position: relative;">
+                            <div class="product-card">
+                                <div class="product-image-wrapper">
                                     {% if produit.image and produit.image != '' %}
                                         {% if produit.image starts with 'http' %}
-                                            <img src="{{ produit.image }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                            <img src="{{ produit.image }}" alt="{{ produit.nom }}" class="product-image">
                                         {% else %}
-                                            <img src="{{ asset('uploads/' ~ produit.image) }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                            <img src="{{ asset('uploads/' ~ produit.image) }}" alt="{{ produit.nom }}" class="product-image">
                                         {% endif %}
                                     {% else %}
-                                        <img src="{{ asset('images/room1.jpg') }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                        <img src="{{ asset('images/room1.jpg') }}" alt="{{ produit.nom }}" class="product-image">
                                     {% endif %}
-                                    
+
                                     {% if produit.stock <= 0 %}
-                                        <div style="position: absolute; top: 10px; right: 10px;">
-                                            <span class="badge bg-danger"><i class="fa fa-exclamation-circle"></i> Rupture de stock</span>
-                                        </div>
+                                        <div class="product-badge badge-danger">Out of Stock</div>
                                     {% elseif produit.stock < 10 %}
-                                        <div style="position: absolute; top: 10px; right: 10px;">
-                                            <span class="badge bg-warning text-dark"><i class="fa fa-warning"></i> Stock faible</span>
-                                        </div>
+                                        <div class="product-badge badge-warning">Low Stock</div>
                                     {% endif %}
                                 </div>
-                                
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h5 class="card-title mb-0">{{ produit.nom }}</h5>
-                                            <p class="h6 text-primary mb-1 mt-1">{{ produit.prix|number_format(2, ',', ' ') }} TND</p>
-                                        </div>
-                                    </div>
 
+                                <div class="product-body">
                                     {% if produit.categorie %}
-                                        <p class="small mb-2"><span class="badge bg-secondary">{{ produit.categorie.nom }}</span></p>
+                                        <span class="product-category">{{ produit.categorie.nom }}</span>
                                     {% else %}
-                                        <p class="small mb-2"><span class="badge bg-light text-dark">Sans catégorie</span></p>
+                                        <span class="product-category">Uncategorized</span>
                                     {% endif %}
 
-                                    <div class="mb-3">
-                                        <p class="small mb-1"><strong>Stock disponible:</strong></p>
-                                        <div>
-                                            {% if produit.stock > 0 %}
-                                                <span class="badge bg-success">{{ produit.stock }} unités</span>
-                                            {% else %}
-                                                <span class="badge bg-danger">Épuisé</span>
-                                            {% endif %}
-                                        </div>
+                                    <h5 class="product-title">{{ produit.nom }}</h5>
+
+                                    <div class="product-price">{{ produit.prix|number_format(2) }} TND</div>
+
+                                    <div class="stock-info">
+                                        <span class="stock-label">Stock:</span>
+                                        {% if produit.stock > 0 %}
+                                            <span class="stock-value">{{ produit.stock }} units</span>
+                                        {% else %}
+                                            <span class="stock-value" style="color: #dc3545;">Out of Stock</span>
+                                        {% endif %}
                                     </div>
 
-                                    <div class="d-grid gap-2">
-                                        <a href="{{  path('front_produit_detail', { id: produit.id }) }}" class="btn btn-info btn-sm text-white">
-                                            <i class="fa fa-eye"></i> Voir détails
+                                    <div class="btn-group-product">
+                                        <a href="{{ path('front_produit_detail', { id: produit.id }) }}" class="btn-view">
+                                            View Details
                                         </a>
                                         {% if produit.stock > 0 %}
-                                            <button type="button" class="btn btn-success btn-sm" onclick="commander({{ produit.id }}, '{{ produit.nom|e('js') }}')">
-                                                <i class="fa fa-shopping-cart"></i> Commander
+                                            <button
+                                                    type="button"
+                                                    class="btn-buy"
+                                                    data-url="{{ path('app_panier_add_produit', {id: produit.id}) }}">
+                                                Add to Cart
                                             </button>
                                         {% else %}
-                                            <button type="button" class="btn btn-secondary btn-sm" disabled>
-                                                <i class="fa fa-ban"></i> Indisponible
+                                            <button type="button" class="btn-buy" disabled>
+                                                Unavailable
                                             </button>
                                         {% endif %}
                                     </div>
@@ -131,62 +555,52 @@
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div class="col-12 text-center py-5">
-                        <p class="text-muted">Aucun produit à afficher pour le moment.</p>
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <div class="empty-icon">🛍️</div>
+                            <h3>No Products Available</h3>
+                            <p>Check back soon for new items</p>
+                        </div>
                     </div>
                 {% endif %}
             </div>
         </div>
-    </section>
-    <!--================ Products Area =================-->
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
             const sortSelect = document.getElementById('sortSelect');
-            const clearBtn = document.getElementById('clearSearch');
-            const grid = document.getElementById('productGrid');
-            const noResults = document.getElementById('noResults');
+            const clearBtn = document.getElementById('clearBtn');
+            const filterForm = document.getElementById('filterForm');
+            const productsList = document.getElementById('productsList');
+            const productCount = document.getElementById('productCount');
 
+            // AJAX filtering
             function filterProducts() {
                 const searchTerm = searchInput.value.trim().toLowerCase();
                 const sortValue = sortSelect.value;
-                const allCards = Array.from(document.querySelectorAll('.product-card'));
 
-                // Step 1: Filter cards
+                const allCards = Array.from(productsList.querySelectorAll('[data-nom]'));
+
+                // Filter
                 let visibleCards = allCards.filter(card => {
-                    if (!searchTerm) return true;
                     const nom = (card.dataset.nom || '').toLowerCase();
                     const categorie = (card.dataset.categorie || '').toLowerCase();
-                    return nom.includes(searchTerm) || categorie.includes(searchTerm);
+
+                    return !searchTerm || nom.includes(searchTerm) || categorie.includes(searchTerm);
                 });
 
-                // Step 2: Sort visible cards
+                // Sort
                 visibleCards.sort((a, b) => {
-                    // Prioritize search relevance if search term exists
                     if (searchTerm) {
                         const nomA = (a.dataset.nom || '').toLowerCase();
                         const nomB = (b.dataset.nom || '').toLowerCase();
-                        const catA = (a.dataset.categorie || '').toLowerCase();
-                        const catB = (b.dataset.categorie || '').toLowerCase();
-                        
-                        // Exact name match
-                        const aExactNom = nomA === searchTerm ? 0 : 1;
-                        const bExactNom = nomB === searchTerm ? 0 : 1;
-                        if (aExactNom !== bExactNom) return aExactNom - bExactNom;
-                        
-                        // Name starts with search term
-                        const aStartsNom = nomA.startsWith(searchTerm) ? 0 : 1;
-                        const bStartsNom = nomB.startsWith(searchTerm) ? 0 : 1;
-                        if (aStartsNom !== bStartsNom) return aStartsNom - bStartsNom;
-                        
-                        // Exact category match
-                        const aExactCat = catA === searchTerm ? 0 : 1;
-                        const bExactCat = catB === searchTerm ? 0 : 1;
-                        if (aExactCat !== bExactCat) return aExactCat - bExactCat;
+
+                        if (nomA.startsWith(searchTerm) && !nomB.startsWith(searchTerm)) return -1;
+                        if (!nomA.startsWith(searchTerm) && nomB.startsWith(searchTerm)) return 1;
                     }
-                    
-                    // Apply selected sort
+
                     switch(sortValue) {
                         case 'nom_asc':
                             return a.dataset.nom.localeCompare(b.dataset.nom);
@@ -203,61 +617,104 @@
                     }
                 });
 
-                // Step 3: Reorder grid
+                // Update DOM
+                allCards.forEach(card => card.style.display = 'none');
+
                 if (visibleCards.length === 0) {
-                    noResults.style.display = 'block';
-                    allCards.forEach(card => card.style.display = 'none');
+                    productsList.innerHTML = `
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <div class="empty-icon">🛍️</div>
+                                <h3>No Products Found</h3>
+                                <p>Try adjusting your filters</p>
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    noResults.style.display = 'none';
-                    // Hide all cards first
-                    allCards.forEach(card => card.style.display = 'none');
-                    // Show and reorder visible cards
                     visibleCards.forEach(card => {
                         card.style.display = '';
-                        grid.appendChild(card);
+                        productsList.appendChild(card);
                     });
                 }
+
+                productCount.textContent = visibleCards.length;
+                attachBuyListeners();
             }
 
-            // Bind events
-            searchInput.addEventListener('input', filterProducts);
+            // Event listeners
+            searchInput.addEventListener('input', debounce(filterProducts, 300));
             sortSelect.addEventListener('change', filterProducts);
-            clearBtn.addEventListener('click', function() { 
-                searchInput.value = ''; 
-                filterProducts(); 
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                sortSelect.value = '';
+                filterProducts();
             });
 
-            // Image hover effect
-            function setupHoverEffect() {
-                document.querySelectorAll('.product-card').forEach(card => {
-                    const img = card.querySelector('.product-image');
-                    if (img) {
-                        card.addEventListener('mouseenter', function() { 
-                            img.style.transform = 'scale(1.05)'; 
-                        });
-                        card.addEventListener('mouseleave', function() { 
-                            img.style.transform = 'scale(1)'; 
-                        });
-                    }
+            // Debounce
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func(...args), wait);
+                };
+            }
+
+            // Buy buttons
+            function attachBuyListeners() {
+                document.querySelectorAll('.btn-buy').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        if (this.disabled) return;
+
+                        const originalHTML = this.innerHTML;
+                        this.innerHTML = 'Adding...';
+                        this.disabled = true;
+
+                        fetch(this.dataset.url, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: 'quantity=1'
+                        })
+                            .then(r => r.json())
+                            .then(d => {
+                                if (d.success) {
+                                    this.innerHTML = '✓ Added!';
+                                    this.classList.add('btn-success-animation');
+                                    this.style.background = 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)';
+
+                                    if (typeof updateCartBadge === 'function') {
+                                        updateCartBadge(d.count);
+                                    }
+
+                                    setTimeout(() => {
+                                        this.innerHTML = originalHTML;
+                                        this.disabled = false;
+                                        this.style.background = '';
+                                        this.classList.remove('btn-success-animation');
+                                    }, 2000);
+                                } else {
+                                    this.innerHTML = '✗ Error';
+                                    this.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                                    setTimeout(() => {
+                                        this.innerHTML = originalHTML;
+                                        this.disabled = false;
+                                        this.style.background = '';
+                                    }, 2000);
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Error:', err);
+                                this.innerHTML = originalHTML;
+                                this.disabled = false;
+                            });
+                    });
                 });
             }
 
-            setupHoverEffect();
-            filterProducts();
+            attachBuyListeners();
         });
-
-        // Commander function
-        function commander(produitId, produitNom) {
-            // Vous pouvez soit :
-            // 1. Rediriger vers une page de commande
-            // window.location.href = '/commande/' + produitId;
-            
-            // 2. Afficher une modal de confirmation
-            if (confirm('Voulez-vous commander "' + produitNom + '" ?')) {
-                // Redirection vers la page de commande/panier
-                window.location.href = '{{ path('app_home') }}'; // Remplacer par votre route de commande
-                // Ou ajouter au panier via AJAX
-            }
-        }
     </script>
 {% endblock %}

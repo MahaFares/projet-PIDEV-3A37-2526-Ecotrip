@@ -1,4 +1,32 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+
+<div class="form-group">
+    {{ form_label(form.name, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.name, { attr: { class: 'form-input' ~ (form.name.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Ex: Randonnée' } }) }}
+    {% if form.name.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.name) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-group">
+    {{ form_label(form.description, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.description, { attr: { class: 'form-textarea' ~ (form.description.vars.errors|length ? ' is-invalid' : ''), placeholder: 'Description de la catégorie...' } }) }}
+    {% if form.description.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.description) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-group">
+    {{ form_label(form.icon, null, { label_attr: { class: 'form-label' } }) }}
+    {{ form_widget(form.icon, { attr: { class: 'form-input' ~ (form.icon.vars.errors|length ? ' is-invalid' : '') } }) }}
+    {% if form.icon.vars.errors|length > 0 %}
+        <div class="error-message"><i class="bi bi-exclamation-circle"></i> {{ form_errors(form.icon) }}</div>
+    {% endif %}
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="modern-btn btn-submit"><i class="bi bi-check"></i> {{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('app_activity_category_index') }}" class="modern-btn btn-cancel"><i class="bi bi-x"></i> Annuler</a>
+</div>
+
 {{ form_end(form) }}
