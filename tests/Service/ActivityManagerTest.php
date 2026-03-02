@@ -66,3 +66,4 @@ class ActivityManagerTest extends TestCase
     }
 
 }
+
