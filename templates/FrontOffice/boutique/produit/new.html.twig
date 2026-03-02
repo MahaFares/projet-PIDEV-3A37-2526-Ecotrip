@@ -15,15 +15,15 @@
         </div>
     </div>
 </section>
-</section>
+
 <!-- Boutons de navigation -->
 <section class="py-3">
     <div class="container">
-       <div class="text-right">
-    <a href="{{ path('app_categorie_new') }}" class="btn theme_btn button_hover">Categorie</a>
-    <a href="{{ path('app_paiement_new') }}" class="btn theme_btn button_hover">Paiement</a>
-    <a href="{{ path('app_commande_new') }}" class="btn theme_btn button_hover">Commandes</a>
-</div>
+        <div class="text-right">
+            <a href="{{ path('app_categorie_new') }}" class="btn theme_btn button_hover">Categorie</a>
+            <a href="{{ path('app_paiement_new') }}" class="btn theme_btn button_hover">Paiement</a>
+            <a href="{{ path('app_commande_new') }}" class="btn theme_btn button_hover">Commandes</a>
+        </div>
     </div>
 </section>
 
@@ -32,16 +32,62 @@
         {% for message in app.flashes('error') %}
             <div class="alert alert-danger">{{ message }}</div>
         {% endfor %}
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
 
-        {{ form_start(form) }}
+        {# ✅ IMPORTANT : enctype="multipart/form-data" est OBLIGATOIRE pour l'upload #}
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
         {{ form_row(form.nom) }}
         {{ form_row(form.prix) }}
         {{ form_row(form.stock) }}
-        {{ form_row(form.image) }}
+
+        {# ✅ Le champ s'appelle imageFile dans ProduitType (pas image) #}
+        {{ form_row(form.imageFile) }}
+
+        {# Aperçu de l'image choisie avant soumission #}
+        <div id="imagePreviewContainer" style="display:none; margin-bottom: 15px;">
+            <p><strong>Aperçu :</strong></p>
+            <img id="imagePreview"
+                 src="#"
+                 alt="Aperçu"
+                 style="max-width: 200px; max-height: 200px; border-radius: 10px; border: 2px solid #2d5016;">
+        </div>
+
         {{ form_row(form.categorie) }}
-        <button type="submit" class="btn theme_btn button_hover">Enregistrer</button>
+
+        <button type="submit" class="btn theme_btn button_hover">
+            Créer le produit
+        </button>
         <a href="{{ path('app_produit_index') }}" class="btn btn-secondary">Annuler</a>
+
         {{ form_end(form) }}
     </div>
 </section>
+
+<script>
+    // Aperçu de l'image sélectionnée
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.querySelector('input[type="file"]');
+        const preview = document.getElementById('imagePreview');
+        const container = document.getElementById('imagePreviewContainer');
+
+        if (input) {
+            input.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        preview.src = e.target.result;
+                        container.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

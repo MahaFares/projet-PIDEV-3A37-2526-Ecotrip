@@ -7,10 +7,12 @@ use App\Form\ProduitType;
 use App\Repository\ProduitRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/admin/produit')]
@@ -19,7 +21,8 @@ class ProduitCrudController extends AbstractController
     public function __construct(
         private readonly ProduitRepository $produitRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        private readonly SluggerInterface $slugger
     ) {
     }
 
@@ -37,7 +40,6 @@ class ProduitCrudController extends AbstractController
 
         $produits = $this->produitRepository->findByFilters($q, $minPrice, $maxPrice, $available);
 
-        // Stats
         $totalProduits   = $this->produitRepository->count([]);
         $totalEnStock    = $this->produitRepository->countByStockGreaterThanZero();
         $totalRupture    = $this->produitRepository->countByStockZero();
@@ -106,26 +108,47 @@ class ProduitCrudController extends AbstractController
     public function new(Request $request): Response
     {
         $produit = new Produit();
-        $form = $this->createForm(ProduitType::class, $produit);
+        $form    = $this->createForm(ProduitType::class, $produit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $nom = trim((string) $produit->getNom());
 
+            $nom = trim((string) $produit->getNom());
             if (empty($nom)) {
                 $this->addFlash('error', 'Le nom du produit ne peut pas être vide.');
-                return $this->render('ProductTemplate/produit/new.html.twig', [
-                    'produit' => $produit,
-                    'form'    => $form,
-                ]);
+                return $this->render('ProductTemplate/produit/new.html.twig', ['produit' => $produit, 'form' => $form]);
             }
-
             if (preg_match('/^\d+$/', $nom)) {
                 $this->addFlash('error', 'Le nom du produit ne peut pas contenir uniquement des chiffres.');
-                return $this->render('ProductTemplate/produit/new.html.twig', [
-                    'produit' => $produit,
-                    'form'    => $form,
-                ]);
+                return $this->render('ProductTemplate/produit/new.html.twig', ['produit' => $produit, 'form' => $form]);
+            }
+
+            // ✅ LA BONNE FAÇON : récupérer le fichier depuis $form->get('imageFile')->getData()
+            // PAS depuis $request->files (qui ne fonctionne pas avec mapped: false)
+            /** @var \Symfony\Component\HttpFoundation\File\UploadedFile|null $imageFile */
+            $imageFile = $form->get('imageFile')->getData();
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename     = $this->slugger->slug($originalFilename);
+                $newFilename      = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                // Dossier de destination
+                $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/produits';
+
+                // Crée le dossier automatiquement s'il n'existe pas
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                try {
+                    $imageFile->move($uploadDir, $newFilename);
+                    // ✅ Sauvegarde UNIQUEMENT le nom du fichier en base de données
+                    $produit->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur upload image : ' . $e->getMessage());
+                    return $this->render('ProductTemplate/produit/new.html.twig', ['produit' => $produit, 'form' => $form]);
+                }
             }
 
             $errors = $this->validator->validate($produit);
@@ -133,10 +156,7 @@ class ProduitCrudController extends AbstractController
                 foreach ($errors as $error) {
                     $this->addFlash('error', $error->getMessage());
                 }
-                return $this->render('ProductTemplate/produit/new.html.twig', [
-                    'produit' => $produit,
-                    'form'    => $form,
-                ]);
+                return $this->render('ProductTemplate/produit/new.html.twig', ['produit' => $produit, 'form' => $form]);
             }
 
             $this->entityManager->persist($produit);
@@ -167,33 +187,54 @@ class ProduitCrudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $nom = trim((string) $produit->getNom());
 
+            $nom = trim((string) $produit->getNom());
             if (empty($nom)) {
                 $this->addFlash('error', 'Le nom du produit ne peut pas être vide.');
-                return $this->render('ProductTemplate/produit/edit.html.twig', [
-                    'produit' => $produit,
-                    'form'    => $form,
-                ]);
+                return $this->render('ProductTemplate/produit/edit.html.twig', ['produit' => $produit, 'form' => $form]);
             }
-
             if (preg_match('/^\d+$/', $nom)) {
                 $this->addFlash('error', 'Le nom du produit ne peut pas contenir uniquement des chiffres.');
-                return $this->render('ProductTemplate/produit/edit.html.twig', [
-                    'produit' => $produit,
-                    'form'    => $form,
-                ]);
+                return $this->render('ProductTemplate/produit/edit.html.twig', ['produit' => $produit, 'form' => $form]);
             }
+
+            // ✅ LA BONNE FAÇON
+            /** @var \Symfony\Component\HttpFoundation\File\UploadedFile|null $imageFile */
+            $imageFile = $form->get('imageFile')->getData();
+
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename     = $this->slugger->slug($originalFilename);
+                $newFilename      = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+
+                $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/produits';
+
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                try {
+                    // Supprime l'ancienne image du disque
+                    $oldImage = $produit->getImage();
+                    if ($oldImage && file_exists($uploadDir . '/' . $oldImage)) {
+                        unlink($uploadDir . '/' . $oldImage);
+                    }
+
+                    $imageFile->move($uploadDir, $newFilename);
+                    $produit->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur upload image : ' . $e->getMessage());
+                    return $this->render('ProductTemplate/produit/edit.html.twig', ['produit' => $produit, 'form' => $form]);
+                }
+            }
+            // Si pas de nouvelle image → l'ancienne est conservée automatiquement
 
             $errors = $this->validator->validate($produit);
             if (count($errors) > 0) {
                 foreach ($errors as $error) {
                     $this->addFlash('error', $error->getMessage());
                 }
-                return $this->render('ProductTemplate/produit/edit.html.twig', [
-                    'produit' => $produit,
-                    'form'    => $form,
-                ]);
+                return $this->render('ProductTemplate/produit/edit.html.twig', ['produit' => $produit, 'form' => $form]);
             }
 
             $this->entityManager->flush();
@@ -212,6 +253,12 @@ class ProduitCrudController extends AbstractController
     public function delete(Request $request, Produit $produit): Response
     {
         if ($this->isCsrfTokenValid('delete_produit_' . $produit->getId(), $request->request->get('_token'))) {
+            if ($produit->getImage()) {
+                $imagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/produits/' . $produit->getImage();
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
             $this->entityManager->remove($produit);
             $this->entityManager->flush();
             $this->addFlash('success', 'Produit supprimé avec succès.');

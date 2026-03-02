@@ -72,9 +72,9 @@
                                 <div style="height: 250px; overflow: hidden; background: #e9ecef; position: relative;">
                                     {% if produit.image and produit.image != '' %}
                                         {% if produit.image starts with 'http' %}
-                                            <img src="{{ produit.image }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                            <img src="{{ asset('uploads/produits/' ~ produit.image) }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
                                         {% else %}
-                                            <img src="{{ asset('uploads/' ~ produit.image) }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
+                                            <img src="{{ asset('uploads/produits/' ~ produit.image) }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">
                                         {% endif %}
                                     {% else %}
                                         <img src="{{ asset('images/default-product.jpg') }}" alt="{{ produit.nom }}" class="w-100 h-100 product-image" style="object-fit: cover; transition: transform 0.3s ease;">

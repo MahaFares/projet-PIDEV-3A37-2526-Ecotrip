@@ -56,7 +56,9 @@
                                 {% elseif item.type == 'transport' and item.entity.image %}
                                     <img src="{{ item.entity.image starts with 'http' ? item.entity.image : asset('uploads/transports/' ~ item.entity.image) }}" alt="" class="cart-item-img">
                                 {% elseif item.type == 'produit' and item.entity.image %}
-                                    <img src="{{ item.entity.image starts with 'http' ? item.entity.image : asset('uploads/' ~ item.entity.image) }}" alt="" class="cart-item-img">
+                                {# DEBUG #}
+
+                                    <img src="{{ item.entity.image starts with 'http' ? item.entity.image : asset('uploads/produits/' ~ item.entity.image) }}" alt="" class="cart-item-img">
                                 {% else %}
                                     <div class="cart-item-img bg-light d-flex align-items-center justify-content-center"><i class="fa fa-image text-muted"></i></div>
                                 {% endif %}

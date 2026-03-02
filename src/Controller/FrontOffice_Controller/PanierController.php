@@ -61,8 +61,11 @@ class PanierController extends AbstractController
         $hebergementsMap = $hebergementIds ? array_column($hebergementRepo->findBy(['id' => $hebergementIds]), null, 'id') : [];
         $activitiesMap = $activityIds ? array_column($activityRepo->findBy(['id' => $activityIds]), null, 'id') : [];
         $transportsMap = $transportIds ? array_column($transportRepo->findBy(['id' => $transportIds]), null, 'id') : [];
-        $produitsMap = $produitIds ? array_column($produitRepo->findBy(['idProduit' => $produitIds]), null, 'idProduit') : [];
-
+$produitsRaw = $produitIds ? $produitRepo->findBy(['idProduit' => $produitIds]) : [];
+$produitsMap = [];
+foreach ($produitsRaw as $p) {
+    $produitsMap[$p->getId()] = $p;
+}
         foreach ($cart['hebergements'] ?? [] as $cartKey => $data) {
             $id = $data['id'] ?? 0;
             $items[] = ['cartKey' => $cartKey, 'type' => 'hebergement', 'entity' => $hebergementsMap[$id] ?? null, 'data' => $data];
