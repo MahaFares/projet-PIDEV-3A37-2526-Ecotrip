@@ -3,8 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Reservation;
-use App\Entity\Enum\ReservationType;
-use App\Entity\Enum\ReservationStatus;
+use App\Enum\ReservationType;
+use App\Enum\ReservationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

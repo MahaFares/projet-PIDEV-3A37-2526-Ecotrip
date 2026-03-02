@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\Enum\ReservationType;
+use App\Enum\ReservationType;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartService

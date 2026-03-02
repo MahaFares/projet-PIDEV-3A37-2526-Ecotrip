@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\Entity\Enum\PaymentMethod;
-use App\Entity\Enum\PaymentStatus;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
 use App\Repository\PaymentReservationRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;

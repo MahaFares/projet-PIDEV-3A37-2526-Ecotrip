@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Controller\FrontOffice_Controller;
+namespace App\Controller\Reservation;
 
-use App\Entity\Enum\ReservationType;
+use App\Enum\ReservationType;
 use App\Entity\Reservation;
 use App\Form\ReservationEditType;
 use App\Repository\HebergementRepository;
@@ -13,7 +13,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\User;
 
+#[IsGranted('ROLE_USER')]
 #[Route('/mes-reservations')]
 class MesReservationsController extends AbstractController
 {
@@ -24,10 +27,8 @@ class MesReservationsController extends AbstractController
         ActivityRepository $activityRepo,
         TransportRepository $transportRepo
     ): Response {
+        /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
 
         $reservations = $reservationRepo->findByUser($user->getId());
         $items = [];
@@ -72,8 +73,9 @@ class MesReservationsController extends AbstractController
         ActivityRepository $activityRepo,
         TransportRepository $transportRepo
     ): Response {
+        /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if ($user === null) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -109,8 +111,9 @@ class MesReservationsController extends AbstractController
     #[Route('/{id}/delete', name: 'app_mes_reservations_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(Request $request, int $id, ReservationRepository $reservationRepo): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if ($user === null) {
             return $this->redirectToRoute('app_login');
         }
 
