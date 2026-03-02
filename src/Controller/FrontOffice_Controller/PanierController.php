@@ -4,10 +4,10 @@ namespace App\Controller\FrontOffice_Controller;
 
 use App\Entity\Activity;
 use App\Entity\Commande;
-use App\Entity\Enum\PaymentMethod;
-use App\Entity\Enum\PaymentStatus;
-use App\Entity\Enum\ReservationStatus;
-use App\Entity\Enum\ReservationType;
+use App\Enum\PaymentMethod;
+use App\Enum\PaymentStatus;
+use App\Enum\ReservationStatus;
+use App\Enum\ReservationType;
 use App\Entity\Hebergement;
 use App\Entity\LigneDeCommande;
 use App\Entity\Paiement;

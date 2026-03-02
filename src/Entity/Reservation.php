@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\Entity\Enum\ReservationType;
-use App\Entity\Enum\ReservationStatus;
+use App\Enum\ReservationType;
+use App\Enum\ReservationStatus;
 use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -145,9 +145,15 @@ class Reservation
         return $this->dateFrom;
     }
 
-    public function setDateFrom(\DateTimeImmutable $dateFrom): self
+    public function setDateFrom(\DateTimeInterface $dateFrom): self
     {
-        $this->dateFrom = $dateFrom;
+        if ($dateFrom instanceof \DateTimeImmutable) {
+            $this->dateFrom = $dateFrom;
+        } else {
+            $this->dateFrom = \DateTimeImmutable::createFromMutable(
+                $dateFrom instanceof \DateTime ? $dateFrom : new \DateTime($dateFrom->format('c'))
+            );
+        }
         return $this;
     }
 
