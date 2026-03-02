@@ -15,7 +15,7 @@ class Produit
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id_produit', type: 'integer')]
+    #[ORM\Column(name: 'id', type: 'integer')]
     private ?int $idProduit = null;
 
     #[ORM\Column(length: 150)]
@@ -43,7 +43,7 @@ class Produit
     private ?string $image = null;
 
     #[ORM\ManyToOne(targetEntity: Categorie::class, inversedBy: 'produits')]
-    #[ORM\JoinColumn(name: 'id_categorie', referencedColumnName: 'id_categorie', nullable: false)]
+    #[ORM\JoinColumn(name: 'categorie_id', referencedColumnName: 'id', nullable: false)]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire.')]
     private ?Categorie $categorie = null;
 

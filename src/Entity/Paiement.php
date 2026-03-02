@@ -17,7 +17,7 @@ class Paiement
     private ?int $idPaiement = null;
 
     #[ORM\ManyToOne(targetEntity: Commande::class, inversedBy: 'paiements')]
-    #[ORM\JoinColumn(name: 'id_commande', referencedColumnName: 'id_commande')]
+    #[ORM\JoinColumn(name: 'commande_id', referencedColumnName: 'id')]
     #[Assert\NotNull(message: 'La commande est obligatoire.')]
     private ?Commande $commande = null;
 

@@ -26,11 +26,11 @@ class Activity
     #[Assert\Length(min: 10, max: 5000, minMessage: 'La description doit contenir au moins 10 caractères', maxMessage: 'La description ne peut pas dépasser 5000 caractères')]
     private ?string $description = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'Le prix est requis')]
     #[Assert\Positive(message: 'Le prix doit être un nombre positif')]
-    #[Assert\Type('float', message: 'Le prix doit être un nombre')]
-    private ?float $price = null;
+    #[Assert\Type('numeric', message: 'Le prix doit être un nombre')]
+    private ?string  $price = null;
 
     #[ORM\Column]
     #[Assert\NotNull(message: 'La durée est requise')]
@@ -69,7 +69,7 @@ class Activity
     #[ORM\ManyToOne(inversedBy: 'activities')]
     private ?Guide $guide = null;
 
-    #[ORM\OneToMany(mappedBy: 'activity', targetEntity: ActivitySchedule::class, cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'activity', targetEntity: ActivitySchedule::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $schedules;
 
     public function __construct()
@@ -85,8 +85,8 @@ class Activity
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(string $v): self { $this->description = $v; return $this; }
 
-    public function getPrice(): ?float { return $this->price; }
-    public function setPrice(float $v): self { $this->price = $v; return $this; }
+    public function getPrice(): ?string  { return $this->price; }
+    public function setPrice(string  $v): self { $this->price = $v; return $this; }
 
     public function getDurationMinutes(): ?int { return $this->durationMinutes; }
     public function setDurationMinutes(int $v): self { $this->durationMinutes = $v; return $this; }

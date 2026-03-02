@@ -21,10 +21,10 @@ class PaymentReservation
     #[Assert\NotNull(message: 'La réservation est requise')]
     private ?Reservation $reservation = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'Le montant est requis')]
     #[Assert\Positive(message: 'Le montant doit être positif')]
-    private ?float $amount = null;
+    private ?string  $amount = null;
 
     #[ORM\Column(type: 'string', enumType: PaymentMethod::class)]
     #[Assert\NotNull(message: 'La méthode de paiement est requise')]
@@ -64,12 +64,12 @@ class PaymentReservation
         return $this;
     }
 
-    public function getAmount(): ?float
+    public function getAmount(): ?string 
     {
         return $this->amount;
     }
 
-    public function setAmount(float $amount): self
+    public function setAmount(string  $amount): self
     {
         $this->amount = $amount;
         return $this;

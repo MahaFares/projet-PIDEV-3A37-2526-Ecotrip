@@ -31,10 +31,10 @@ class Reservation
     #[Assert\Positive(message: 'L\'ID doit être positif')]
     private ?int $reservationId = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'Le prix total est requis')]
     #[Assert\Positive(message: 'Le prix doit être positif')]
-    private ?float $totalPrice = null;
+    private ?string  $totalPrice = null;
 
     #[ORM\Column(type: 'string', enumType: ReservationStatus::class)]
     private ?ReservationStatus $status = ReservationStatus::PENDING;
@@ -117,12 +117,12 @@ class Reservation
         return $this;
     }
 
-    public function getTotalPrice(): ?float
+    public function getTotalPrice(): ?string
     {
         return $this->totalPrice;
     }
 
-    public function setTotalPrice(float $totalPrice): self
+    public function setTotalPrice(string  $totalPrice): self
     {
         $this->totalPrice = $totalPrice;
         return $this;

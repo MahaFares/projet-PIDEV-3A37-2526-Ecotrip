@@ -21,14 +21,14 @@ class Commande
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id_commande', type: 'integer')]
+    #[ORM\Column(name: 'id', type: 'integer')]
     private ?int $idCommande = null;
 
     #[ORM\Column(name: 'id_user', type: 'integer', nullable: true)]
     private ?int $idUser = self::DEFAULT_USER_ID;
 
     #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'commandes')]
-    #[ORM\JoinColumn(name: 'id_produit', referencedColumnName: 'id_produit', nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(name: 'produit_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
     private ?Produit $produit = null;
 
 

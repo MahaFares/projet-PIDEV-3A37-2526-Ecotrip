@@ -16,7 +16,7 @@ class Categorie
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id_categorie', type: 'integer')]
+    #[ORM\Column(name: 'id', type: 'integer')]
     private ?int $idCategorie = null;
 
     #[ORM\Column(length: 100)]
