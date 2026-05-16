@@ -10,15 +10,34 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Service\GeminiService;
 #[Route('/chambre')]
 final class ChambreController extends AbstractController
 {
     #[Route(name: 'app_chambre_index', methods: ['GET'])]
-    public function index(ChambreRepository $chambreRepository): Response
+    public function index(Request $request, ChambreRepository $chambreRepository): Response
     {
+        $searchQuery = $request->query->get('q', '');
+
+        // Filter chambres based on search
+        if (!empty($searchQuery)) {
+            $chambres = $chambreRepository->findBySearchQuery($searchQuery);
+        } else {
+            $chambres = $chambreRepository->findAll();
+        }
+
+        // If AJAX request, return only the table rows partial
+        if ($request->isXmlHttpRequest() || $request->query->get('ajax')) {
+            return $this->render('HebergementTemplate/chambre/_table.html.twig', [
+                'chambres' => $chambres,
+            ]);
+        }
+
+        // Regular request, return full page
         return $this->render('HebergementTemplate/chambre/index.html.twig', [
-            'chambres' => $chambreRepository->findAll(),
+            'chambres' => $chambres,
+            'filters' => ['q' => $searchQuery],
         ]);
     }
 
@@ -77,5 +96,27 @@ final class ChambreController extends AbstractController
         }
 
         return $this->redirectToRoute('app_chambre_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/ai/suggest-price', name: 'app_chambre_ai_price', methods: ['POST'])]
+    public function suggestPrice(Request $request, GeminiService $geminiService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $type = $data['type'] ?? 'Standard';
+        $capacite = $data['capacite'] ?? '2';
+        $hebergement = $data['hebergement'] ?? 'Non spécifié';
+        $ville = $data['ville'] ?? 'Tunisie';
+        $etoiles = $data['etoiles'] ?? 'Non spécifié';
+
+        $prompt = "Suggère un prix par nuit (en Dinars Tunisiens TND) pour cette chambre d'hôtel :
+        Type : $type
+        Capacité : $capacite personnes
+        Hébergement : $hebergement ($etoiles étoiles) situé à $ville.
+        Réponds UNIQUEMENT avec le prix suggéré (juste le chiffre, ex: 120.00).";
+
+        $suggestion = $geminiService->generateText($prompt);
+
+        return $this->json(['suggestion' => $suggestion]);
     }
 }

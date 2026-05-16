@@ -1,0 +1,39 @@
+{% for user in users %}
+<tr>
+    <td>{{ user.id }}</td>
+    <td>
+        {% if user.image %}
+            <img src="{{ asset(user.image) }}" alt="" class="user-avatar-sm">
+        {% else %}
+            <span class="user-avatar-placeholder">{{ user.username|slice(0,1)|upper }}</span>
+        {% endif %}
+        <span>{{ user.username }}</span>
+    </td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.telephone ?? '—' }}</td>
+    <td>
+        {% if user.roles[0] is defined and 'ADMIN' in (user.roles[0] ?? '') %}
+            <span class="badge-role admin">Admin</span>
+        {% else %}
+            <span class="badge-role user">User</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if user.isVerified %}
+            <span class="badge-verified yes">Oui</span>
+        {% else %}
+            <span class="badge-verified no">Non</span>
+        {% endif %}
+    </td>
+    <td class="actions">
+        <a href="{{ path('app_user_edit', {id: user.id}) }}" class="btn-action edit" title="Modifier"><i class="fa fa-pencil"></i></a>
+        <a href="{{ path('app_user_show', {id: user.id}) }}" class="btn-action view" title="Voir"><i class="fa fa-eye"></i></a>
+        <form method="post" action="{{ path('app_user_delete', {id: user.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+            <button type="submit" class="btn-action delete" title="Supprimer"><i class="fa fa-trash"></i></button>
+        </form>
+    </td>
+</tr>
+{% else %}
+<tr><td colspan="7" class="text-center text-muted py-4">Aucun utilisateur trouvé</td></tr>
+{% endfor %}

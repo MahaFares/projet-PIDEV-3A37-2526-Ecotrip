@@ -43,7 +43,6 @@ class Hebergement
     private ?int $nbEtoiles = null;
 
     #[ORM\Column(length: 500, nullable: true)]
-    #[Assert\Length(max: 500, maxMessage: "Le chemin de l'image est trop long ({{ limit }} caractères maximum).")]
     private ?string $imagePrincipale = null;
 
     #[ORM\Column(length: 100, nullable: true)]

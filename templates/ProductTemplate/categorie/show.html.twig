@@ -5,6 +5,14 @@
 {% block body %}
 <div class="container py-4">
     {{ include('admin_nav.html.twig') }}
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    {% endfor %}
+
     <h1>{{ categorie.nom }}</h1>
 
     <div class="row mt-4">
@@ -12,7 +20,7 @@
             <h3>Détails</h3>
             <dl class="row">
                 <dt class="col-sm-3">ID</dt>
-                <dd class="col-sm-9">{{ categorie.idCategorie }}</dd>
+                <dd class="col-sm-9">{{ categorie.id }}</dd>
                 <dt class="col-sm-3">Nom</dt>
                 <dd class="col-sm-9">{{ categorie.nom }}</dd>
                 <dt class="col-sm-3">Description</dt>
@@ -21,9 +29,9 @@
         </div>
         <div class="col-md-4">
             <h3>Actions</h3>
-            <a href="{{ path('app_categorie_edit', { id: categorie.idCategorie }) }}" class="btn btn-warning d-block mb-2">Modifier</a>
-            <form method="post" action="{{ path('app_categorie_delete', { id: categorie.idCategorie }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete_categorie_' ~ categorie.idCategorie) }}">
+            <a href="{{ path('app_categorie_edit', { id: categorie.id }) }}" class="btn btn-warning d-block mb-2">Modifier</a>
+            <form method="post" action="{{ path('app_categorie_delete', { id: categorie.id }) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_categorie_' ~ categorie.id) }}">
                 <button type="submit" class="btn btn-danger d-block mb-2 w-100">Supprimer</button>
             </form>
         </div>

@@ -9,7 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/produit/categorie')]
@@ -19,15 +21,72 @@ class CategorieCrudController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly CategorieRepository $repository,
         private readonly ValidatorInterface $validator,
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
     ) {
     }
+
     #[Route(name: 'app_categorie_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $items = $this->repository->findBy([], ['nom' => 'ASC']);
+        // If it's an AJAX request, return JSON
+        if ($request->isXmlHttpRequest()) {
+            return $this->searchCategories($request);
+        }
+
+        // Get stats
+        $totalCategories = $this->repository->count([]);
+        $aLouerCount = $this->repository->count(['nom' => 'A louer']);
+        $aVendreCount = $this->repository->count(['nom' => 'A vendre']);
 
         return $this->render('ProductTemplate/categorie/index.html.twig', [
-            'categories' => $items,
+            'categories' => [],
+            'stats' => [
+                'total' => $totalCategories,
+                'aLouer' => $aLouerCount,
+                'aVendre' => $aVendreCount,
+            ],
+        ]);
+    }
+
+    #[Route('/search', name: 'app_categorie_search', methods: ['GET'])]
+    public function searchCategories(Request $request): JsonResponse
+    {
+        $searchTerm = $request->query->get('q', '');
+        $filterType = $request->query->get('type', '');
+
+        $qb = $this->repository->createQueryBuilder('c')
+            ->orderBy('c.nom', 'ASC');
+
+        // Search by name or description
+        if (!empty($searchTerm)) {
+            $qb->andWhere('c.nom LIKE :search OR c.description LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
+        }
+
+        // Filter by type (A louer / A vendre)
+        if (!empty($filterType)) {
+            $qb->andWhere('c.nom = :type')
+                ->setParameter('type', $filterType);
+        }
+
+        $categories = $qb->getQuery()->getResult();
+
+        // Transform to JSON-friendly array (with delete CSRF token per row for delete-from-table)
+        $data = array_map(function ($categorie) {
+            $tokenId = 'delete_categorie_' . $categorie->getId();
+            return [
+                'id' => $categorie->getId(),
+                'nom' => $categorie->getNom(),
+                'description' => $categorie->getDescription(),
+                'produitsCount' => $categorie->getProduits()->count(),
+                'deleteToken' => $this->csrfTokenManager->getToken($tokenId)->getValue(),
+            ];
+        }, $categories);
+
+        return $this->json([
+            'success' => true,
+            'categories' => $data,
+            'count' => count($data)
         ]);
     }
 
@@ -51,7 +110,7 @@ class CategorieCrudController extends AbstractController
             }
             $this->em->persist($categorie);
             $this->em->flush();
-            $this->addFlash('success', 'Catégorie créée.');
+            $this->addFlash('success', 'Catégorie créée avec succès!');
             return $this->redirectToRoute('app_categorie_index');
         }
 
@@ -97,7 +156,7 @@ class CategorieCrudController extends AbstractController
                 ]);
             }
             $this->em->flush();
-            $this->addFlash('success', 'Catégorie mise à jour.');
+            $this->addFlash('success', 'Catégorie mise à jour avec succès!');
             return $this->redirectToRoute('app_categorie_index');
         }
 
@@ -116,14 +175,43 @@ class CategorieCrudController extends AbstractController
         }
 
         $token = $request->request->get('_token');
-        if (!$this->isCsrfTokenValid('delete_categorie_' . $id, $token)) {
-            $this->addFlash('error', 'Jeton CSRF invalide.');
-            return $this->redirectToRoute('app_categorie_index');
+        if ($token === null) {
+            $data = $request->request->all();
+            foreach ($data as $value) {
+                if (\is_array($value) && isset($value['_token'])) {
+                    $token = $value['_token'];
+                    break;
+                }
+            }
+        }
+        $tokenId = 'delete_categorie_' . $id;
+        if (!$token || !$this->isCsrfTokenValid($tokenId, $token)) {
+            $this->addFlash('error', 'Jeton de sécurité invalide. Réessayez de supprimer.');
+            return $this->redirectToRoute('app_categorie_show', ['id' => $id]);
         }
 
-        $this->em->remove($categorie);
-        $this->em->flush();
-        $this->addFlash('success', 'Catégorie supprimée.');
+        foreach ($categorie->getProduits() as $produit) {
+            foreach ($produit->getCommandes() as $commande) {
+                $commande->setProduit(null);
+            }
+            foreach ($produit->getLigneDeCommandes() as $ligne) {
+                $ligne->setIdProduct(null);
+            }
+        }
+
+        try {
+            $this->em->remove($categorie);
+            $this->em->flush();
+            $this->addFlash('success', 'Catégorie supprimée avec succès!');
+        } catch (\Throwable $e) {
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'foreign key') || str_contains($msg, 'constraint') || str_contains($msg, '1451') || str_contains($msg, 'Integrity')) {
+                $this->addFlash('error', 'Impossible de supprimer : des produits de cette catégorie sont liés à des commandes.');
+            } else {
+                $this->addFlash('error', 'Impossible de supprimer la catégorie (erreur base de données).');
+            }
+            return $this->redirectToRoute('app_categorie_show', ['id' => $id]);
+        }
 
         return $this->redirectToRoute('app_categorie_index');
     }

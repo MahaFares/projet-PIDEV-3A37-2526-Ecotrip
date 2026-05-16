@@ -1,0 +1,51 @@
+{% extends 'BackOffice/base.html.twig' %}
+
+{% block title %}Nouveau chauffeur | Admin{% endblock %}
+{% block page_title %}Nouveau chauffeur{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card shadow-sm" style="max-width: 560px;">
+        <div class="card-body">
+            {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.firstName) }}
+                    {{ form_widget(form.firstName, { attr: { class: 'form-control' ~ (form.firstName.vars.errors|length ? ' is-invalid' : '') } }) }}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.firstName) }}</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.lastName) }}
+                    {{ form_widget(form.lastName, { attr: { class: 'form-control' ~ (form.lastName.vars.errors|length ? ' is-invalid' : '') } }) }}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.lastName) }}</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.phone) }}
+                {{ form_widget(form.phone, { attr: { class: 'form-control' ~ (form.phone.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.phone) }}</div>
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.licenseNumber) }}
+                {{ form_widget(form.licenseNumber, { attr: { class: 'form-control' ~ (form.licenseNumber.vars.errors|length ? ' is-invalid' : '') } }) }}
+                <div class="invalid-feedback d-block">{{ form_errors(form.licenseNumber) }}</div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.experience) }}
+                    {{ form_widget(form.experience, { attr: { class: 'form-control' ~ (form.experience.vars.errors|length ? ' is-invalid' : '') } }) }}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.experience) }}</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.rating) }}
+                    {{ form_widget(form.rating, { attr: { class: 'form-control' ~ (form.rating.vars.errors|length ? ' is-invalid' : '') } }) }}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.rating) }}</div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Créer</button>
+            <a href="{{ path('app_chauffeur_index') }}" class="btn btn-outline-secondary">Annuler</a>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

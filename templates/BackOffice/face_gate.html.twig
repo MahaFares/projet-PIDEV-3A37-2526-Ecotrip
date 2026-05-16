@@ -1,0 +1,146 @@
+{% extends 'BackOffice/base.html.twig' %}
+
+{% block title %}Vérification faciale | EcoTrip Admin{% endblock %}
+{% block page_title %}Vérification faciale{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.face-gate-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.face-gate-popup {
+    max-width: 500px;
+    width: 100%;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    background: #fff;
+    position: relative;
+    z-index: 10000;
+    animation: faceGatePop 0.3s ease-out;
+}
+@keyframes faceGatePop {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+.face-gate-popup h2 { color: #1a5f2a; margin-bottom: 0.5rem; font-size: 1.35rem; }
+.face-gate-popup video { width: 100%; border-radius: 12px; background: #000; }
+.face-gate-popup .btn-capture { margin-top: 1rem; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <p class="text-muted">Redirection vers le tableau de bord…</p>
+</div>
+
+{# Popup with blurred background #}
+<div class="face-gate-backdrop" id="faceGateBackdrop">
+    <div class="face-gate-popup" id="faceGatePopup">
+        <h2><i class="fa fa-camera"></i> Accès au tableau de bord</h2>
+        <p class="text-muted mb-3">Vérifiez votre identité par reconnaissance faciale pour continuer.</p>
+
+        {% if not hasFaceEnrolled %}
+            <div class="alert alert-warning">
+                <strong>Visage non enregistré.</strong> Enregistrez d'abord votre visage depuis <a href="{{ path('app_my_account') }}">Mon Compte</a>, puis revenez ici.
+            </div>
+            <a href="{{ path('app_my_account') }}" class="btn btn-success">Aller à Mon Compte</a>
+            <a href="{{ path('app_logout') }}" class="btn btn-outline-secondary ml-2">Déconnexion</a>
+        {% else %}
+            <div id="faceGateStatus" class="small mb-2" style="min-height:22px; font-weight:600;"></div>
+            <video id="faceGateVideo" autoplay playsinline width="432" height="324" style="max-width:100%;"></video>
+            <div id="faceGateError" class="alert alert-danger mt-2" style="display:none;"></div>
+            <button type="button" class="btn btn-success btn-capture" id="faceGateCapture"><i class="fa fa-camera"></i> Vérifier mon visage</button>
+        {% endif %}
+    </div>
+</div>
+
+{% if hasFaceEnrolled %}
+<script>
+(function() {
+    var verifyGateUrl = '{{ path('app_face_verify_gate') }}';
+    var video = document.getElementById('faceGateVideo');
+    var errEl = document.getElementById('faceGateError');
+    var statusEl = document.getElementById('faceGateStatus');
+    var btn = document.getElementById('faceGateCapture');
+    var stream = null;
+
+    function stopStream(s) {
+        if (s && s.getTracks) s.getTracks().forEach(function(t) { t.stop(); });
+    }
+    function captureBase64(v) {
+        var w = v.videoWidth || 432, h = v.videoHeight || 324;
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(v, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.85).replace(/^data:image\/jpeg;base64,/, '');
+    }
+
+    statusEl.textContent = 'Chargement de la caméra...';
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } })
+        .then(function(s) {
+            stream = s;
+            video.srcObject = s;
+            video.muted = true;
+            video.playsInline = true;
+            return video.play();
+        })
+        .then(function() {
+            statusEl.textContent = 'Positionnez votre visage puis cliquez sur « Vérifier mon visage ».';
+        })
+        .catch(function(err) {
+            statusEl.textContent = '';
+            errEl.textContent = err.message || 'Impossible d\'accéder à la caméra.';
+            errEl.style.display = 'block';
+        });
+
+    btn.addEventListener('click', function() {
+        if (!video.srcObject || video.readyState < 2) {
+            errEl.textContent = 'Attendez que la vidéo soit prête.';
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+        statusEl.textContent = 'Vérification en cours...';
+        var btnText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Vérification...';
+        var base64 = captureBase64(video);
+        fetch(verifyGateUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 })
+        })
+        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+        .then(function(r) {
+            if (r.data.success && r.data.redirect) {
+                window.location.href = r.data.redirect;
+            } else {
+                errEl.textContent = r.data.message || 'Reconnaissance échouée.';
+                errEl.style.display = 'block';
+            }
+        })
+        .catch(function(err) {
+            errEl.textContent = err.message || 'Erreur réseau';
+            errEl.style.display = 'block';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = btnText;
+            statusEl.textContent = 'Positionnez votre visage puis cliquez sur « Vérifier mon visage ».';
+        });
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

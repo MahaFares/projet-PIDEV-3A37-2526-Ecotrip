@@ -1,4 +1,6 @@
-<form method="post" action="{{ path('app_activity_schedule_delete', {'id': activity_schedule.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+<form method="post" action="{{ path('app_activity_schedule_delete', {'id': activity_schedule.id}) }}" onsubmit="return confirm('Supprimer cet horaire ?');" class="d-inline">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ activity_schedule.id) }}">
-    <button class="btn">Delete</button>
+    <button type="submit" class="modern-btn" style="background:#fef2f2;color:#dc2626;border:2px solid #fecaca;">
+        <i class="bi bi-trash"></i> Supprimer
+    </button>
 </form>

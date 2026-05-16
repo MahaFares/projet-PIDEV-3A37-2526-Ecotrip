@@ -1,60 +1,385 @@
-{% extends 'base.html.twig' %}
+{% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}Mon compte | Eco Trip | {{ app.user.username }}{% endblock %}
+{% block title %}Mon compte | EcoTrip | {{ app.user.username }}{% endblock %}
+{% block page_title %}Mon Compte{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --eco-primary: #1a5f2a;
+    --eco-primary-light: #2d8a3e;
+    --eco-primary-dark: #0d3d18;
+    --eco-accent: #4ade80;
+    --surface: #ffffff;
+    --surface-elevated: #f8faf9;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.06);
+}
+
+.user-profile-page { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.profile-hero {
+    background: linear-gradient(135deg, var(--eco-primary-dark) 0%, var(--eco-primary) 50%, var(--eco-primary-light) 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+.profile-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+.avatar-wrap {
+    position: relative;
+    display: inline-block;
+}
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.4);
+    box-shadow: var(--shadow-lg);
+}
+.avatar-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 28px;
+    height: 28px;
+    background: var(--eco-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--eco-primary-dark);
+    font-size: 12px;
+}
+.greeting h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.02em;
+}
+.greeting p { opacity: 0.9; font-size: 0.95rem; margin: 0; }
+
+.info-card {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.info-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0;
+}
+.info-item {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+.info-item:last-child { border-bottom: none; }
+.info-item:nth-child(odd) { background: var(--surface-elevated); }
+.info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(26,95,42,0.1) 0%, rgba(45,138,62,0.08) 100%);
+    color: var(--eco-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.info-content label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+.info-content span { font-weight: 500; color: var(--text-primary); }
+.info-content .empty { color: var(--text-secondary); font-style: italic; }
+
+.action-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--border);
+    transition: all 0.25s ease;
+}
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--eco-primary);
+}
+.action-card .icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+.action-card.edit .icon-box { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: var(--eco-primary); }
+.action-card.password .icon-box { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #2563eb; }
+.action-card.face .icon-box { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
+.action-card h4 { font-size: 1.05rem; font-weight: 600; margin: 0 0 4px 0; color: var(--text-primary); }
+.action-card p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+.face-status { font-size: 0.8rem; color: #15803d; margin-top: 6px; }
+.face-modal .modal-dialog { max-width: 480px; }
+.face-modal video { width: 100%; border-radius: 12px; background: #000; }
+.face-modal .btn-capture { margin-top: 12px; }
+</style>
+{% endblock %}
 
 {% block body %}
-    <!--================Breadcrumb Area =================-->
-    <section class="breadcrumb_area">
-        <div class="overlay bg-parallax" data-stellar-ratio="0.8" data-stellar-vertical-offset="0" data-background=""></div>
-        <div class="container">
-            <div class="page-cover text-center">
-                <h2 class="page-cover-tittle">Mon Compte</h2>
-                <ol class="breadcrumb">
-                    <li><a href="{{ path('app_home') }}">Home</a></li>
-                    <li class="active">Mon Compte</li>
-                </ol>
+<div class="container-fluid user-profile-page">
+    <div class="profile-hero">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="avatar-wrap">
+                    {% if app.user.image %}
+                        <img src="{{ asset(app.user.image) }}" alt="Photo" class="profile-avatar">
+                    {% else %}
+                        <img src="{{ asset('images/about_banner.jpg') }}" alt="Avatar" class="profile-avatar">
+                    {% endif %}
+                    <span class="avatar-badge"><i class="fa fa-check"></i></span>
+                </div>
             </div>
-        </div>
-    </section>
-    <!--================End Breadcrumb Area =================-->
-
-    <!--================ Profile Area =================-->
-    <section class="sample-text-area">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 col-md-10">
-                    <div class="section_title text-center">
-                        <h2 class="title_color">Informations Personnelles</h2>
-                        <p>Gérez vos informations et préférences.</p>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 text-center">
-                            <img src="{{ asset('images/about_banner.jpg') }}" alt="User Avatar" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                            <!-- Placeholder image, ideally user has an avatar field -->
-                        </div>
-                        <div class="col-md-8">
-                            <div class="typography">
-                                <h3 class="mb-3">Bonjour, {{ app.user.username }} !</h3>
-                                <ul class="list_style unordered-list p-0">
-                                    <li><strong>Email :</strong> {{ app.user.email }}</li>
-                                    <li><strong>Nom d'utilisateur :</strong> {{ app.user.username }}</li>
-                                    <!-- Add other user fields here if available -->
-                                </ul>
-                                
-                                <div class="mt-4 d-flex flex-wrap gap-2">
-                                    <a href="{{ path('app_update_account') }}" class="btn theme_btn button_hover mr-2 mb-2">
-                                        <i class="fa fa-pencil"></i> Modifier mes informations
-                                    </a>
-                                    <a href="{{ path('app_change_password') }}" class="btn theme_btn_two button_hover mb-2">
-                                        <i class="fa fa-lock"></i> Changer mon mot de passe
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col">
+                <div class="greeting">
+                    <h2>Bonjour, {{ app.user.username }} 👋</h2>
+                    <p>Bienvenue sur votre espace personnel EcoTrip</p>
                 </div>
             </div>
         </div>
-    </section>
-    <!--================ End Profile Area =================-->
+    </div>
+
+    <div class="info-card">
+        <div class="info-card-header"><i class="fa fa-id-card"></i> Informations du profil</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-icon"><i class="fa fa-envelope"></i></div>
+                <div class="info-content"><label>Email</label><span>{{ app.user.email }}</span></div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon"><i class="fa fa-user"></i></div>
+                <div class="info-content"><label>Nom d'utilisateur</label><span>{{ app.user.username }}</span></div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon"><i class="fa fa-map-marker"></i></div>
+                <div class="info-content"><label>Adresse</label><span class="{{ app.user.address ? '' : 'empty' }}">{{ app.user.address ?? 'Non renseignée' }}</span></div>
+            </div>
+            <div class="info-item">
+                <div class="info-icon"><i class="fa fa-phone"></i></div>
+                <div class="info-content"><label>Téléphone</label><span class="{{ app.user.telephone ? '' : 'empty' }}">{{ app.user.telephone ?? 'Non renseigné' }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-cards">
+        <a href="{{ path('app_update_account') }}" class="action-card edit">
+            <div class="icon-box"><i class="fa fa-pencil"></i></div>
+            <div>
+                <h4>Modifier mon profil</h4>
+                <p>Mettre à jour vos informations personnelles</p>
+            </div>
+        </a>
+        <a href="{{ path('app_change_password') }}" class="action-card password">
+            <div class="icon-box"><i class="fa fa-lock"></i></div>
+            <div>
+                <h4>Changer le mot de passe</h4>
+                <p>Sécuriser votre compte</p>
+            </div>
+        </a>
+        <div class="action-card face" id="faceCard" style="cursor:pointer;">
+            <div class="icon-box"><i class="fa fa-camera"></i></div>
+            <div>
+                <h4>Reconnaissance faciale</h4>
+                <p>Connexion par le visage</p>
+                <span class="face-status" id="faceStatus">{% if app.user.faceDescriptor %}Visage enregistré{% else %}Enregistrer mon visage{% endif %}</span>
+                {% if app.user.faceDescriptor %}
+                <br><a href="#" class="face-delete-link text-danger small" id="faceDeleteBtn">Supprimer mon visage</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Enregistrer visage -->
+<div class="modal face-modal" id="faceEnrollModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enregistrer mon visage</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-1">Autorisez la caméra, positionnez votre visage, puis cliquez Capturer. L'image est envoyée au serveur (Hugging Face).</p>
+                <div id="faceEnrollStatus" class="small mb-2" style="min-height:20px;font-weight:600;"></div>
+                <video id="faceEnrollVideo" autoplay playsinline width="432" height="324" style="max-width:100%;"></video>
+                <div id="faceEnrollError" class="alert alert-danger mt-2" style="display:none;"></div>
+                <button type="button" class="btn btn-success btn-capture" id="faceEnrollCapture"><i class="fa fa-camera"></i> Capturer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    var enrollUrl = '{{ path('app_face_enroll') }}';
+    var deleteUrl = '{{ path('app_face_delete') }}';
+    var hasFace = {{ app.user.faceDescriptor is not null and app.user.faceDescriptor|length > 0 ? 'true' : 'false' }};
+
+    function stopStream(stream) {
+        if (stream && stream.getTracks) stream.getTracks().forEach(function(t) { t.stop(); });
+    }
+    function captureVideoAsBase64(video) {
+        var w = video.videoWidth || 432;
+        var h = video.videoHeight || 324;
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.85).replace(/^data:image\/jpeg;base64,/, '');
+    }
+
+    document.getElementById('faceCard').addEventListener('click', function(e) {
+        if (e.target.classList.contains('face-delete-link')) return;
+        e.preventDefault();
+        openEnrollModal();
+    });
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'faceDeleteBtn') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!confirm('Supprimer l\'enregistrement de votre visage ?')) return;
+            fetch(deleteUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        hasFace = false;
+                        document.getElementById('faceStatus').textContent = 'Enregistrer mon visage';
+                        var link = document.getElementById('faceDeleteBtn');
+                        if (link && link.parentNode) link.parentNode.removeChild(link);
+                    }
+                });
+        }
+    });
+
+    var enrollStream = null;
+    function openEnrollModal() {
+        var modal = $('#faceEnrollModal');
+        var video = document.getElementById('faceEnrollVideo');
+        var errEl = document.getElementById('faceEnrollError');
+        var statusEl = document.getElementById('faceEnrollStatus');
+        errEl.style.display = 'none';
+        statusEl.textContent = 'Chargement caméra...';
+        statusEl.style.color = '#64748b';
+        modal.modal('show');
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } })
+            .then(function(stream) {
+                enrollStream = stream;
+                video.srcObject = stream;
+                video.muted = true;
+                video.playsInline = true;
+                return video.play();
+            })
+            .then(function() {
+                statusEl.textContent = 'Positionnez votre visage puis cliquez Capturer.';
+            })
+            .catch(function(err) {
+                statusEl.textContent = '';
+                errEl.textContent = err.message || 'Impossible d\'accéder à la caméra.';
+                errEl.style.display = 'block';
+            });
+        modal.off('hidden.bs.modal').on('hidden.bs.modal', function() {
+            if (enrollStream) { stopStream(enrollStream); enrollStream = null; }
+            video.srcObject = null;
+        });
+    }
+
+    document.getElementById('faceEnrollCapture').addEventListener('click', function() {
+        var video = document.getElementById('faceEnrollVideo');
+        var errEl = document.getElementById('faceEnrollError');
+        var statusEl = document.getElementById('faceEnrollStatus');
+        var btn = this;
+        var btnText = btn.innerHTML;
+        if (!video.srcObject || video.readyState < 2) {
+            errEl.textContent = 'Attendez que la vidéo soit prête.';
+            errEl.style.display = 'block';
+            return;
+        }
+        errEl.style.display = 'none';
+        statusEl.textContent = 'Envoi de l\'image au serveur...';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Envoi...';
+        var base64 = captureVideoAsBase64(video);
+        fetch(enrollUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 })
+        })
+        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+        .then(function(r) {
+            if (r.data.success) {
+                document.getElementById('faceStatus').textContent = 'Visage enregistré';
+                hasFace = true;
+                $('#faceEnrollModal').modal('hide');
+                alert(r.data.message || 'Visage enregistré.');
+            } else {
+                errEl.textContent = r.data.message || 'Erreur';
+                errEl.style.display = 'block';
+            }
+        })
+        .catch(function(err) {
+            errEl.textContent = err.message || 'Erreur réseau';
+            errEl.style.display = 'block';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = btnText;
+            statusEl.textContent = 'Positionnez votre visage puis cliquez Capturer.';
+        });
+    });
+})();
+</script>
 {% endblock %}

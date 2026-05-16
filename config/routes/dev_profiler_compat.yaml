@@ -1,0 +1,16 @@
+when@dev:
+    app_dev_profiler_compat_profiler:
+        path: /transport/_profiler/{path}
+        controller: App\Controller\DevProfilerCompatController::profiler
+        methods: [GET]
+        defaults:
+            path: ''
+        requirements:
+            path: '.*'
+
+    app_dev_profiler_compat_wdt:
+        path: /transport/_wdt/{token}
+        controller: App\Controller\DevProfilerCompatController::wdt
+        methods: [GET]
+        requirements:
+            token: '.+'

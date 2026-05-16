@@ -50,4 +50,57 @@ class ProduitRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+    public function countByStockGreaterThanZero(): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.idProduit)')
+            ->where('p.stock > 0')
+            ->getQuery()
+            ->getSingleScalarResult() ?? 0;
+    }
+
+    public function countByStockZero(): int
+    {
+        return $this->count(['stock' => 0]);
+    }
+
+    /**
+     * Same-category recommendations (fallback when AI is unavailable).
+     * Excludes the given product and limits to $limit items.
+     *
+     * @return Produit[]
+     */
+    public function findRecommendedByCategory(Produit $exclude, int $limit = 4): array
+    {
+        $categorie = $exclude->getCategorie();
+        if (!$categorie) {
+            return $this->findOthersExcluding($exclude, $limit);
+        }
+
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.idProduit != :excludeId')
+            ->andWhere('p.categorie = :categorie')
+            ->setParameter('excludeId', $exclude->getId())
+            ->setParameter('categorie', $categorie)
+            ->orderBy('p.nom', 'ASC')
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Other products excluding one (used when product has no category or as fallback).
+     *
+     * @return Produit[]
+     */
+    public function findOthersExcluding(Produit $exclude, int $limit = 4): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.idProduit != :excludeId')
+            ->setParameter('excludeId', $exclude->getId())
+            ->orderBy('p.nom', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Changer le mot de passe | EcoTrip{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.compte-hero { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); padding: 36px 0; color: #fff; text-align: center; }
+.compte-hero h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+
+.password-panel {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: hidden;
+    max-width: 480px;
+    margin: 0 auto;
+    border: 1px solid #e5e7eb;
+}
+.password-panel-header {
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: white;
+    text-align: center;
+}
+.password-panel-header .icon-wrap {
+    width: 64px;
+    height: 64px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 16px;
+}
+.password-panel-header h3 { margin: 0; font-size: 1.35rem; font-weight: 600; }
+.password-panel-header p { margin: 8px 0 0 0; opacity: 0.9; font-size: 0.9rem; }
+.password-panel-body { padding: 32px; }
+
+.form-group { margin-bottom: 24px; }
+.form-group label { display: block; font-weight: 500; color: #111; margin-bottom: 8px; font-size: 0.9rem; }
+.form-control-modern {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+.form-control-modern:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.form-control-modern.is-invalid { border-color: #dc2626; }
+.invalid-feedback { color: #dc2626; font-size: 0.85rem; margin-top: 6px; }
+
+.security-tip {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    color: #0c4a6e;
+}
+.security-tip i { margin-right: 8px; color: #0284c7; }
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    color: white;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    width: 100%;
+}
+.btn-primary-modern:hover { color: #fff; }
+.btn-outline-modern {
+    display: block;
+    text-align: center;
+    padding: 14px;
+    margin-top: 16px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    color: #374151;
+    font-weight: 500;
+    text-decoration: none;
+}
+.btn-outline-modern:hover { background: #f8fafc; border-color: #2563eb; color: #2563eb; }
+.alert-success { background: #dcfce7; color: #166534; padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; border: none; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="compte-hero">
+    <div class="container">
+        <h1><i class="fa fa-lock"></i> Changer le mot de passe</h1>
+    </div>
+</section>
+
+<section class="section_gap">
+    <div class="container">
+        <div class="password-panel">
+            <div class="password-panel-header">
+                <div class="icon-wrap"><i class="fa fa-shield"></i></div>
+                <h3>Sécurité du compte</h3>
+                <p>Choisissez un mot de passe fort pour protéger votre compte</p>
+            </div>
+            <div class="password-panel-body">
+                {% for flash in app.flashes('success') %}
+                    <div class="alert-success">{{ flash }}</div>
+                {% endfor %}
+
+                <div class="security-tip">
+                    <i class="fa fa-info-circle"></i>
+                    Utilisez au moins 6 caractères. Un mot de passe fort combine lettres, chiffres et symboles.
+                </div>
+
+                {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+                <div class="form-group">
+                    {{ form_label(form.currentPassword) }}
+                    {{ form_widget(form.currentPassword, { attr: { class: 'form-control form-control-modern' ~ (form.currentPassword.vars.errors|length ? ' is-invalid' : '') } }) }}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.currentPassword) }}</div>
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.newPassword.first) }}
+                    {{ form_widget(form.newPassword.first, { attr: { class: 'form-control form-control-modern' ~ (form.newPassword.first.vars.errors|length ? ' is-invalid' : '') } }) }}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.newPassword.first) }}</div>
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.newPassword.second) }}
+                    {{ form_widget(form.newPassword.second, { attr: { class: 'form-control form-control-modern' ~ (form.newPassword.second.vars.errors|length ? ' is-invalid' : '') } }) }}
+                    <div class="invalid-feedback d-block">{{ form_errors(form.newPassword.second) }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary-modern"><i class="fa fa-lock"></i> Mettre à jour le mot de passe</button>
+                <a href="{{ path('app_front_mon_compte') }}" class="btn btn-outline-modern">Retour à mon compte</a>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

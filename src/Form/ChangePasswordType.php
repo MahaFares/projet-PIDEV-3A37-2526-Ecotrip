@@ -21,17 +21,18 @@ class ChangePasswordType extends AbstractType
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer votre mot de passe actuel']),
                 ],
-                'attr' => ['autocomplete' => 'current-password'],
+                'attr' => ['autocomplete' => 'current-password', 'class' => 'form-control'],
             ])
             ->add('newPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
                 'first_options' => [
                     'label' => 'Nouveau mot de passe',
-                    'attr' => ['autocomplete' => 'new-password'],
+                    'attr' => ['autocomplete' => 'new-password', 'class' => 'form-control'],
                 ],
                 'second_options' => [
                     'label' => 'Confirmer le nouveau mot de passe',
+                    'attr' => ['class' => 'form-control'],
                 ],
                 'invalid_message' => 'Les mots de passe ne correspondent pas.',
                 'constraints' => [

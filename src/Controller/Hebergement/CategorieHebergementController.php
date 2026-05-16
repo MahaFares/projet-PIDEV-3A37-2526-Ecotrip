@@ -15,10 +15,28 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CategorieHebergementController extends AbstractController
 {
     #[Route('/', name: 'app_categorie_hebergement_index', methods: ['GET'])]
-    public function index(CategorieHebergementRepository $categorieHebergementRepository): Response
+    public function index(Request $request, CategorieHebergementRepository $categorieHebergementRepository): Response
     {
+        $searchQuery = $request->query->get('q', '');
+
+        // Filter categories based on search
+        if (!empty($searchQuery)) {
+            $categories = $categorieHebergementRepository->findBySearchQuery($searchQuery);
+        } else {
+            $categories = $categorieHebergementRepository->findAll();
+        }
+
+        // If AJAX request, return only the table rows partial
+        if ($request->isXmlHttpRequest() || $request->query->get('ajax')) {
+            return $this->render('HebergementTemplate/categorie_hebergement/_table.html.twig', [
+                'categorie_hebergements' => $categories,
+            ]);
+        }
+
+        // Regular request, return full page
         return $this->render('HebergementTemplate/categorie_hebergement/index.html.twig', [
-            'categorie_hebergements' => $categorieHebergementRepository->findAll(),
+            'categorie_hebergements' => $categories,
+            'filters' => ['q' => $searchQuery],
         ]);
     }
 

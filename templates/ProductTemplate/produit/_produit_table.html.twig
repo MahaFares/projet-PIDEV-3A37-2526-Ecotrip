@@ -1,0 +1,17 @@
+{% for p in produits %}
+    <tr>
+        <td>{{ p.id }}</td>
+        <td>{{ p.nom }}</td>
+        <td>{{ p.prix }} EUR</td>
+        <td>{{ p.stock }}</td>
+        <td>{{ p.categorie ? p.categorie.nom : '–' }}</td>
+        <td>
+            <a href="{{ path('app_produit_show', {id: p.id}) }}" class="btn-action view"><i class="fa fa-eye"></i></a>
+            <a href="{{ path('app_produit_edit', {id: p.id}) }}" class="btn-action edit ms-1"><i class="fa fa-edit"></i></a>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="6" class="text-center text-muted py-4">Aucun produit trouvé.</td>
+    </tr>
+{% endfor %}

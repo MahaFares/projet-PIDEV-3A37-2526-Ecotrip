@@ -1,42 +1,213 @@
 {% extends 'BackOffice/base.html.twig' %}
 
-{% block title %}{{ produit.nom }} - Admin{% endblock %}
+{% block title %}{{ produit.nom }} • Détails Produit{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .product-show-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .product-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0;
+            color: #1a1a1a;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-card-body {
+            padding: 2.5rem;
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1.2rem 2rem;
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .detail-value {
+            color: #111827;
+        }
+
+        .price-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .stock-badge {
+            font-size: 1rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 9999px;
+        }
+
+        .actions-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .actions-card-body {
+            padding: 2rem;
+        }
+
+        .btn-action {
+            width: 100%;
+            font-size: 1.1rem;
+            padding: 0.9rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .btn-edit {
+            background: #f59e0b;
+            border: none;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            border: none;
+            color: white;
+        }
+
+        .product-image {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .product-header { flex-direction: column; align-items: flex-start; }
+            .actions-card { position: static; margin-top: 2rem; }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<div class="container py-4">
-    {{ include('admin_nav.html.twig') }}
-    <h1>{{ produit.nom }}</h1>
+    <div class="product-show-container">
+        {{ include('admin_nav.html.twig') }}
 
-    <div class="row mt-4">
-        <div class="col-md-8">
-            <h3>Détails</h3>
-            <dl class="row">
-                <dt class="col-sm-3">ID</dt>
-                <dd class="col-sm-9">{{ produit.idProduit }}</dd>
-                <dt class="col-sm-3">Nom</dt>
-                <dd class="col-sm-9">{{ produit.nom }}</dd>
-                <dt class="col-sm-3">Prix</dt>
-                <dd class="col-sm-9">{{ produit.prix }} EUR</dd>
-                <dt class="col-sm-3">Stock</dt>
-                <dd class="col-sm-9">{{ produit.stock }}</dd>
-                <dt class="col-sm-3">Catégorie</dt>
-                <dd class="col-sm-9">{{ produit.categorie ? produit.categorie.nom : '–' }}</dd>
-                {% if produit.image %}
-                <dt class="col-sm-3">Image</dt>
-                <dd class="col-sm-9"><img src="{{ produit.image }}" alt="{{ produit.nom }}" style="max-width: 300px;"></dd>
-                {% endif %}
-            </dl>
+        <div class="product-header">
+            <h1 class="product-title">{{ produit.nom }}</h1>
+            <a href="{{ path('app_produit_index') }}" class="btn btn-outline-secondary px-4">
+                <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+            </a>
         </div>
-        <div class="col-md-4">
-            <h3>Actions</h3>
-            <a href="{{ path('app_produit_edit', { id: produit.idProduit }) }}" class="btn btn-warning d-block mb-2">Modifier</a>
-            <form method="post" action="{{ path('app_produit_delete', { id: produit.idProduit }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete_produit_' ~ produit.idProduit) }}">
-                <button type="submit" class="btn btn-danger d-block mb-2 w-100">Supprimer</button>
-            </form>
+
+        <div class="row g-4">
+            <!-- Main info -->
+            <div class="col-lg-8">
+                <div class="info-card">
+                    <div class="info-card-body">
+                        {% if produit.image %}
+                            <div class="text-center mb-4">
+                                <img src="{{ produit.image }}" alt="{{ produit.nom }}" class="product-image">
+                            </div>
+                        {% endif %}
+
+                        <h3 class="mb-4 fw-bold text-dark">Informations produit</h3>
+
+                        <div class="detail-row">
+                            <div class="detail-label">ID</div>
+                            <div class="detail-value">{{ produit.id }}</div>
+
+                            <div class="detail-label">Nom</div>
+                            <div class="detail-value fw-medium">{{ produit.nom }}</div>
+
+                            <div class="detail-label">Prix</div>
+                            <div class="detail-value price-value">
+                                {{ produit.prix|number_format(2, ',', ' ') }} €
+                            </div>
+
+                            <div class="detail-label">Stock</div>
+                            <div class="detail-value">
+                                {% if produit.stock > 0 %}
+                                    <span class="badge bg-success stock-badge">
+                                    {{ produit.stock }} en stock
+                                </span>
+                                {% else %}
+                                    <span class="badge bg-danger stock-badge">
+                                    Rupture de stock
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="detail-label">Catégorie</div>
+                            <div class="detail-value">
+                                {{ produit.categorie ? produit.categorie.nom : 'Non classé' }}
+                            </div>
+
+                            <div class="detail-label">Créé le</div>
+                            <div class="detail-value">
+                                {% if produit.createdAt ?? false %}
+                                    {{ produit.createdAt|date('d/m/Y à H:i') }}
+                                {% else %}
+                                    –
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-lg-4">
+                <div class="actions-card">
+                    <div class="actions-card-body">
+                        <h4 class="mb-4 fw-bold text-dark">Actions</h4>
+
+                        <a href="{{ path('app_produit_edit', {id: produit.id}) }}"
+                           class="btn btn-action btn-edit">
+                            <i class="fas fa-edit"></i> Modifier le produit
+                        </a>
+
+                        <form method="post"
+                              action="{{ path('app_produit_delete', {id: produit.id}) }}"
+                              onsubmit="return confirm('Supprimer « {{ produit.nom }} » ? Cette action est irréversible.');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_produit_' ~ produit.id) }}">
+                            <button type="submit" class="btn btn-action btn-delete">
+                                <i class="fas fa-trash-alt"></i> Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <a href="{{ path('app_produit_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
-</div>
 {% endblock %}
